@@ -36,8 +36,6 @@ public class NameRetryService {
         }
 
         application.setMinecraftName(trimmed);
-        application.setNameRetryCount(application.getNameRetryCount() + 1);
-
         return new RetryResult(true, "Naamcorrectie verwerkt.", null);
     }
 

@@ -26,39 +26,40 @@ public class UsernameValidationService {
 
     public ValidationResult validate(String minecraftName) {
         if (minecraftName == null || minecraftName.isBlank()) {
-            return new ValidationResult(false, "Minecraft naam ontbreekt.", null);
+            return new ValidationResult(false, false, "Minecraft naam ontbreekt.", null);
         }
 
         String input = minecraftName.trim();
 
         if (!config.isMinecraftNameValidationEnabled()) {
-            return new ValidationResult(true, "Validatie uitgeschakeld.", null);
+            return new ValidationResult(true, false, "Validatie uitgeschakeld.", null);
         }
 
         if (input.length() < config.getMinecraftNameMinLength()) {
-            return new ValidationResult(false, "Minecraft naam is te kort.", null);
+            return new ValidationResult(false, false, "Minecraft naam is te kort.", null);
         }
 
         if (input.length() > config.getMinecraftNameMaxLength()) {
-            return new ValidationResult(false, "Minecraft naam is te lang.", null);
+            return new ValidationResult(false, false, "Minecraft naam is te lang.", null);
         }
 
         if (!minecraftNamePattern.matcher(input).matches()) {
-            return new ValidationResult(false, "Minecraft naam bevat ongeldige tekens.", null);
+            return new ValidationResult(false, false, "Minecraft naam bevat ongeldige tekens.", null);
         }
 
         if (!config.isCheckProfileExistsEnabled()) {
-            return new ValidationResult(true, "Naam syntactisch geldig.", null);
+            return new ValidationResult(true, false, "Naam syntactisch geldig.", null);
         }
 
         try {
             LookupResult lookup = fetchUuid(input);
 
             return switch (lookup.status()) {
-                case FOUND -> new ValidationResult(true, "Minecraft profiel gevonden.", lookup.uuid());
-                case NOT_FOUND -> new ValidationResult(false, "Minecraft profiel bestaat niet.", null);
+                case FOUND -> new ValidationResult(true, false, "Minecraft profiel gevonden.", lookup.uuid());
+                case NOT_FOUND -> new ValidationResult(false, false, "Minecraft profiel bestaat niet.", null);
                 case TEMP_ERROR -> new ValidationResult(
                         false,
+                        true,
                         "Minecraft profiel kon tijdelijk niet geverifieerd worden. Probeer later opnieuw.",
                         null
                 );
@@ -67,6 +68,7 @@ public class UsernameValidationService {
             plugin.getLogger().warning("Minecraft naam-validatie crashte voor '" + input + "': " + ex.getMessage());
             return new ValidationResult(
                     false,
+                    true,
                     "Minecraft profiel kon tijdelijk niet geverifieerd worden. Probeer later opnieuw.",
                     null
             );
@@ -154,7 +156,7 @@ public class UsernameValidationService {
     }
 
     private String extractJsonValue(String json, String key) {
-        Pattern pattern = Pattern.compile("\"" + Pattern.quote(key) + "\"\\s*:\\s*\"([^\"]+)\"");
+        Pattern pattern = Pattern.compile("\\\"" + Pattern.quote(key) + "\\\"\\s*:\\s*\\\"([^\\\"]+)\\\"");
         Matcher matcher = pattern.matcher(json);
         if (matcher.find()) {
             return matcher.group(1);
@@ -171,6 +173,6 @@ public class UsernameValidationService {
     private record LookupResult(LookupStatus status, String uuid) {
     }
 
-    public record ValidationResult(boolean valid, String reason, String minecraftUuid) {
+    public record ValidationResult(boolean valid, boolean temporaryFailure, String reason, String minecraftUuid) {
     }
 }

@@ -1,6 +1,7 @@
 package me.lekkernakkie.lekkeradmin.discord.interaction.button;
 
 import me.lekkernakkie.lekkeradmin.LekkerAdmin;
+import me.lekkernakkie.lekkeradmin.config.DCBotConfig;
 import me.lekkernakkie.lekkeradmin.discord.embed.ReviewEmbedFactory;
 import me.lekkernakkie.lekkeradmin.discord.interaction.component.ComponentIdParser;
 import me.lekkernakkie.lekkeradmin.discord.log.DiscordWebhookLogger;
@@ -16,6 +17,7 @@ import java.util.Optional;
 
 public class ReviewButtonHandler {
 
+    private final DCBotConfig config;
     private final ApplicationService applicationService;
     private final WhitelistService whitelistService;
     private final ReviewEmbedFactory embedFactory;
@@ -25,6 +27,7 @@ public class ReviewButtonHandler {
     private final DiscordRoleService discordRoleService;
 
     public ReviewButtonHandler(LekkerAdmin plugin) {
+        this.config = plugin.getConfigManager().getDcBotConfig();
         this.applicationService = new ApplicationService(plugin);
         this.whitelistService = new WhitelistService(plugin);
         this.embedFactory = new ReviewEmbedFactory(plugin);
@@ -57,7 +60,7 @@ public class ReviewButtonHandler {
                 applicationService.findByApplicationId(applicationId);
 
         if (optional.isEmpty()) {
-            event.reply("Application not found").setEphemeral(true).queue();
+            event.reply(config.getStaffApplicationNotFound()).setEphemeral(true).queue();
             return;
         }
 
@@ -69,7 +72,7 @@ public class ReviewButtonHandler {
                 whitelistService.finalizeApprovedApplication(application, reviewerId, reviewer);
 
         if (!result.success()) {
-            event.reply("Whitelist failed: " + result.message())
+            event.reply(config.getStaffWhitelistFailed().replace("{reason}", result.message()))
                     .setEphemeral(true)
                     .queue();
 
@@ -105,7 +108,7 @@ public class ReviewButtonHandler {
                 applicationService.findByApplicationId(applicationId);
 
         if (optional.isEmpty()) {
-            event.reply("Application not found").setEphemeral(true).queue();
+            event.reply(config.getStaffApplicationNotFound()).setEphemeral(true).queue();
             return;
         }
 

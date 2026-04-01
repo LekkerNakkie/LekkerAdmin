@@ -15,6 +15,9 @@ import java.util.Locale;
 
 public class MigrationRunner {
 
+    private static final String WHITELIST_TABLE = "LA_whitelist";
+    private static final String LEGACY_WHITELIST_TABLE = "whitelist_entries";
+
     private final LekkerAdmin plugin;
     private final DatabaseManager databaseManager;
     private final DCBotConfig config;
@@ -33,9 +36,10 @@ public class MigrationRunner {
 
     public void runMigrations() {
         ensureMigrationsTable();
+        renameLegacyWhitelistTableIfNeeded();
 
         List<Migration> migrations = List.of(
-                new Migration("V1", "Single whitelist_entries schema", getV1Statements()),
+                new Migration("V1", "Single LA_whitelist schema", getV1Statements()),
                 new Migration("V2", "Create punishments table and indexes", getV2Statements())
         );
 
@@ -79,6 +83,42 @@ public class MigrationRunner {
             statement.executeUpdate(sql);
         } catch (Exception ex) {
             throw new RuntimeException("Failed to create migrations table", ex);
+        }
+    }
+
+    private void renameLegacyWhitelistTableIfNeeded() {
+        if (normalizeDatabaseType().equals("MYSQL")) {
+            renameLegacyWhitelistTableIfNeededMySql();
+        } else {
+            renameLegacyWhitelistTableIfNeededSqlite();
+        }
+    }
+
+    private void renameLegacyWhitelistTableIfNeededMySql() {
+        if (!mysqlTableExists(LEGACY_WHITELIST_TABLE) || mysqlTableExists(WHITELIST_TABLE)) {
+            return;
+        }
+
+        try (Connection connection = databaseManager.getConnection();
+             Statement statement = connection.createStatement()) {
+            statement.executeUpdate("RENAME TABLE " + LEGACY_WHITELIST_TABLE + " TO " + WHITELIST_TABLE);
+            plugin.getLogger().info("Renamed legacy table " + LEGACY_WHITELIST_TABLE + " to " + WHITELIST_TABLE);
+        } catch (Exception ex) {
+            throw new RuntimeException("Failed to rename MySQL whitelist table", ex);
+        }
+    }
+
+    private void renameLegacyWhitelistTableIfNeededSqlite() {
+        if (!sqliteTableExists(LEGACY_WHITELIST_TABLE) || sqliteTableExists(WHITELIST_TABLE)) {
+            return;
+        }
+
+        try (Connection connection = databaseManager.getConnection();
+             Statement statement = connection.createStatement()) {
+            statement.executeUpdate("ALTER TABLE " + LEGACY_WHITELIST_TABLE + " RENAME TO " + WHITELIST_TABLE);
+            plugin.getLogger().info("Renamed legacy table " + LEGACY_WHITELIST_TABLE + " to " + WHITELIST_TABLE);
+        } catch (Exception ex) {
+            throw new RuntimeException("Failed to rename SQLite whitelist table", ex);
         }
     }
 
@@ -253,7 +293,7 @@ public class MigrationRunner {
         List<String> statements = new ArrayList<>();
 
         statements.add("""
-                CREATE TABLE IF NOT EXISTS whitelist_entries (
+                CREATE TABLE IF NOT EXISTS LA_whitelist (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     application_id TEXT NOT NULL UNIQUE,
                     discord_user_id TEXT NOT NULL UNIQUE,
@@ -275,7 +315,7 @@ public class MigrationRunner {
 
         statements.add("""
                 CREATE INDEX IF NOT EXISTS idx_whitelist_entries_status
-                ON whitelist_entries(status)
+                ON LA_whitelist(status)
                 """);
 
         statements.add("""
@@ -304,7 +344,7 @@ public class MigrationRunner {
         List<String> statements = new ArrayList<>();
 
         statements.add("""
-                CREATE TABLE IF NOT EXISTS whitelist_entries (
+                CREATE TABLE IF NOT EXISTS LA_whitelist (
                     id BIGINT NOT NULL AUTO_INCREMENT,
                     application_id VARCHAR(64) NOT NULL,
                     discord_user_id VARCHAR(64) NOT NULL,
@@ -488,20 +528,20 @@ public class MigrationRunner {
     }
 
     private void ensureMysqlWhitelistEntriesReviewerNameColumn() {
-        if (mysqlColumnExists("whitelist_entries", "reviewed_by_discord_name")) {
+        if (mysqlColumnExists(WHITELIST_TABLE, "reviewed_by_discord_name")) {
             return;
         }
 
         try (Connection connection = databaseManager.getConnection();
              Statement statement = connection.createStatement()) {
-            statement.executeUpdate("ALTER TABLE whitelist_entries ADD COLUMN reviewed_by_discord_name VARCHAR(100) NULL AFTER reviewed_by_discord_id");
+            statement.executeUpdate("ALTER TABLE " + WHITELIST_TABLE + " ADD COLUMN reviewed_by_discord_name VARCHAR(100) NULL AFTER reviewed_by_discord_id");
         } catch (Exception ex) {
-            throw new RuntimeException("Failed to ensure MySQL whitelist_entries reviewer name column", ex);
+            throw new RuntimeException("Failed to ensure MySQL whitelist reviewer name column", ex);
         }
     }
 
     private void ensureMysqlWhitelistEntriesDateTimeColumn(String columnName, boolean nullable) {
-        String currentType = getMysqlColumnType("whitelist_entries", columnName);
+        String currentType = getMysqlColumnType(WHITELIST_TABLE, columnName);
         if (isDateTimeType(currentType)) {
             return;
         }
@@ -511,30 +551,30 @@ public class MigrationRunner {
         try (Connection connection = databaseManager.getConnection();
              Statement statement = connection.createStatement()) {
 
-            if (!mysqlColumnExists("whitelist_entries", tempColumn)) {
-                statement.executeUpdate("ALTER TABLE whitelist_entries ADD COLUMN " + tempColumn + " DATETIME(3) NULL");
+            if (!mysqlColumnExists(WHITELIST_TABLE, tempColumn)) {
+                statement.executeUpdate("ALTER TABLE " + WHITELIST_TABLE + " ADD COLUMN " + tempColumn + " DATETIME(3) NULL");
             }
 
             statement.executeUpdate("""
-                    UPDATE whitelist_entries
+                    UPDATE %s
                     SET %s = CASE
                         WHEN %s IS NULL THEN NULL
                         ELSE FROM_UNIXTIME(%s / 1000.0)
                     END
-                    """.formatted(tempColumn, columnName, columnName));
+                    """.formatted(WHITELIST_TABLE, tempColumn, columnName, columnName));
 
-            statement.executeUpdate("ALTER TABLE whitelist_entries DROP COLUMN " + columnName);
+            statement.executeUpdate("ALTER TABLE " + WHITELIST_TABLE + " DROP COLUMN " + columnName);
 
             String nullSql = nullable ? "NULL" : "NOT NULL";
-            statement.executeUpdate("ALTER TABLE whitelist_entries CHANGE COLUMN " + tempColumn + " " + columnName + " DATETIME(3) " + nullSql);
+            statement.executeUpdate("ALTER TABLE " + WHITELIST_TABLE + " CHANGE COLUMN " + tempColumn + " " + columnName + " DATETIME(3) " + nullSql);
 
         } catch (Exception ex) {
-            throw new RuntimeException("Failed to convert MySQL whitelist_entries column to DATETIME: " + columnName, ex);
+            throw new RuntimeException("Failed to convert MySQL whitelist column to DATETIME: " + columnName, ex);
         }
     }
 
     private void ensureSqliteWhitelistEntriesColumn(String columnName, String definition) {
-        String sql = "PRAGMA table_info(whitelist_entries)";
+        String sql = "PRAGMA table_info(" + WHITELIST_TABLE + ")";
 
         try (Connection connection = databaseManager.getConnection();
              PreparedStatement statement = connection.prepareStatement(sql);
@@ -548,11 +588,11 @@ public class MigrationRunner {
             }
 
             try (Statement alter = connection.createStatement()) {
-                alter.executeUpdate("ALTER TABLE whitelist_entries ADD COLUMN " + columnName + " " + definition);
+                alter.executeUpdate("ALTER TABLE " + WHITELIST_TABLE + " ADD COLUMN " + columnName + " " + definition);
             }
 
         } catch (Exception ex) {
-            throw new RuntimeException("Failed to ensure SQLite whitelist_entries column: " + columnName, ex);
+            throw new RuntimeException("Failed to ensure SQLite whitelist column: " + columnName, ex);
         }
     }
 
@@ -564,7 +604,7 @@ public class MigrationRunner {
                 statement.executeUpdate("PRAGMA foreign_keys = OFF");
 
                 statement.executeUpdate("""
-                        CREATE TABLE IF NOT EXISTS whitelist_entries_new (
+                        CREATE TABLE IF NOT EXISTS LA_whitelist_new (
                             id INTEGER PRIMARY KEY AUTOINCREMENT,
                             application_id TEXT NOT NULL UNIQUE,
                             discord_user_id TEXT NOT NULL,
@@ -585,7 +625,7 @@ public class MigrationRunner {
                         """);
 
                 statement.executeUpdate("""
-                        INSERT INTO whitelist_entries_new (
+                        INSERT INTO LA_whitelist_new (
                             id,
                             application_id,
                             discord_user_id,
@@ -620,25 +660,25 @@ public class MigrationRunner {
                             finalized_at,
                             name_retry_count,
                             form_answers_json
-                        FROM whitelist_entries
+                        FROM LA_whitelist
                         """);
 
-                statement.executeUpdate("DROP TABLE whitelist_entries");
-                statement.executeUpdate("ALTER TABLE whitelist_entries_new RENAME TO whitelist_entries");
+                statement.executeUpdate("DROP TABLE " + WHITELIST_TABLE);
+                statement.executeUpdate("ALTER TABLE LA_whitelist_new RENAME TO " + WHITELIST_TABLE);
 
                 statement.executeUpdate("""
                         CREATE INDEX IF NOT EXISTS idx_whitelist_entries_status
-                        ON whitelist_entries(status)
+                        ON LA_whitelist(status)
                         """);
 
                 statement.executeUpdate("""
                         CREATE INDEX IF NOT EXISTS idx_whitelist_entries_discord_user_id
-                        ON whitelist_entries(discord_user_id)
+                        ON LA_whitelist(discord_user_id)
                         """);
 
                 statement.executeUpdate("""
                         CREATE INDEX IF NOT EXISTS idx_whitelist_entries_minecraft_name
-                        ON whitelist_entries(minecraft_name)
+                        ON LA_whitelist(minecraft_name)
                         """);
 
                 statement.executeUpdate("PRAGMA foreign_keys = ON");
@@ -646,20 +686,20 @@ public class MigrationRunner {
                 connection.commit();
             } catch (Exception ex) {
                 connection.rollback();
-                throw new RuntimeException("Failed to rebuild SQLite whitelist_entries without unique user/name constraints", ex);
+                throw new RuntimeException("Failed to rebuild SQLite whitelist table without unique user/name constraints", ex);
             } finally {
                 connection.setAutoCommit(true);
             }
         } catch (Exception ex) {
-            throw new RuntimeException("Failed to migrate SQLite whitelist_entries constraints", ex);
+            throw new RuntimeException("Failed to migrate SQLite whitelist constraints", ex);
         }
     }
 
     private void ensureMysqlWhitelistEntriesNonUniqueConstraints() {
-        ensureMysqlUniqueIndexDropped("whitelist_entries", "uk_whitelist_entries_discord_user_id");
-        ensureMysqlUniqueIndexDropped("whitelist_entries", "uk_whitelist_entries_minecraft_name");
-        ensureMysqlIndex("whitelist_entries", "idx_whitelist_entries_discord_user_id", "CREATE INDEX idx_whitelist_entries_discord_user_id ON whitelist_entries(discord_user_id)");
-        ensureMysqlIndex("whitelist_entries", "idx_whitelist_entries_minecraft_name", "CREATE INDEX idx_whitelist_entries_minecraft_name ON whitelist_entries(minecraft_name)");
+        ensureMysqlUniqueIndexDropped(WHITELIST_TABLE, "uk_whitelist_entries_discord_user_id");
+        ensureMysqlUniqueIndexDropped(WHITELIST_TABLE, "uk_whitelist_entries_minecraft_name");
+        ensureMysqlIndex(WHITELIST_TABLE, "idx_whitelist_entries_discord_user_id", "CREATE INDEX idx_whitelist_entries_discord_user_id ON " + WHITELIST_TABLE + "(discord_user_id)");
+        ensureMysqlIndex(WHITELIST_TABLE, "idx_whitelist_entries_minecraft_name", "CREATE INDEX idx_whitelist_entries_minecraft_name ON " + WHITELIST_TABLE + "(minecraft_name)");
     }
 
     private void ensurePunishmentsColumns() {
@@ -1101,6 +1141,47 @@ public class MigrationRunner {
 
         } catch (Exception ex) {
             throw new RuntimeException("Failed to ensure MySQL index: " + indexName, ex);
+        }
+    }
+
+    private boolean mysqlTableExists(String tableName) {
+        String sql = """
+                SELECT COUNT(*)
+                FROM INFORMATION_SCHEMA.TABLES
+                WHERE TABLE_SCHEMA = DATABASE()
+                  AND TABLE_NAME = ?
+                """;
+
+        try (Connection connection = databaseManager.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+
+            statement.setString(1, tableName);
+
+            try (ResultSet rs = statement.executeQuery()) {
+                return rs.next() && rs.getInt(1) > 0;
+            }
+        } catch (Exception ex) {
+            throw new RuntimeException("Failed to inspect MySQL table: " + tableName, ex);
+        }
+    }
+
+    private boolean sqliteTableExists(String tableName) {
+        String sql = """
+                SELECT name
+                FROM sqlite_master
+                WHERE type = 'table' AND name = ?
+                """;
+
+        try (Connection connection = databaseManager.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+
+            statement.setString(1, tableName);
+
+            try (ResultSet rs = statement.executeQuery()) {
+                return rs.next();
+            }
+        } catch (Exception ex) {
+            throw new RuntimeException("Failed to inspect SQLite table: " + tableName, ex);
         }
     }
 

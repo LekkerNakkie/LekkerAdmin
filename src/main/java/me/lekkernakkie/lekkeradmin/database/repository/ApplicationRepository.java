@@ -22,6 +22,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class ApplicationRepository {
 
+    private static final String TABLE_NAME = "LA_whitelist";
     private static final Type ANSWER_LIST_TYPE = new TypeToken<List<ApplicationAnswer>>() {}.getType();
 
     private final DatabaseManager databaseManager;
@@ -34,7 +35,7 @@ public class ApplicationRepository {
 
     public void saveApplication(WhitelistApplication application) {
         String sql = """
-                INSERT INTO whitelist_entries (
+                INSERT INTO LA_whitelist (
                     application_id,
                     discord_user_id,
                     discord_tag,
@@ -65,10 +66,10 @@ public class ApplicationRepository {
             statement.setString(7, application.getReviewReason());
             statement.setString(8, application.getReviewedByDiscordId());
             statement.setString(9, application.getReviewedByDiscordName());
-            setTemporal(statement, connection, "whitelist_entries", "submitted_at", 10, application.getSubmittedAt(), false);
-            setTemporal(statement, connection, "whitelist_entries", "reviewed_at", 11, application.getReviewedAt(), true);
-            setTemporal(statement, connection, "whitelist_entries", "linked_at", 12, application.getLinkedAt(), true);
-            setTemporal(statement, connection, "whitelist_entries", "finalized_at", 13, application.getFinalizedAt(), true);
+            setTemporal(statement, connection, TABLE_NAME, "submitted_at", 10, application.getSubmittedAt(), false);
+            setTemporal(statement, connection, TABLE_NAME, "reviewed_at", 11, application.getReviewedAt(), true);
+            setTemporal(statement, connection, TABLE_NAME, "linked_at", 12, application.getLinkedAt(), true);
+            setTemporal(statement, connection, TABLE_NAME, "finalized_at", 13, application.getFinalizedAt(), true);
             statement.setInt(14, application.getNameRetryCount());
             statement.setString(15, toJson(application.getAnswers()));
 
@@ -80,7 +81,7 @@ public class ApplicationRepository {
 
     public void updateApplication(WhitelistApplication application) {
         String sql = """
-                UPDATE whitelist_entries
+                UPDATE LA_whitelist
                 SET discord_tag = ?,
                     minecraft_name = ?,
                     minecraft_uuid = ?,
@@ -107,10 +108,10 @@ public class ApplicationRepository {
             statement.setString(5, application.getReviewReason());
             statement.setString(6, application.getReviewedByDiscordId());
             statement.setString(7, application.getReviewedByDiscordName());
-            setTemporal(statement, connection, "whitelist_entries", "submitted_at", 8, application.getSubmittedAt(), false);
-            setTemporal(statement, connection, "whitelist_entries", "reviewed_at", 9, application.getReviewedAt(), true);
-            setTemporal(statement, connection, "whitelist_entries", "linked_at", 10, application.getLinkedAt(), true);
-            setTemporal(statement, connection, "whitelist_entries", "finalized_at", 11, application.getFinalizedAt(), true);
+            setTemporal(statement, connection, TABLE_NAME, "submitted_at", 8, application.getSubmittedAt(), false);
+            setTemporal(statement, connection, TABLE_NAME, "reviewed_at", 9, application.getReviewedAt(), true);
+            setTemporal(statement, connection, TABLE_NAME, "linked_at", 10, application.getLinkedAt(), true);
+            setTemporal(statement, connection, TABLE_NAME, "finalized_at", 11, application.getFinalizedAt(), true);
             statement.setInt(12, application.getNameRetryCount());
             statement.setString(13, toJson(application.getAnswers()));
             statement.setString(14, application.getApplicationId());
@@ -122,7 +123,7 @@ public class ApplicationRepository {
     }
 
     public Optional<WhitelistApplication> findByApplicationId(String applicationId) {
-        String sql = "SELECT * FROM whitelist_entries WHERE application_id = ? LIMIT 1";
+        String sql = "SELECT * FROM LA_whitelist WHERE application_id = ? LIMIT 1";
 
         try (Connection connection = databaseManager.getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)) {
@@ -142,7 +143,7 @@ public class ApplicationRepository {
 
     public Optional<WhitelistApplication> findLatestByDiscordUserId(String discordUserId) {
         String sql = """
-                SELECT * FROM whitelist_entries
+                SELECT * FROM LA_whitelist
                 WHERE discord_user_id = ?
                 ORDER BY submitted_at DESC
                 LIMIT 1
@@ -166,9 +167,9 @@ public class ApplicationRepository {
 
     public Optional<WhitelistApplication> findLatestOpenByDiscordUserId(String discordUserId) {
         String sql = """
-                SELECT * FROM whitelist_entries
+                SELECT * FROM LA_whitelist
                 WHERE discord_user_id = ?
-                  AND status IN (?, ?, ?)
+                  AND status IN (?, ?, ?, ?)
                 ORDER BY submitted_at DESC
                 LIMIT 1
                 """;
@@ -177,9 +178,10 @@ public class ApplicationRepository {
              PreparedStatement statement = connection.prepareStatement(sql)) {
 
             statement.setString(1, discordUserId);
-            statement.setString(2, ApplicationStatus.PENDING_REVIEW.name());
-            statement.setString(3, ApplicationStatus.APPROVED_PENDING_NAME_FIX.name());
-            statement.setString(4, ApplicationStatus.APPROVED.name());
+            statement.setString(2, ApplicationStatus.PENDING_NAME_VALIDATION.name());
+            statement.setString(3, ApplicationStatus.PENDING_REVIEW.name());
+            statement.setString(4, ApplicationStatus.APPROVED_PENDING_NAME_FIX.name());
+            statement.setString(5, ApplicationStatus.APPROVED.name());
 
             try (ResultSet rs = statement.executeQuery()) {
                 if (rs.next()) {
@@ -194,7 +196,7 @@ public class ApplicationRepository {
 
     public Optional<WhitelistApplication> findByDiscordUserId(String discordUserId) {
         String sql = """
-                SELECT * FROM whitelist_entries
+                SELECT * FROM LA_whitelist
                 WHERE discord_user_id = ?
                 ORDER BY
                     CASE WHEN linked_at IS NULL THEN 1 ELSE 0 END,
@@ -221,7 +223,7 @@ public class ApplicationRepository {
 
     public Optional<WhitelistApplication> findByMinecraftName(String minecraftName) {
         String sql = """
-                SELECT * FROM whitelist_entries
+                SELECT * FROM LA_whitelist
                 WHERE minecraft_name = ?
                 ORDER BY
                     CASE WHEN linked_at IS NULL THEN 1 ELSE 0 END,
@@ -260,10 +262,10 @@ public class ApplicationRepository {
         application.setReviewReason(rs.getString("review_reason"));
         application.setReviewedByDiscordId(rs.getString("reviewed_by_discord_id"));
         application.setReviewedByDiscordName(rs.getString("reviewed_by_discord_name"));
-        application.setSubmittedAt(getRequiredTemporal(rs, connection, "whitelist_entries", "submitted_at"));
-        application.setReviewedAt(getNullableTemporal(rs, connection, "whitelist_entries", "reviewed_at"));
-        application.setLinkedAt(getNullableTemporal(rs, connection, "whitelist_entries", "linked_at"));
-        application.setFinalizedAt(getNullableTemporal(rs, connection, "whitelist_entries", "finalized_at"));
+        application.setSubmittedAt(getRequiredTemporal(rs, connection, TABLE_NAME, "submitted_at"));
+        application.setReviewedAt(getNullableTemporal(rs, connection, TABLE_NAME, "reviewed_at"));
+        application.setLinkedAt(getNullableTemporal(rs, connection, TABLE_NAME, "linked_at"));
+        application.setFinalizedAt(getNullableTemporal(rs, connection, TABLE_NAME, "finalized_at"));
         application.setNameRetryCount(rs.getInt("name_retry_count"));
         application.setFormAnswersJson(rs.getString("form_answers_json"));
         application.setAnswers(fromJson(rs.getString("form_answers_json")));

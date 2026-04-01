@@ -218,6 +218,14 @@ messages:
     blocked-already-whitelisted: "Je bent al gewhitelist. Je kan geen nieuwe aanvraag indienen."
     blocked-discord-already-linked: "Je Discord account is al gekoppeld aan een Minecraft account. Je kan geen nieuwe aanvraag indienen."
     blocked-minecraft-already-linked: "Deze Minecraft naam is al gekoppeld aan een ander Discord account."
+    whitelist-cooldown: "Je moet even wachten voor je opnieuw een whitelist aanvraag kan indienen."
+    invalid-form: "Je formulier is ongeldig: {reason}"
+    application-not-found: "Applicatie niet gevonden."
+    retry-name-processing-failed: "Naamcorrectie mislukt: {reason}"
+    invalid-name-retry-sent: "De Minecraft naam is ongeldig of kon niet bevestigd worden. Je hebt een DM gekregen om je naam opnieuw in te vullen."
+    retry-name-submitted-to-staff: "Je naam is correct verwerkt. Je whitelist aanvraag is nu doorgestuurd naar staff."
+    approval-failed: "Goedkeuring mislukt: {reason}"
+    finalization-failed-after-retry: "Naam werd aangepast, maar finalisatie mislukte: {reason}"
 
   staff:
     review-title: "Nieuwe whitelist aanvraag"
@@ -225,7 +233,10 @@ messages:
     denied: "Aanvraag afgekeurd."
     pending-name-fix: "Aanvraag goedgekeurd, maar Minecraft naam is ongeldig."
     retry-processed: "Naamcorrectie succesvol verwerkt."
-
+    review-no-permission: "Je hebt geen permissie om aanvragen te reviewen."
+    whitelist-failed: "Whitelist mislukt: {reason}"
+    application-not-found: "Applicatie niet gevonden."
+    pending-name-fix-with-reason: "Applicatie goedgekeurd, maar naamcorrectie is nodig: {reason}"
 # =========================================================
 # Discord buttons
 # Mogelijke styles: PRIMARY / SUCCESS / DANGER / SECONDARY

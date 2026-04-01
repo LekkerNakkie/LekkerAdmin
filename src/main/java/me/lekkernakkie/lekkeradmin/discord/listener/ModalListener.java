@@ -85,7 +85,7 @@ public class ModalListener extends ListenerAdapter {
         if (root.equalsIgnoreCase("review")) {
             Member member = event.getMember();
             if (!discordRoleService.hasReviewPermission(member)) {
-                event.reply("Je hebt geen permissie om aanvragen te reviewen.")
+                event.reply(config.getStaffReviewNoPermission())
                         .setEphemeral(true)
                         .queue();
                 return;
@@ -116,7 +116,7 @@ public class ModalListener extends ListenerAdapter {
         String discordUserId = event.getUser().getId();
 
         if (isOnWhitelistCooldown(discordUserId)) {
-            event.reply("Je moet even wachten voor je opnieuw een whitelist aanvraag kan indienen.")
+            event.reply(config.getDmWhitelistCooldown())
                     .setEphemeral(true)
                     .queue();
             return;
@@ -170,12 +170,12 @@ public class ModalListener extends ListenerAdapter {
 
         answers.sort(Comparator.comparingInt(ApplicationAnswer::getFieldOrder));
         application.setAnswers(answers);
-        application.setStatus(ApplicationStatus.PENDING_REVIEW);
+        application.setStatus(ApplicationStatus.PENDING_NAME_VALIDATION);
         application.setSubmittedAt(System.currentTimeMillis());
 
         ApplicationValidator.ValidationResult validation = applicationValidator.validate(application);
         if (!validation.valid()) {
-            event.reply("Je formulier is ongeldig: " + validation.message())
+            event.reply(config.getDmInvalidForm().replace("{reason}", validation.message()))
                     .setEphemeral(true)
                     .queue();
             return;
@@ -197,19 +197,34 @@ public class ModalListener extends ListenerAdapter {
             return;
         }
 
+        applicationService.saveNewApplication(application);
+
         UsernameValidationService.ValidationResult mcValidation =
                 usernameValidationService.validate(application.getMinecraftName());
 
         if (!mcValidation.valid()) {
-            event.reply("De Minecraft naam is ongeldig: " + mcValidation.reason())
+            if (!mcValidation.temporaryFailure()) {
+                application.setNameRetryCount(application.getNameRetryCount() + 1);
+                applicationService.update(application);
+            }
+
+            webhookLogger.logInvalidName(application);
+            discordDmService.sendInvalidMinecraftNameDm(
+                    application.getDiscordUserId(),
+                    application.getApplicationId(),
+                    application.getMinecraftName(),
+                    mcValidation.reason()
+            );
+
+            event.reply(config.getDmInvalidNameRetrySent())
                     .setEphemeral(true)
                     .queue();
             return;
         }
 
         application.setMinecraftUuid(mcValidation.minecraftUuid());
-
-        applicationService.saveNewApplication(application);
+        application.setStatus(ApplicationStatus.PENDING_REVIEW);
+        applicationService.update(application);
         markWhitelistSubmitted(discordUserId);
 
         auditLogService.log(
@@ -239,7 +254,7 @@ public class ModalListener extends ListenerAdapter {
                 applicationService.findByApplicationId(applicationId);
 
         if (optionalApplication.isEmpty()) {
-            event.reply("Applicatie niet gevonden.")
+            event.reply(config.getDmApplicationNotFound())
                     .setEphemeral(true)
                     .queue();
             return;
@@ -247,15 +262,12 @@ public class ModalListener extends ListenerAdapter {
 
         WhitelistApplication application = optionalApplication.get();
 
-        if (isRetryExpired(application)) {
+        if (application.getStatus() == ApplicationStatus.APPROVED_PENDING_NAME_FIX && isRetryExpired(application)) {
             event.reply(config.getDmApplicationCancelled())
                     .setEphemeral(true)
                     .queue();
             return;
         }
-
-        String newMinecraftName = event.getValue("field:minecraft_name").getAsString();
-        String oldName = application.getMinecraftName();
 
         if (application.getNameRetryCount() >= config.getMaxNameRetries()) {
             event.reply(config.getDmRetryNameFailed())
@@ -263,6 +275,9 @@ public class ModalListener extends ListenerAdapter {
                     .queue();
             return;
         }
+
+        String newMinecraftName = event.getValue("field:minecraft_name").getAsString();
+        String oldName = application.getMinecraftName();
 
         if (minecraftWhitelistService.isWhitelisted(newMinecraftName, config.isCaseSensitiveNameCheck())) {
             event.reply(config.getDmBlockedAlreadyWhitelisted())
@@ -284,7 +299,7 @@ public class ModalListener extends ListenerAdapter {
                 nameRetryService.processRetry(application, newMinecraftName);
 
         if (!retryResult.success()) {
-            event.reply("Naamcorrectie mislukt: " + retryResult.message())
+            event.reply(config.getDmRetryNameProcessingFailed().replace("{reason}", retryResult.message()))
                     .setEphemeral(true)
                     .queue();
             return;
@@ -294,21 +309,61 @@ public class ModalListener extends ListenerAdapter {
                 usernameValidationService.validate(application.getMinecraftName());
 
         if (!mcValidation.valid()) {
+            if (!mcValidation.temporaryFailure()) {
+                application.setNameRetryCount(application.getNameRetryCount() + 1);
+            }
+
             applicationService.update(application);
-            event.reply(config.getDmRetryNameFailed())
+            webhookLogger.logInvalidName(application);
+
+            discordDmService.sendInvalidMinecraftNameDm(
+                    application.getDiscordUserId(),
+                    application.getApplicationId(),
+                    application.getMinecraftName(),
+                    mcValidation.reason()
+            );
+
+            event.reply(mcValidation.reason())
                     .setEphemeral(true)
                     .queue();
             return;
         }
 
         application.setMinecraftUuid(mcValidation.minecraftUuid());
+
+        if (application.getStatus() == ApplicationStatus.PENDING_NAME_VALIDATION) {
+            application.setStatus(ApplicationStatus.PENDING_REVIEW);
+            applicationService.update(application);
+            markWhitelistSubmitted(application.getDiscordUserId());
+
+            auditLogService.log(
+                    "APPLICATION_SUBMITTED_AFTER_NAME_RETRY",
+                    event.getUser().getId(),
+                    event.getUser().getAsTag(),
+                    application.getDiscordUserId(),
+                    application.getMinecraftName(),
+                    application.getApplicationId(),
+                    "Whitelist application submitted after successful name retry"
+            );
+
+            webhookLogger.logRetrySuccess(application, oldName, newMinecraftName);
+            discordStaffReviewService.postApplicationReview(application);
+            discordDmService.sendSubmittedOverviewDm(application.getDiscordUserId(), application);
+            notifyIngameWhitelistRequest(application);
+
+            event.reply(config.getDmRetryNameSubmittedToStaff())
+                    .setEphemeral(true)
+                    .queue();
+            return;
+        }
+
         applicationService.update(application);
 
         WhitelistService.WhitelistResult whitelistResult =
                 whitelistService.finalizeApprovedApplication(application);
 
         if (!whitelistResult.success()) {
-            event.reply("Naam werd aangepast, maar finalisatie mislukte: " + whitelistResult.message())
+            event.reply(config.getDmFinalizationFailedAfterRetry().replace("{reason}", whitelistResult.message()))
                     .setEphemeral(true)
                     .queue();
             return;
@@ -335,7 +390,7 @@ public class ModalListener extends ListenerAdapter {
                 applicationService.findByApplicationId(applicationId);
 
         if (optionalApplication.isEmpty()) {
-            event.reply("Applicatie niet gevonden.")
+            event.reply(config.getDmApplicationNotFound())
                     .setEphemeral(true)
                     .queue();
             return;
@@ -361,7 +416,7 @@ public class ModalListener extends ListenerAdapter {
 
             discordStaffReviewService.editApprovedReview(application, event.getUser().getAsTag(), reason);
 
-            event.reply("Applicatie goedgekeurd.")
+            event.reply(config.getStaffApproved())
                     .setEphemeral(true)
                     .queue();
             return;
@@ -383,13 +438,13 @@ public class ModalListener extends ListenerAdapter {
                 discordStaffReviewService.editPendingNameFixReview(application, event.getUser().getAsTag(), result.message());
             }
 
-            event.reply("Applicatie goedgekeurd, maar naamcorrectie is nodig: " + result.message())
+            event.reply(config.getStaffPendingNameFixWithReason().replace("{reason}", result.message()))
                     .setEphemeral(true)
                     .queue();
             return;
         }
 
-        event.reply("Goedkeuring mislukt: " + result.message())
+        event.reply(config.getDmApprovalFailed().replace("{reason}", result.message()))
                 .setEphemeral(true)
                 .queue();
     }
@@ -399,7 +454,7 @@ public class ModalListener extends ListenerAdapter {
                 applicationService.findByApplicationId(applicationId);
 
         if (optionalApplication.isEmpty()) {
-            event.reply("Applicatie niet gevonden.")
+            event.reply(config.getDmApplicationNotFound())
                     .setEphemeral(true)
                     .queue();
             return;
@@ -419,7 +474,7 @@ public class ModalListener extends ListenerAdapter {
 
         discordStaffReviewService.editDeniedReview(application, event.getUser().getAsTag(), reason);
 
-        event.reply("Applicatie afgekeurd.")
+        event.reply(config.getStaffDenied())
                 .setEphemeral(true)
                 .queue();
     }

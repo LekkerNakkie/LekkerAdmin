@@ -21,7 +21,7 @@ public class ApplicationService {
         application.setApplicationId(UUID.randomUUID().toString().replace("-", ""));
         application.setDiscordUserId(discordUserId);
         application.setDiscordTag(discordTag);
-        application.setStatus(ApplicationStatus.PENDING_REVIEW);
+        application.setStatus(ApplicationStatus.PENDING_NAME_VALIDATION);
         application.setSubmittedAt(System.currentTimeMillis());
         application.setNameRetryCount(0);
         return application;

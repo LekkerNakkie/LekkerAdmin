@@ -81,7 +81,7 @@ logs:
       channel-id: "1485283783346491524"
 
     webhook:
-      url: "https://discord.com/api/webhooks/1485284298939564084/ZVG0j9LFfWvO3eiyX-Z1OFq1RhMe6E4eAurvfwRNUZT0FMkDZPoPOaTuJFj2xg7PuBXk"
+      url: ""
       username: "Drop Logs"
       avatar-url: ""
 

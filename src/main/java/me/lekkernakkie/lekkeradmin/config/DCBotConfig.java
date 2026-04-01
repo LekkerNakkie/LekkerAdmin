@@ -442,6 +442,47 @@ public class DCBotConfig {
         return config.getString("messages.dm.blocked-minecraft-already-linked", "Deze Minecraft naam is al gekoppeld aan een ander Discord account.");
     }
 
+    public String getDmWhitelistCooldown() {
+        return config.getString("messages.dm.whitelist-cooldown", "Je moet even wachten voor je opnieuw een whitelist aanvraag kan indienen.");
+    }
+
+    public String getDmInvalidForm() {
+        return config.getString("messages.dm.invalid-form", "Je formulier is ongeldig: {reason}");
+    }
+
+    public String getDmApplicationNotFound() {
+        return config.getString("messages.dm.application-not-found", "Applicatie niet gevonden.");
+    }
+
+    public String getDmRetryNameProcessingFailed() {
+        return config.getString("messages.dm.retry-name-processing-failed", "Naamcorrectie mislukt: {reason}");
+    }
+
+    public String getDmInvalidNameRetrySent() {
+        return config.getString(
+                "messages.dm.invalid-name-retry-sent",
+                "De Minecraft naam is ongeldig of kon niet bevestigd worden. Je hebt een DM gekregen om je naam opnieuw in te vullen."
+        );
+    }
+
+    public String getDmRetryNameSubmittedToStaff() {
+        return config.getString(
+                "messages.dm.retry-name-submitted-to-staff",
+                "Je naam is correct verwerkt. Je whitelist aanvraag is nu doorgestuurd naar staff."
+        );
+    }
+
+    public String getDmApprovalFailed() {
+        return config.getString("messages.dm.approval-failed", "Goedkeuring mislukt: {reason}");
+    }
+
+    public String getDmFinalizationFailedAfterRetry() {
+        return config.getString(
+                "messages.dm.finalization-failed-after-retry",
+                "Naam werd aangepast, maar finalisatie mislukte: {reason}"
+        );
+    }
+
     public String getStaffReviewTitle() {
         return config.getString("messages.staff.review-title", "Nieuwe whitelist aanvraag");
     }
@@ -460,6 +501,25 @@ public class DCBotConfig {
 
     public String getStaffRetryProcessed() {
         return config.getString("messages.staff.retry-processed", "Naamcorrectie succesvol verwerkt.");
+    }
+
+    public String getStaffReviewNoPermission() {
+        return config.getString("messages.staff.review-no-permission", "Je hebt geen permissie om aanvragen te reviewen.");
+    }
+
+    public String getStaffWhitelistFailed() {
+        return config.getString("messages.staff.whitelist-failed", "Whitelist mislukt: {reason}");
+    }
+
+    public String getStaffApplicationNotFound() {
+        return config.getString("messages.staff.application-not-found", "Applicatie niet gevonden.");
+    }
+
+    public String getStaffPendingNameFixWithReason() {
+        return config.getString(
+                "messages.staff.pending-name-fix-with-reason",
+                "Applicatie goedgekeurd, maar naamcorrectie is nodig: {reason}"
+        );
     }
 
     public String getEmbedWhitelistStartTitle() {
