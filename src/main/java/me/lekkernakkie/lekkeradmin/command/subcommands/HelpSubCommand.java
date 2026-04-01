@@ -15,25 +15,25 @@ public class HelpSubCommand {
     }
 
     public boolean execute(CommandSender sender, String[] args) {
-        String prefix = plugin.getConfigManager().getMainConfig().getPrefix();
-
         List<String> lines = new ArrayList<>();
-        lines.add(color(prefix + "&fBeschikbare commands:"));
+
+        lines.add(plugin.lang().get("admin.help.header", "&8&m----------------------------------------"));
+        lines.add(plugin.lang().get("admin.help.title", "&9LekkerAdmin &7- Help"));
 
         if (sender.hasPermission("lekkeradmin.help") || sender.hasPermission("lekkeradmin.admin")) {
-            lines.add(color("&7- &b/lekkeradmin help &7Toont deze help."));
+            lines.add(plugin.lang().get("admin.help.help", "&7/la help &8- &bToon help"));
         }
 
         if (sender.hasPermission("lekkeradmin.reload") || sender.hasPermission("lekkeradmin.admin")) {
-            lines.add(color("&7- &b/lekkeradmin reload &7Herlaadt config bestanden."));
+            lines.add(plugin.lang().get("admin.help.reload", "&7/la reload &8- &bHerlaad plugin"));
         }
 
         if (sender.hasPermission("lekkeradmin.invsee") || sender.hasPermission("lekkeradmin.admin")) {
-            lines.add(color("&7- &b/lekkeradmin invsee <speler> &7Bekijk inventory van een speler."));
+            lines.add(plugin.lang().get("admin.tools.invsee", "&7/la invsee <speler> &8- &bBekijk inventory van speler"));
         }
 
         if (sender.hasPermission("lekkeradmin.enderchest") || sender.hasPermission("lekkeradmin.admin")) {
-            lines.add(color("&7- &b/lekkeradmin enderchest <speler> &7Bekijk enderchest van een speler."));
+            lines.add(plugin.lang().get("admin.tools.enderchest", "&7/la enderchest <speler> &8- &bBekijk enderchest van speler"));
         }
 
         if (sender.hasPermission("lekkeradmin.punishment.ban")
@@ -44,17 +44,15 @@ public class HelpSubCommand {
                 || sender.hasPermission("lekkeradmin.punishment.warn")
                 || sender.hasPermission("lekkeradmin.punishment.banlist")
                 || sender.hasPermission("lekkeradmin.admin")) {
-            lines.add(color("&7- &b/lekkeradmin punishments &7Toont punishment commands."));
+            lines.add(plugin.lang().get("admin.help.punishments", "&7/la punishments &8- &bToon punishment commands"));
         }
+
+        lines.add(plugin.lang().get("admin.help.footer", "&8&m----------------------------------------"));
 
         for (String line : lines) {
             sender.sendMessage(line);
         }
 
         return true;
-    }
-
-    private String color(String input) {
-        return input == null ? "" : input.replace("&", "§");
     }
 }

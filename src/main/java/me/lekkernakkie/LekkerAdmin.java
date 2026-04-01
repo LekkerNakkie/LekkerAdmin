@@ -25,6 +25,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.command.TabCompleter;
+import org.bukkit.event.HandlerList;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
@@ -65,47 +66,19 @@ public class LekkerAdmin extends JavaPlugin {
         this.migrationRunner = new MigrationRunner(this, databaseManager);
         this.migrationRunner.runMigrations();
 
-        this.discordPunishmentLogger = new DiscordPunishmentLogger(this);
-        this.punishmentService = new PunishmentService(this);
-        this.punishmentExpiryService = new PunishmentExpiryService(this);
-        this.warnService = new WarnService(this);
-        this.itemLogAggregationService = new ItemLogAggregationService(this);
-        this.minecraftLogDispatcher = new MinecraftLogDispatcher(this);
-        this.invseeService = new InvseeService(this);
-        this.restartService = new RestartService(this);
-        this.maintenanceService = new MaintenanceService(this);
-        this.explosionTrackerService = new ExplosionTrackerService(this);
+        createRuntimeServices();
 
         registerHooks();
         registerCommands();
         registerListeners();
-        startDiscord();
-
-        punishmentService.loadCacheAndReschedule();
-        punishmentExpiryService.start();
-        restartService.start();
+        startRuntimeServices();
 
         printStartupBanner();
     }
 
     @Override
     public void onDisable() {
-        if (restartService != null) {
-            restartService.shutdown();
-        }
-
-        if (punishmentExpiryService != null) {
-            punishmentExpiryService.stop();
-        }
-
-        if (punishmentService != null) {
-            punishmentService.cancelAllScheduledExpirations();
-        }
-
-        if (discordManager != null) {
-            discordManager.shutdown();
-            discordManager = null;
-        }
+        shutdownRuntimeServices();
 
         if (databaseManager != null) {
             databaseManager.disconnect();
@@ -120,22 +93,9 @@ public class LekkerAdmin extends JavaPlugin {
         console("&b&m-------------------&9 LekkerAdmin Reload &b&m-------------------");
         console(lang().message("reload.started", "&7Reload gestart..."));
 
-        if (restartService != null) {
-            restartService.shutdown();
-        }
+        shutdownRuntimeServices();
 
-        if (punishmentExpiryService != null) {
-            punishmentExpiryService.stop();
-        }
-
-        if (punishmentService != null) {
-            punishmentService.cancelAllScheduledExpirations();
-        }
-
-        if (discordManager != null) {
-            discordManager.shutdown();
-            discordManager = null;
-        }
+        HandlerList.unregisterAll(this);
 
         if (databaseManager != null) {
             databaseManager.disconnect();
@@ -150,21 +110,10 @@ public class LekkerAdmin extends JavaPlugin {
         this.migrationRunner = new MigrationRunner(this, databaseManager);
         this.migrationRunner.runMigrations();
 
-        this.discordPunishmentLogger = new DiscordPunishmentLogger(this);
-        this.punishmentService = new PunishmentService(this);
-        this.punishmentExpiryService = new PunishmentExpiryService(this);
-        this.warnService = new WarnService(this);
-        this.itemLogAggregationService = new ItemLogAggregationService(this);
-        this.minecraftLogDispatcher = new MinecraftLogDispatcher(this);
-        this.invseeService = new InvseeService(this);
-        this.restartService = new RestartService(this);
-        this.maintenanceService = new MaintenanceService(this);
-        this.explosionTrackerService = new ExplosionTrackerService(this);
-
-        startDiscord();
-        punishmentService.loadCacheAndReschedule();
-        punishmentExpiryService.start();
-        restartService.start();
+        createRuntimeServices();
+        registerCommands();
+        registerListeners();
+        startRuntimeServices();
 
         long time = System.currentTimeMillis() - start;
 
@@ -182,6 +131,46 @@ public class LekkerAdmin extends JavaPlugin {
         console(lang().message("reload.sessions", "&a✔ &7Offline sessies herladen"));
         console(lang().formatMessage("reload.finished", "&7Reload voltooid in &b{time}ms&7.", Map.of("time", String.valueOf(time))));
         console("&b&m--------------------------------------------------------------");
+    }
+
+    private void createRuntimeServices() {
+        this.discordPunishmentLogger = new DiscordPunishmentLogger(this);
+        this.punishmentService = new PunishmentService(this);
+        this.punishmentExpiryService = new PunishmentExpiryService(this);
+        this.warnService = new WarnService(this);
+        this.itemLogAggregationService = new ItemLogAggregationService(this);
+        this.minecraftLogDispatcher = new MinecraftLogDispatcher(this);
+        this.invseeService = new InvseeService(this);
+        this.restartService = new RestartService(this);
+        this.maintenanceService = new MaintenanceService(this);
+        this.explosionTrackerService = new ExplosionTrackerService(this);
+    }
+
+    private void startRuntimeServices() {
+        startDiscord();
+
+        punishmentService.loadCacheAndReschedule();
+        punishmentExpiryService.start();
+        restartService.start();
+    }
+
+    private void shutdownRuntimeServices() {
+        if (restartService != null) {
+            restartService.shutdown();
+        }
+
+        if (punishmentExpiryService != null) {
+            punishmentExpiryService.stop();
+        }
+
+        if (punishmentService != null) {
+            punishmentService.cancelAllScheduledExpirations();
+        }
+
+        if (discordManager != null) {
+            discordManager.shutdown();
+            discordManager = null;
+        }
     }
 
     private void registerHooks() {
@@ -216,7 +205,7 @@ public class LekkerAdmin extends JavaPlugin {
         if (maintenanceAlias == null) {
             getLogger().warning("Command 'maintenance' not found in plugin.yml");
         } else {
-            maintenanceAlias.setExecutor(new MaintenanceAliasCommand());
+            maintenanceAlias.setExecutor(new MaintenanceAliasCommand(this));
         }
 
         RestartAliasCommand restartAliasCommand = new RestartAliasCommand(this);

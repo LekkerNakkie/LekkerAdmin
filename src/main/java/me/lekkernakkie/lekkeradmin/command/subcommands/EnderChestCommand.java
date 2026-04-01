@@ -19,17 +19,26 @@ public class EnderChestCommand {
 
     public boolean execute(CommandSender sender, String[] args) {
         if (!(sender instanceof Player player)) {
-            sender.sendMessage("§cAlleen spelers kunnen dit command gebruiken.");
+            sender.sendMessage(plugin.lang().message(
+                    "enderchest-command.player-only",
+                    "&cAlleen spelers kunnen dit command gebruiken."
+            ));
             return true;
         }
 
         if (!plugin.getConfigManager().getMainConfig().isEnderchestEnabled()) {
-            player.sendMessage("§cEnderchest bekijken staat uitgeschakeld.");
+            player.sendMessage(plugin.lang().message(
+                    "enderchest-command.disabled",
+                    "&cEnderchest bekijken staat uitgeschakeld."
+            ));
             return true;
         }
 
         if (!player.hasPermission("lekkeradmin.enderchest")) {
-            player.sendMessage("§cDaar edde gij het lef ni vur..");
+            player.sendMessage(plugin.lang().message(
+                    "general.no-permission",
+                    "&cDaar edde gij het lef ni vur.."
+            ));
             return true;
         }
 
@@ -47,18 +56,27 @@ public class EnderChestCommand {
         }
 
         if (!plugin.getConfigManager().getMainConfig().isEnderchestAllowOffline()) {
-            player.sendMessage("§cOffline enderchest bekijken staat uitgeschakeld.");
+            player.sendMessage(plugin.lang().message(
+                    "enderchest-command.offline-disabled",
+                    "&cOffline enderchest bekijken staat uitgeschakeld."
+            ));
             return true;
         }
 
         if (!player.hasPermission("lekkeradmin.enderchest.offline")) {
-            player.sendMessage("§cDaar edde gij het lef ni vur..");
+            player.sendMessage(plugin.lang().message(
+                    "general.no-permission",
+                    "&cDaar edde gij het lef ni vur.."
+            ));
             return true;
         }
 
         OfflinePlayer offlineTarget = Bukkit.getOfflinePlayer(targetName);
         if (offlineTarget == null || (!offlineTarget.hasPlayedBefore() && !offlineTarget.isOnline())) {
-            player.sendMessage("§cDie speler bestaat niet of heeft nog nooit gejoint.");
+            player.sendMessage(plugin.lang().message(
+                    "enderchest-command.player-never-joined",
+                    "&cDie speler bestaat niet of heeft nog nooit gejoint."
+            ));
             return true;
         }
 

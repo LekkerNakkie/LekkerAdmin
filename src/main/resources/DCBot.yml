@@ -19,7 +19,7 @@ bot:
     enabled: true
     interval-seconds: 10
     messages:
-      - "🌸 Sakurahelm Season 2"
+      - "🌸 Welcome to LekkerAdmin!"
       - "👥 {online} spelers online"
     type: PLAYING
 

@@ -21,7 +21,10 @@ public class WhitelistSubCommand {
 
     public boolean execute(CommandSender sender, String[] args) {
         if (!sender.hasPermission("lekkeradmin.whitelist") && !sender.hasPermission("lekkeradmin.admin")) {
-            sender.sendMessage(color(plugin.getConfigManager().getMainConfig().getPrefix() + "&cGeen permissie."));
+            sender.sendMessage(plugin.lang().message(
+                    "general.no-permission",
+                    "&cDaar edde gij het lef ni vur.."
+            ));
             return true;
         }
 
@@ -37,18 +40,18 @@ public class WhitelistSubCommand {
             Optional<WhitelistApplication> optional = applicationService.findByApplicationId(applicationId);
 
             if (optional.isEmpty()) {
-                sender.sendMessage(color(plugin.getConfigManager().getMainConfig().getPrefix() + "&cAanvraag niet gevonden."));
+                sender.sendMessage(plugin.lang().withPrefix("&cAanvraag niet gevonden."));
                 return true;
             }
 
             WhitelistApplication application = optional.get();
-            sender.sendMessage(color(plugin.getConfigManager().getMainConfig().getPrefix() + "&fApplication ID: &b" + safe(application.getApplicationId())));
-            sender.sendMessage(color("&7Discord: &f" + safe(application.getDiscordTag()) + " &8(" + safe(application.getDiscordUserId()) + "&8)"));
-            sender.sendMessage(color("&7Minecraft: &f" + safe(application.getMinecraftName())));
-            sender.sendMessage(color("&7Status: &f" + application.getStatus().name()));
-            sender.sendMessage(color("&7Retries: &f" + application.getNameRetryCount()));
-            sender.sendMessage(color("&7Reviewer: &f" + safe(application.getReviewedByDiscordId())));
-            sender.sendMessage(color("&7Reden: &f" + safe(application.getReviewReason())));
+            sender.sendMessage(plugin.lang().withPrefix("&7Application ID: &b" + safe(application.getApplicationId())));
+            sender.sendMessage("&7Discord: &b" + safe(application.getDiscordTag()) + " &8(" + safe(application.getDiscordUserId()) + "&8)");
+            sender.sendMessage("&7Minecraft: &b" + safe(application.getMinecraftName()));
+            sender.sendMessage("&7Status: &b" + application.getStatus().name());
+            sender.sendMessage("&7Retries: &b" + application.getNameRetryCount());
+            sender.sendMessage("&7Reviewer: &b" + safe(application.getReviewedByDiscordId()));
+            sender.sendMessage("&7Reden: &b" + safe(application.getReviewReason()));
             return true;
         }
 
@@ -67,7 +70,7 @@ public class WhitelistSubCommand {
     }
 
     private void sendUsage(CommandSender sender) {
-        sender.sendMessage(color(plugin.getConfigManager().getMainConfig().getPrefix() + "&eGebruik: &7/lekkeradmin whitelist status <applicationId>"));
+        sender.sendMessage(plugin.lang().withPrefix("&7Gebruik: &b/lekkeradmin whitelist status <applicationId>"));
     }
 
     private void addIfMatches(List<String> completions, String input, String option) {
@@ -78,9 +81,5 @@ public class WhitelistSubCommand {
 
     private String safe(String value) {
         return value == null || value.isBlank() ? "-" : value;
-    }
-
-    private String color(String input) {
-        return input == null ? "" : input.replace("&", "§");
     }
 }

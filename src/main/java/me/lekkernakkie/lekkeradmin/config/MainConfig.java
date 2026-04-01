@@ -16,10 +16,6 @@ public class MainConfig {
         return config.getBoolean("debug", false);
     }
 
-    public String getPrefix() {
-        return config.getString("prefix", "&7[&bLekkerAdmin&7] ");
-    }
-
     public boolean isInvseeEnabled() {
         return config.getBoolean("invsee.enabled", true);
     }
@@ -54,7 +50,7 @@ public class MainConfig {
     }
 
     public String getEnderchestTitle() {
-        return config.getString("enderchest.title", "&5Enderchest &7• &f{player}");
+        return config.getString("enderchest.title", "&bEnderchest &7• &f{player}");
     }
 
     public boolean isLeaveTrackingEnabled() {
@@ -157,18 +153,6 @@ public class MainConfig {
         return config.getIntegerList("restart.announce-seconds");
     }
 
-    public String getRestartPrefix() {
-        return config.getString("restart.messages.prefix", "&7[&cRestart&7] &7");
-    }
-
-    public String getRestartChatMessage() {
-        return config.getString("restart.messages.chat", "{prefix}&7Server restart over &e{time}&7. Reden: &e{reason}");
-    }
-
-    public String getRestartChatNowMessage() {
-        return config.getString("restart.messages.chat-now", "{prefix}&cServer restart nu! Reden: &f{reason}");
-    }
-
     public boolean isRestartTitleEnabled() {
         return config.getBoolean("restart.title.enabled", true);
     }
@@ -185,20 +169,8 @@ public class MainConfig {
         return config.getInt("restart.title.fade-out", 10);
     }
 
-    public String getRestartTitleMain() {
-        return config.getString("restart.title.main", "&7Restart over &e{time}");
-    }
-
-    public String getRestartTitleSub() {
-        return config.getString("restart.title.sub", "&7Reden: &f{reason}");
-    }
-
     public boolean isRestartDisconnectEnabled() {
         return config.getBoolean("restart.disconnect.enabled", true);
-    }
-
-    public String getRestartKickMessage() {
-        return config.getString("restart.disconnect.kick-message", "&cServer restart!\n\n&7Reden: &f{reason}\n&7Je kan direct terug joinen.");
     }
 
     public String getRestartActionType() {
@@ -217,58 +189,7 @@ public class MainConfig {
         return config.getString("planrestart.default-reason", "Geen reden opgegeven.");
     }
 
-    public String getPlanRestartNoPermissionMessage() {
-        return config.getString("planrestart.messages.no-permission", "&cDaar edde gij het lef ni vur..");
-    }
-
-    public String getPlanRestartUsageMessage() {
-        return config.getString("planrestart.messages.usage", "&eGebruik: &7/planrestart <time> <reden...>");
-    }
-
-    public String getPlanRestartBadTimeMessage() {
-        return config.getString("planrestart.messages.bad-time", "&cOngeldige tijd. Gebruik bv: &710s, 5m, 2h, 1h30m");
-    }
-
-    public String getPlanRestartAlreadyPlannedMessage() {
-        return config.getString("planrestart.messages.already-planned", "&cEr is al een restart gepland en overschrijven is uitgeschakeld.");
-    }
-
-    public String getPlanRestartPlannedMessage() {
-        return config.getString("planrestart.messages.planned", "&7Restart gepland over &e{time}&7. Reden: &e{reason}&7. Uitvoering om &e{target-time}&7.");
-    }
-
-    public String getCancelRestartNoPermissionMessage() {
-        return config.getString("cancelrestart.messages.no-permission", "&cDaar edde gij het lef ni vur..");
-    }
-
-    public String getCancelRestartNoneRunningMessage() {
-        return config.getString("cancelrestart.messages.none-running", "&cEr is momenteel geen restart gepland.");
-    }
-
-    public String getCancelRestartCancelledMessage() {
-        return config.getString("cancelrestart.messages.cancelled", "&eDe geplande restart is geannuleerd.");
-    }
     public boolean isMaintenanceEnabled() {
         return config.getBoolean("maintenance.enabled", false);
-    }
-
-    public String getMaintenanceNoPermissionMessage() {
-        return config.getString("maintenance.messages.no-permission", "&cDaar edde gij het lef ni vur..");
-    }
-
-    public String getMaintenanceToggledOnMessage() {
-        return config.getString("maintenance.messages.toggled-on", "&aMaintenance mode is ingeschakeld.");
-    }
-
-    public String getMaintenanceToggledOffMessage() {
-        return config.getString("maintenance.messages.toggled-off", "&cMaintenance mode is uitgeschakeld.");
-    }
-
-    public String getMaintenanceOnlineKickMessage() {
-        return config.getString("maintenance.kick.online-message", "&cServer staat in maintenance mode.\n\n&7Probeer later opnieuw.");
-    }
-
-    public String getMaintenanceJoinKickMessage() {
-        return config.getString("maintenance.kick.join-message", "&cServer staat in maintenance mode.\n\n&7Probeer later opnieuw.");
     }
 }

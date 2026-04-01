@@ -19,22 +19,34 @@ public class InvseeCommand {
 
     public boolean execute(CommandSender sender, String[] args) {
         if (!(sender instanceof Player player)) {
-            sender.sendMessage("§cAlleen spelers kunnen dit command gebruiken.");
+            sender.sendMessage(plugin.lang().message(
+                    "invsee-command.player-only",
+                    "&cAlleen spelers kunnen dit command gebruiken."
+            ));
             return true;
         }
 
         if (!plugin.getConfigManager().getMainConfig().isInvseeEnabled()) {
-            player.sendMessage("§cInvsee staat uitgeschakeld.");
+            player.sendMessage(plugin.lang().message(
+                    "invsee-command.disabled",
+                    "&cInvsee staat uitgeschakeld."
+            ));
             return true;
         }
 
         if (!player.hasPermission("lekkeradmin.invsee")) {
-            player.sendMessage("§cDaar edde gij het lef ni vur..");
+            player.sendMessage(plugin.lang().message(
+                    "general.no-permission",
+                    "&cDaar edde gij het lef ni vur.."
+            ));
             return true;
         }
 
         if (args.length < 2) {
-            player.sendMessage("§eGebruik: §7/lekkeradmin invsee <speler>");
+            player.sendMessage(plugin.lang().message(
+                    "invsee-command.usage",
+                    "&7Gebruik: &b/lekkeradmin invsee <speler>"
+            ));
             return true;
         }
 
@@ -47,18 +59,27 @@ public class InvseeCommand {
         }
 
         if (!plugin.getConfigManager().getMainConfig().isInvseeAllowOffline()) {
-            player.sendMessage("§cOffline invsee staat uitgeschakeld.");
+            player.sendMessage(plugin.lang().message(
+                    "invsee-command.offline-disabled",
+                    "&cOffline invsee staat uitgeschakeld."
+            ));
             return true;
         }
 
         if (!player.hasPermission("lekkeradmin.invsee.offline")) {
-            player.sendMessage("§cDaar edde gij het lef ni vur..");
+            player.sendMessage(plugin.lang().message(
+                    "general.no-permission",
+                    "&cDaar edde gij het lef ni vur.."
+            ));
             return true;
         }
 
         OfflinePlayer offlineTarget = Bukkit.getOfflinePlayer(targetName);
         if (offlineTarget == null || (!offlineTarget.hasPlayedBefore() && !offlineTarget.isOnline())) {
-            player.sendMessage("§cDie speler bestaat niet of heeft nog nooit gejoint.");
+            player.sendMessage(plugin.lang().message(
+                    "invsee-command.player-never-joined",
+                    "&cDie speler bestaat niet of heeft nog nooit gejoint."
+            ));
             return true;
         }
 

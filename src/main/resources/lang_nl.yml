@@ -1,3 +1,155 @@
+# =========================================================
+#  LekkerAdmin - Nederlandse language file
+# =========================================================
+# Kleurstijl:
+#   &7 = gewone zinsbouw
+#   &b = markering / belangrijke waarde
+#   &9 = titel / accent
+#   &a = succes / aan
+#   &c = fout / uit / geweigerd
+#
+# Placeholders:
+#   {player}      = spelernaam
+#   {actor}       = uitvoerder / staff
+#   {reason}      = reden
+#   {duration}    = duur
+#   {expires_at}  = vervalt op
+#   {remaining}   = resterende tijd
+#   {date}        = datum
+#   {page}        = huidige pagina
+#   {max_page}    = maximum pagina
+#   {id}          = punishment id
+#   {index}       = index in lijst
+#   {status}      = status
+#   {time}        = tijd
+#   {target-time} = exacte uitvoertijd
+#   {server}      = servernaam
+# =========================================================
+
+general:
+  prefix: "&7[&9LekkerAdmin&7] "
+
+  no-permission: "&cDaar edde gij het lef ni vur.."
+  player-only: "&cDit commando kan enkel door spelers gebruikt worden."
+  player-not-found: "&cSpeler niet gevonden."
+  unknown-error: "&cEr is iets misgelopen."
+  reload-only-ingame: "&cDit commando kan enkel in-game gebruikt worden."
+
+# =========================================================
+#  Reload
+# =========================================================
+reload:
+  started: "&7Reload gestart..."
+  config: "&a✔ &7Config herladen"
+  database: "&a✔ &7Database reconnect uitgevoerd"
+  discord: "&a✔ &7Discord bot herstart"
+  punishments: "&a✔ &7Punishments herladen"
+  punishment-cache: "&a✔ &7Punishment cache herladen"
+  expirations: "&a✔ &7Expirations opnieuw ingepland"
+  logs: "&a✔ &7Logs herladen"
+  invsee: "&a✔ &7Invsee herladen"
+  restart: "&a✔ &7Restart systeem herladen"
+  maintenance: "&a✔ &7Maintenance systeem herladen"
+  explosions: "&a✔ &7Explosion logs herladen"
+  sessions: "&a✔ &7Offline sessies herladen"
+  finished: "&7Reload voltooid in &b{time}ms&7."
+
+# =========================================================
+#  Admin command help
+# =========================================================
+admin:
+  help:
+    header: "&8&m----------------------------------------"
+    title: "&9LekkerAdmin &7- Help"
+    help: "&7/la help &8- &bToon help"
+    reload: "&7/la reload &8- &bHerlaad plugin"
+    punishments: "&7/la punishments &8- &bToon punishment commands"
+    tools: "&7/la tools &8- &bToon tools commands"
+    footer: "&8&m----------------------------------------"
+
+  tools:
+    header: "&8&m----------------------------------------"
+    title: "&9LekkerAdmin &7- Tools"
+    invsee: "&7/la invsee <speler> &8- &bBekijk inventory van speler"
+    enderchest: "&7/la enderchest <speler> &8- &bBekijk enderchest van speler"
+    planrestart: "&7/la planrestart <time> <reden...> &8- &bPlan een restart"
+    cancelrestart: "&7/la cancelrestart &8- &bAnnuleer geplande restart"
+    maintenance: "&7/la maintenancemode &8- &bToggle maintenance mode"
+    footer: "&8&m----------------------------------------"
+
+  punishment-help:
+    header: "&8&m----------------------------------------"
+    title: "&9Punishments &7- Commands"
+    ban: "&7/ban <speler> <tijd|perm> [reden]"
+    unban: "&7/unban <speler> [reden]"
+    mute: "&7/mute <speler> <tijd|perm> [reden]"
+    unmute: "&7/unmute <speler> [reden]"
+    kick: "&7/kick <speler> [reden]"
+    warn: "&7/warn <speler> [reden]"
+    banlist: "&7/banlist [pagina]"
+    history: "&7/history <speler> [pagina]"
+    clearhistory: "&7/clearhistory <speler> <punishmentID/all> [reden]"
+    footer: "&8&m----------------------------------------"
+
+  reload-complete: "&7LekkerAdmin is volledig &aherladen&7."
+
+# =========================================================
+#  Invsee / Enderchest commands
+# =========================================================
+invsee-command:
+  player-only: "&cAlleen spelers kunnen dit command gebruiken."
+  disabled: "&cInvsee staat uitgeschakeld."
+  usage: "&7Gebruik: &b/lekkeradmin invsee <speler>"
+  offline-disabled: "&cOffline invsee staat uitgeschakeld."
+  player-never-joined: "&cDie speler bestaat niet of heeft nog nooit gejoint."
+
+enderchest-command:
+  player-only: "&cAlleen spelers kunnen dit command gebruiken."
+  disabled: "&cEnderchest bekijken staat uitgeschakeld."
+  offline-disabled: "&cOffline enderchest bekijken staat uitgeschakeld."
+  player-never-joined: "&cDie speler bestaat niet of heeft nog nooit gejoint."
+
+# =========================================================
+#  Invsee intern
+# =========================================================
+invsee:
+  offline-inventory-in-use: "&7Deze offline inventory wordt momenteel al door iemand anders &bbewerkt&7."
+  offline-enderchest-in-use: "&7Deze offline enderchest wordt momenteel al door iemand anders &bbewerkt&7."
+  offline-inventory-load-failed: "&cKon offline inventory niet laden: &7{error}"
+  offline-enderchest-load-failed: "&cKon offline enderchest niet laden: &7{error}"
+  save-failed: "&cKon wijzigingen niet opslaan: &7{error}"
+  flush-join-failed: "&cKon offline invsee sessie niet verwerken bij join van &b{player}&7."
+
+# =========================================================
+#  Maintenance
+# =========================================================
+maintenance:
+  enabled: "&7Maintenance mode is nu &aingeschakeld&7."
+  disabled: "&7Maintenance mode is nu &cuitgeschakeld&7."
+  kick-online: "&cServer staat in maintenance mode.\n\n&7Probeer later opnieuw."
+  kick-join: "&cServer staat in maintenance mode.\n\n&7Probeer later opnieuw."
+  alias-forward-failed: "&cKon &b/maintenance&c niet doorsturen naar &b/lekkeradmin maintenancemode&c."
+
+# =========================================================
+#  Restart
+# =========================================================
+restart:
+  prefix: "&7[&cRestart&7] &7"
+  chat: "{prefix}&7Server restart over &b{time}&7. Reden: &b{reason}"
+  chat-now: "{prefix}&cServer restart nu&7. Reden: &b{reason}"
+  title-main: "&7Restart over &b{time}"
+  title-sub: "&7Reden: &b{reason}"
+  kick-message: "&cServer restart!\n\n&7Reden: &b{reason}\n&7Je kan direct terug joinen."
+  planned: "&7Restart gepland over &b{time}&7. Reden: &b{reason}&7. Uitvoering om &b{target-time}&7."
+  cancelled: "&7De geplande restart is &cgeannuleerd&7."
+  none-running: "&cEr is momenteel geen restart gepland."
+  already-planned: "&cEr is al een restart gepland en overschrijven is uitgeschakeld."
+  invalid-time: "&cOngeldige tijd&7. Gebruik bv: &b10s&7, &b5m&7, &b2h&7, &b1h30m"
+  usage: "&7Gebruik: &b/planrestart <time> <reden...>"
+
+# =========================================================
+#  Punishments
+# =========================================================
 punishments:
   common:
     player-not-found: "&cSpeler niet gevonden."

@@ -5,8 +5,6 @@ import me.lekkernakkie.lekkeradmin.command.subcommands.CancelRestartSubCommand;
 import me.lekkernakkie.lekkeradmin.command.subcommands.EnderChestCommand;
 import me.lekkernakkie.lekkeradmin.command.subcommands.InvseeCommand;
 import me.lekkernakkie.lekkeradmin.command.subcommands.PlanRestartSubCommand;
-import me.lekkernakkie.lekkeradmin.config.MainConfig;
-import me.lekkernakkie.lekkeradmin.punishment.util.PunishmentFormatter;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -15,7 +13,6 @@ import org.jetbrains.annotations.NotNull;
 public class LekkerAdminCommand implements CommandExecutor {
 
     private final LekkerAdmin plugin;
-    private final MainConfig mainConfig;
     private final InvseeCommand invseeCommand;
     private final EnderChestCommand enderChestCommand;
     private final PlanRestartSubCommand planRestartCommand;
@@ -23,7 +20,6 @@ public class LekkerAdminCommand implements CommandExecutor {
 
     public LekkerAdminCommand(LekkerAdmin plugin) {
         this.plugin = plugin;
-        this.mainConfig = plugin.getConfigManager().getMainConfig();
         this.invseeCommand = new InvseeCommand(plugin, plugin.getInvseeService());
         this.enderChestCommand = new EnderChestCommand(plugin, plugin.getInvseeService());
         this.planRestartCommand = new PlanRestartSubCommand(plugin);
@@ -33,7 +29,10 @@ public class LekkerAdminCommand implements CommandExecutor {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
         if (!sender.hasPermission("lekkeradmin.admin") && !sender.hasPermission("lekkeradmin.help")) {
-            sender.sendMessage(color("&cDaar edde gij het lef ni vur.."));
+            sender.sendMessage(plugin.lang().message(
+                    "general.no-permission",
+                    "&cDaar edde gij het lef ni vur.."
+            ));
             return true;
         }
 
@@ -61,67 +60,73 @@ public class LekkerAdminCommand implements CommandExecutor {
     }
 
     private void sendHelp(CommandSender sender) {
-        sender.sendMessage(color("&8&m----------------------------------------"));
-        sender.sendMessage(color("&bLekkerAdmin &7- Help"));
-        sender.sendMessage(color("&7/la help &8- &fToon help"));
-        sender.sendMessage(color("&7/la reload &8- &fHerlaad plugin"));
-        sender.sendMessage(color("&7/la punishments &8- &fToon punishment commands"));
-        sender.sendMessage(color("&7/la tools &8- &fToon tools commands"));
-        sender.sendMessage(color("&8&m----------------------------------------"));
+        sender.sendMessage(plugin.lang().get("admin.help.header", "&8&m----------------------------------------"));
+        sender.sendMessage(plugin.lang().get("admin.help.title", "&9LekkerAdmin &7- Help"));
+        sender.sendMessage(plugin.lang().get("admin.help.help", "&7/la help &8- &bToon help"));
+        sender.sendMessage(plugin.lang().get("admin.help.reload", "&7/la reload &8- &bHerlaad plugin"));
+        sender.sendMessage(plugin.lang().get("admin.help.punishments", "&7/la punishments &8- &bToon punishment commands"));
+        sender.sendMessage(plugin.lang().get("admin.help.tools", "&7/la tools &8- &bToon tools commands"));
+        sender.sendMessage(plugin.lang().get("admin.help.footer", "&8&m----------------------------------------"));
     }
 
     private void sendToolsHelp(CommandSender sender) {
-        sender.sendMessage(color("&8&m----------------------------------------"));
-        sender.sendMessage(color("&bLekkerAdmin &7- Tools"));
+        sender.sendMessage(plugin.lang().get("admin.tools.header", "&8&m----------------------------------------"));
+        sender.sendMessage(plugin.lang().get("admin.tools.title", "&9LekkerAdmin &7- Tools"));
 
         if (sender.hasPermission("lekkeradmin.invsee") || sender.hasPermission("lekkeradmin.admin")) {
-            sender.sendMessage(color("&7/la invsee <speler> &8- &fBekijk inventory van speler"));
+            sender.sendMessage(plugin.lang().get("admin.tools.invsee", "&7/la invsee <speler> &8- &bBekijk inventory van speler"));
         }
 
         if (sender.hasPermission("lekkeradmin.enderchest") || sender.hasPermission("lekkeradmin.admin")) {
-            sender.sendMessage(color("&7/la enderchest <speler> &8- &fBekijk enderchest van speler"));
+            sender.sendMessage(plugin.lang().get("admin.tools.enderchest", "&7/la enderchest <speler> &8- &bBekijk enderchest van speler"));
         }
 
         if (sender.hasPermission("lekkeradmin.restart") || sender.hasPermission("lekkeradmin.admin")) {
-            sender.sendMessage(color("&7/la planrestart <time> <reden...> &8- &fPlan een restart"));
-            sender.sendMessage(color("&7/la cancelrestart &8- &fAnnuleer geplande restart"));
+            sender.sendMessage(plugin.lang().get("admin.tools.planrestart", "&7/la planrestart <time> <reden...> &8- &bPlan een restart"));
+            sender.sendMessage(plugin.lang().get("admin.tools.cancelrestart", "&7/la cancelrestart &8- &bAnnuleer geplande restart"));
         }
 
         if (sender.hasPermission("lekkeradmin.maintenance") || sender.hasPermission("lekkeradmin.admin")) {
-            sender.sendMessage(color("&7/la maintenancemode &8- &fToggle maintenance mode"));
+            sender.sendMessage(plugin.lang().get("admin.tools.maintenance", "&7/la maintenancemode &8- &bToggle maintenance mode"));
         }
 
-        sender.sendMessage(color("&8&m----------------------------------------"));
+        sender.sendMessage(plugin.lang().get("admin.tools.footer", "&8&m----------------------------------------"));
     }
 
     private void sendPunishmentHelp(CommandSender sender) {
-        sender.sendMessage(color("&8&m----------------------------------------"));
-        sender.sendMessage(color("&cPunishments &7- Commands"));
-        sender.sendMessage(color("&7/ban <speler> <tijd|perm> [reden]"));
-        sender.sendMessage(color("&7/unban <speler> [reden]"));
-        sender.sendMessage(color("&7/mute <speler> <tijd|perm> [reden]"));
-        sender.sendMessage(color("&7/unmute <speler> [reden]"));
-        sender.sendMessage(color("&7/kick <speler> [reden]"));
-        sender.sendMessage(color("&7/warn <speler> [reden]"));
-        sender.sendMessage(color("&7/banlist [pagina]"));
-        sender.sendMessage(color("&7/history <speler> [pagina]"));
-        sender.sendMessage(color("&7/clearhistory <speler> <punishmentID/all> [reden]"));
-        sender.sendMessage(color("&8&m----------------------------------------"));
+        sender.sendMessage(plugin.lang().get("admin.punishment-help.header", "&8&m----------------------------------------"));
+        sender.sendMessage(plugin.lang().get("admin.punishment-help.title", "&9Punishments &7- Commands"));
+        sender.sendMessage(plugin.lang().get("admin.punishment-help.ban", "&7/ban <speler> <tijd|perm> [reden]"));
+        sender.sendMessage(plugin.lang().get("admin.punishment-help.unban", "&7/unban <speler> [reden]"));
+        sender.sendMessage(plugin.lang().get("admin.punishment-help.mute", "&7/mute <speler> <tijd|perm> [reden]"));
+        sender.sendMessage(plugin.lang().get("admin.punishment-help.unmute", "&7/unmute <speler> [reden]"));
+        sender.sendMessage(plugin.lang().get("admin.punishment-help.kick", "&7/kick <speler> [reden]"));
+        sender.sendMessage(plugin.lang().get("admin.punishment-help.warn", "&7/warn <speler> [reden]"));
+        sender.sendMessage(plugin.lang().get("admin.punishment-help.banlist", "&7/banlist [pagina]"));
+        sender.sendMessage(plugin.lang().get("admin.punishment-help.history", "&7/history <speler> [pagina]"));
+        sender.sendMessage(plugin.lang().get("admin.punishment-help.clearhistory", "&7/clearhistory <speler> <punishmentID/all> [reden]"));
+        sender.sendMessage(plugin.lang().get("admin.punishment-help.footer", "&8&m----------------------------------------"));
     }
 
     private void handleReload(CommandSender sender) {
         if (!sender.hasPermission("lekkeradmin.admin") && !sender.hasPermission("lekkeradmin.reload")) {
-            sender.sendMessage(color("&cDaar edde gij het lef ni vur.."));
+            sender.sendMessage(plugin.lang().message(
+                    "general.no-permission",
+                    "&cDaar edde gij het lef ni vur.."
+            ));
             return;
         }
 
         plugin.reloadPlugin();
-        sender.sendMessage(color(mainConfig.getPrefix() + "&aLekkerAdmin volledig herladen."));
+        sender.sendMessage(plugin.lang().message(
+                "admin.reload-complete",
+                "&7LekkerAdmin is volledig &aherladen&7."
+        ));
     }
 
     private void handleMaintenanceToggle(CommandSender sender) {
         if (!sender.hasPermission("lekkeradmin.maintenance") && !sender.hasPermission("lekkeradmin.admin")) {
-            sender.sendMessage(color(mainConfig.getMaintenanceNoPermissionMessage()));
+            sender.sendMessage(plugin.getMaintenanceService().getNoPermissionMessage());
             return;
         }
 
@@ -133,9 +138,5 @@ public class LekkerAdminCommand implements CommandExecutor {
         } else {
             sender.sendMessage(plugin.getMaintenanceService().getToggleOffMessage());
         }
-    }
-
-    private String color(String text) {
-        return PunishmentFormatter.colorize(text);
     }
 }

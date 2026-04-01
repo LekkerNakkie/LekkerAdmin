@@ -64,8 +64,8 @@ public class RestartService {
 
         if (scheduledAt != null && !config.isPlanRestartAllowOverride()) {
             sender.sendMessage(plugin.lang().message(
-                    "restart.none-running",
-                    "&cEr is momenteel geen restart gepland."
+                    "restart.already-planned",
+                    "&cEr is al een restart gepland en overschrijven is uitgeschakeld."
             ));
             return false;
         }

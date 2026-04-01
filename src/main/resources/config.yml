@@ -1,4 +1,3 @@
-prefix: "&7[&9LekkerAdmin&7] "
 debug: false
 
 invsee:
@@ -67,22 +66,14 @@ restart:
     - 2
     - 1
 
-  messages:
-    prefix: "&7[&cRestart&7] &7"
-    chat: "{prefix}&7Server restart over &e{time}&7. Reden: &e{reason}"
-    chat-now: "{prefix}&cServer restart nu! Reden: &f{reason}"
-
   title:
     enabled: true
     fade-in: 10
     stay: 40
     fade-out: 10
-    main: "&7Restart over &e{time}"
-    sub: "&7Reden: &f{reason}"
 
   disconnect:
     enabled: true
-    kick-message: "&cServer restart!\n\n&7Reden: &f{reason}\n&7Je kan direct terug joinen."
 
   action:
     type: "stop"
@@ -92,27 +83,5 @@ planrestart:
   allow-override: true
   default-reason: "Geen reden opgegeven."
 
-  messages:
-    no-permission: "&cDaar edde gij het lef ni vur.."
-    usage: "&eGebruik: &7/planrestart <time> <reden...>"
-    bad-time: "&cOngeldige tijd. Gebruik bv: &710s, 5m, 2h, 1h30m"
-    already-planned: "&cEr is al een restart gepland en overschrijven is uitgeschakeld."
-    planned: "&7Restart gepland over &e{time}&7. Reden: &e{reason}&7. Uitvoering om &e{target-time}&7."
-
-cancelrestart:
-  messages:
-    no-permission: "&cDaar edde gij het lef ni vur.."
-    none-running: "&cEr is momenteel geen restart gepland."
-    cancelled: "&eDe geplande restart is geannuleerd."
-
 maintenance:
   enabled: false
-
-  messages:
-    no-permission: "&cDaar edde gij het lef ni vur.."
-    toggled-on: "&aMaintenance mode is ingeschakeld."
-    toggled-off: "&cMaintenance mode is uitgeschakeld."
-
-  kick:
-    online-message: "&cServer staat in maintenance mode.\n\n&7Probeer later opnieuw."
-    join-message: "&cServer staat in maintenance mode.\n\n&7Probeer later opnieuw."

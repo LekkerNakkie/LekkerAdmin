@@ -224,7 +224,7 @@ public class InvseeService {
 
             Player viewer = Bukkit.getPlayer(viewerUuid);
             if (viewer != null && viewer.isOnline()) {
-                Bukkit.getScheduler().runTask(plugin, viewer::closeInventory);
+                Bukkit.getScheduler().runTask(plugin, () -> viewer.closeInventory());
             }
         }
     }
