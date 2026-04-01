@@ -1,7 +1,6 @@
 package me.lekkernakkie.lekkeradmin.command.subcommands;
 
 import me.lekkernakkie.lekkeradmin.LekkerAdmin;
-import me.lekkernakkie.lekkeradmin.punishment.util.PunishmentFormatter;
 import org.bukkit.command.CommandSender;
 
 public class CancelRestartSubCommand {
@@ -14,15 +13,14 @@ public class CancelRestartSubCommand {
 
     public boolean execute(CommandSender sender, String[] args) {
         if (!sender.hasPermission("lekkeradmin.restart") && !sender.hasPermission("lekkeradmin.admin")) {
-            sender.sendMessage(color(plugin.getConfigManager().getMainConfig().getCancelRestartNoPermissionMessage()));
+            sender.sendMessage(plugin.lang().message(
+                    "general.no-permission",
+                    "&cDaar edde gij het lef ni vur.."
+            ));
             return true;
         }
 
         plugin.getRestartService().cancelRestart(sender);
         return true;
-    }
-
-    private String color(String text) {
-        return PunishmentFormatter.colorize(text);
     }
 }

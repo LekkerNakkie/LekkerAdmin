@@ -64,7 +64,10 @@ public class InvseeService {
 
     public void openOfflinePlaceholder(Player viewer, OfflinePlayer target) {
         if (!tryLockOfflineTarget(viewer, target)) {
-            viewer.sendMessage("§cDeze offline inventory wordt momenteel al door iemand anders bewerkt.");
+            viewer.sendMessage(plugin.lang().message(
+                    "invsee.offline-inventory-in-use",
+                    "&7Deze offline inventory wordt momenteel al door iemand anders &bbewerkt&7."
+            ));
             return;
         }
 
@@ -81,7 +84,11 @@ public class InvseeService {
             viewer.openInventory(gui);
         } catch (Exception ex) {
             offlineTargetEditors.remove(target.getUniqueId(), viewer.getUniqueId());
-            viewer.sendMessage("§cKon offline inventory niet laden: " + ex.getMessage());
+            viewer.sendMessage(plugin.lang().formatMessage(
+                    "invsee.offline-inventory-load-failed",
+                    "&cKon offline inventory niet laden: &7{error}",
+                    Map.of("error", ex.getMessage() == null ? "-" : ex.getMessage())
+            ));
             plugin.getLogger().warning("Failed to load offline invsee for " + target.getName() + ": " + ex.getMessage());
             ex.printStackTrace();
         }
@@ -106,7 +113,10 @@ public class InvseeService {
 
     public void openOfflineEnderChest(Player viewer, OfflinePlayer target) {
         if (!tryLockOfflineTarget(viewer, target)) {
-            viewer.sendMessage("§cDeze offline enderchest wordt momenteel al door iemand anders bewerkt.");
+            viewer.sendMessage(plugin.lang().message(
+                    "invsee.offline-enderchest-in-use",
+                    "&7Deze offline enderchest wordt momenteel al door iemand anders &bbewerkt&7."
+            ));
             return;
         }
 
@@ -122,7 +132,11 @@ public class InvseeService {
             viewer.openInventory(gui);
         } catch (Exception ex) {
             offlineTargetEditors.remove(target.getUniqueId(), viewer.getUniqueId());
-            viewer.sendMessage("§cKon offline enderchest niet laden: " + ex.getMessage());
+            viewer.sendMessage(plugin.lang().formatMessage(
+                    "invsee.offline-enderchest-load-failed",
+                    "&cKon offline enderchest niet laden: &7{error}",
+                    Map.of("error", ex.getMessage() == null ? "-" : ex.getMessage())
+            ));
             plugin.getLogger().warning("Failed to load offline enderchest for " + target.getName() + ": " + ex.getMessage());
             ex.printStackTrace();
         }
@@ -145,15 +159,19 @@ public class InvseeService {
 
             if (!session.isReadOnly() && !session.isOnlineTarget() && session.hasMeaningfulChanges()) {
                 if (session.isEnderChest()) {
-                    offlineInventoryService.saveEnderChest(session.getTarget(), session.getInventory(), session.getViewerName());
+                    offlineInventoryService.saveEnderChest(session.getTarget(), session.getInventory());
                 } else {
-                    offlineInventoryService.save(session.getTarget(), session.getInventory(), session.getViewerName());
+                    offlineInventoryService.save(session.getTarget(), session.getInventory());
                 }
             }
 
             logService.logSession(session);
         } catch (Exception ex) {
-            viewer.sendMessage("§cKon wijzigingen niet opslaan: " + ex.getMessage());
+            viewer.sendMessage(plugin.lang().formatMessage(
+                    "invsee.save-failed",
+                    "&cKon wijzigingen niet opslaan: &7{error}",
+                    Map.of("error", ex.getMessage() == null ? "-" : ex.getMessage())
+            ));
             plugin.getLogger().warning("Failed to save session for " + session.getTarget().getName() + ": " + ex.getMessage());
             ex.printStackTrace();
         } finally {
@@ -161,13 +179,6 @@ public class InvseeService {
         }
     }
 
-    /**
-     * Anti-dupe:
-     * Als een target joint terwijl iemand in zijn offline invsee / echest zit,
-     * flushen we eerst de open GUI naar pending_changes, sluiten we de GUI
-     * van de staff en daarna mag PendingChangesPlayerListener de pending state
-     * op de echte speler toepassen.
-     */
     public void handleTargetJoinWhileOfflineEditing(Player joinedPlayer) {
         if (joinedPlayer == null) {
             return;
@@ -196,9 +207,9 @@ public class InvseeService {
 
             if (!session.isReadOnly() && session.hasMeaningfulChanges()) {
                 if (session.isEnderChest()) {
-                    offlineInventoryService.saveEnderChest(session.getTarget(), session.getInventory(), session.getViewerName());
+                    offlineInventoryService.saveEnderChest(session.getTarget(), session.getInventory());
                 } else {
-                    offlineInventoryService.save(session.getTarget(), session.getInventory(), session.getViewerName());
+                    offlineInventoryService.save(session.getTarget(), session.getInventory());
                 }
             }
 
@@ -213,7 +224,7 @@ public class InvseeService {
 
             Player viewer = Bukkit.getPlayer(viewerUuid);
             if (viewer != null && viewer.isOnline()) {
-                Bukkit.getScheduler().runTask(plugin, () -> viewer.closeInventory());
+                Bukkit.getScheduler().runTask(plugin, viewer::closeInventory);
             }
         }
     }

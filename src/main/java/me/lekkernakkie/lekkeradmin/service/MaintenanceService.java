@@ -1,8 +1,6 @@
 package me.lekkernakkie.lekkeradmin.service;
 
 import me.lekkernakkie.lekkeradmin.LekkerAdmin;
-import me.lekkernakkie.lekkeradmin.config.MainConfig;
-import me.lekkernakkie.lekkeradmin.punishment.util.PunishmentFormatter;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
@@ -39,8 +37,10 @@ public class MaintenanceService {
     }
 
     public void kickNonBypassOnlinePlayers() {
-        MainConfig config = plugin.getConfigManager().getMainConfig();
-        String kickMessage = color(config.getMaintenanceOnlineKickMessage());
+        String kickMessage = plugin.lang().get(
+                "maintenance.kick-online",
+                "&cServer staat in maintenance mode.\n\n&7Probeer later opnieuw."
+        );
 
         for (Player player : Bukkit.getOnlinePlayers()) {
             if (hasBypass(player)) {
@@ -51,22 +51,30 @@ public class MaintenanceService {
     }
 
     public String getToggleOnMessage() {
-        return color(plugin.getConfigManager().getMainConfig().getMaintenanceToggledOnMessage());
+        return plugin.lang().message(
+                "maintenance.enabled",
+                "&7Maintenance mode is nu &aingeschakeld&7."
+        );
     }
 
     public String getToggleOffMessage() {
-        return color(plugin.getConfigManager().getMainConfig().getMaintenanceToggledOffMessage());
+        return plugin.lang().message(
+                "maintenance.disabled",
+                "&7Maintenance mode is nu &cuitgeschakeld&7."
+        );
     }
 
     public String getNoPermissionMessage() {
-        return color(plugin.getConfigManager().getMainConfig().getMaintenanceNoPermissionMessage());
+        return plugin.lang().message(
+                "general.no-permission",
+                "&cDaar edde gij het lef ni vur.."
+        );
     }
 
     public String getJoinDenyMessage() {
-        return color(plugin.getConfigManager().getMainConfig().getMaintenanceJoinKickMessage());
-    }
-
-    private String color(String text) {
-        return PunishmentFormatter.colorize(text);
+        return plugin.lang().get(
+                "maintenance.kick-join",
+                "&cServer staat in maintenance mode.\n\n&7Probeer later opnieuw."
+        );
     }
 }

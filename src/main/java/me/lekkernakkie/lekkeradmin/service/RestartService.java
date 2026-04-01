@@ -2,7 +2,6 @@ package me.lekkernakkie.lekkeradmin.service;
 
 import me.lekkernakkie.lekkeradmin.LekkerAdmin;
 import me.lekkernakkie.lekkeradmin.config.MainConfig;
-import me.lekkernakkie.lekkeradmin.punishment.util.PunishmentFormatter;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -39,7 +38,6 @@ public class RestartService {
 
     public void start() {
         scheduleNextAutoRestartIfNeeded();
-
         tickTask = Bukkit.getScheduler().runTaskTimer(plugin, this::tick, 20L, 20L);
     }
 
@@ -57,12 +55,18 @@ public class RestartService {
 
         Duration duration = parseDuration(timeInput);
         if (duration == null || duration.isZero() || duration.isNegative()) {
-            sender.sendMessage(color(config.getPlanRestartBadTimeMessage()));
+            sender.sendMessage(plugin.lang().message(
+                    "restart.invalid-time",
+                    "&cOngeldige tijd&7. Gebruik bv: &b10s&7, &b5m&7, &b2h&7, &b1h30m"
+            ));
             return false;
         }
 
         if (scheduledAt != null && !config.isPlanRestartAllowOverride()) {
-            sender.sendMessage(color(config.getPlanRestartAlreadyPlannedMessage()));
+            sender.sendMessage(plugin.lang().message(
+                    "restart.none-running",
+                    "&cEr is momenteel geen restart gepland."
+            ));
             return false;
         }
 
@@ -77,22 +81,34 @@ public class RestartService {
 
         plugin.debug("Manual restart gepland door " + sender.getName() + " om " + target + " met reden: " + this.scheduledReason);
 
-        sender.sendMessage(color(applyPlaceholders(config.getPlanRestartPlannedMessage(), getRemainingFormatted(), this.scheduledReason, target)));
+        sender.sendMessage(plugin.lang().formatMessage(
+                "restart.planned",
+                "&7Restart gepland over &b{time}&7. Reden: &b{reason}&7. Uitvoering om &b{target-time}&7.",
+                Map.of(
+                        "time", getRemainingFormatted(),
+                        "reason", this.scheduledReason,
+                        "target-time", formatTargetTime(target)
+                )
+        ));
         return true;
     }
 
     public boolean cancelRestart(CommandSender sender) {
-        MainConfig config = plugin.getConfigManager().getMainConfig();
-
         if (scheduledAt == null || !manualRestart) {
-            sender.sendMessage(color(config.getCancelRestartNoneRunningMessage()));
+            sender.sendMessage(plugin.lang().message(
+                    "restart.none-running",
+                    "&cEr is momenteel geen restart gepland."
+            ));
             return false;
         }
 
         plugin.debug("Manual restart geannuleerd door " + sender.getName() + ". Vorige planning: " + scheduledAt + ", reden: " + scheduledReason);
 
         clearScheduledRestart();
-        sender.sendMessage(color(config.getCancelRestartCancelledMessage()));
+        sender.sendMessage(plugin.lang().message(
+                "restart.cancelled",
+                "&7De geplande restart is &cgeannuleerd&7."
+        ));
 
         scheduleNextAutoRestartIfNeeded();
         return true;
@@ -167,18 +183,31 @@ public class RestartService {
 
         String formattedTime = formatDuration(remainingSeconds);
 
-        String chatMessage = applyPlaceholders(
-                config.getRestartChatMessage(),
-                formattedTime,
-                scheduledReason,
-                scheduledAt
+        String prefix = plugin.lang().get("restart.prefix", "&7[&cRestart&7] &7");
+        String chatMessage = plugin.lang().format(
+                "restart.chat",
+                "{prefix}&7Server restart over &b{time}&7. Reden: &b{reason}",
+                Map.of(
+                        "prefix", prefix,
+                        "time", formattedTime,
+                        "reason", scheduledReason == null ? "" : scheduledReason
+                )
         );
 
-        Bukkit.broadcastMessage(color(chatMessage));
+        Bukkit.broadcastMessage(chatMessage);
 
         if (config.isRestartTitleEnabled()) {
-            String title = color(applyPlaceholders(config.getRestartTitleMain(), formattedTime, scheduledReason, scheduledAt));
-            String subtitle = color(applyPlaceholders(config.getRestartTitleSub(), formattedTime, scheduledReason, scheduledAt));
+            String title = plugin.lang().format(
+                    "restart.title-main",
+                    "&7Restart over &b{time}",
+                    Map.of("time", formattedTime)
+            );
+
+            String subtitle = plugin.lang().format(
+                    "restart.title-sub",
+                    "&7Reden: &b{reason}",
+                    Map.of("reason", scheduledReason == null ? "" : scheduledReason)
+            );
 
             for (Player player : Bukkit.getOnlinePlayers()) {
                 player.sendTitle(
@@ -195,22 +224,24 @@ public class RestartService {
     private void executeRestart() {
         MainConfig config = plugin.getConfigManager().getMainConfig();
 
-        String nowMessage = applyPlaceholders(
-                config.getRestartChatNowMessage(),
-                "nu",
-                scheduledReason,
-                scheduledAt
+        String prefix = plugin.lang().get("restart.prefix", "&7[&cRestart&7] &7");
+        String nowMessage = plugin.lang().format(
+                "restart.chat-now",
+                "{prefix}&cServer restart nu&7. Reden: &b{reason}",
+                Map.of(
+                        "prefix", prefix,
+                        "reason", scheduledReason == null ? "" : scheduledReason
+                )
         );
 
-        Bukkit.broadcastMessage(color(nowMessage));
+        Bukkit.broadcastMessage(nowMessage);
 
         if (config.isRestartDisconnectEnabled()) {
-            String kickMessage = color(applyPlaceholders(
-                    config.getRestartKickMessage(),
-                    "nu",
-                    scheduledReason,
-                    scheduledAt
-            ));
+            String kickMessage = plugin.lang().format(
+                    "restart.kick-message",
+                    "&cServer restart!\n\n&7Reden: &b{reason}\n&7Je kan direct terug joinen.",
+                    Map.of("reason", scheduledReason == null ? "" : scheduledReason)
+            );
 
             for (Player player : Bukkit.getOnlinePlayers()) {
                 player.kickPlayer(kickMessage);
@@ -364,7 +395,7 @@ public class RestartService {
         }
 
         if (hours > 0) {
-            parts.add(hours + (hours == 1 ? " uur" : " uur"));
+            parts.add(hours + " uur");
         }
 
         if (minutes > 0) {
@@ -386,21 +417,11 @@ public class RestartService {
         return String.join(" ", parts);
     }
 
-    private String applyPlaceholders(String message, String time, String reason, ZonedDateTime targetTime) {
-        MainConfig config = plugin.getConfigManager().getMainConfig();
-
-        String prefix = color(config.getRestartPrefix());
-        String target = targetTime == null
-                ? "-"
-                : targetTime.format(TARGET_TIME_FORMAT) + " " + getZoneId().getId();
-
-        return message
-                .replace("{prefix}", prefix)
-                .replace("{time}", time == null ? "" : time)
-                .replace("{countdown}", time == null ? "" : time)
-                .replace("{reason}", reason == null ? "" : reason)
-                .replace("{target-time}", target)
-                .replace("{date}", target);
+    private String formatTargetTime(ZonedDateTime targetTime) {
+        if (targetTime == null) {
+            return "-";
+        }
+        return targetTime.format(TARGET_TIME_FORMAT) + " " + getZoneId().getId();
     }
 
     private ZoneId getZoneId() {
@@ -412,9 +433,5 @@ public class RestartService {
             plugin.getLogger().warning("Ongeldige timezone in config.yml: " + config.getRestartTimezone() + ". Fallback naar Europe/Brussels.");
             return ZoneId.of("Europe/Brussels");
         }
-    }
-
-    private String color(String text) {
-        return PunishmentFormatter.colorize(text);
     }
 }

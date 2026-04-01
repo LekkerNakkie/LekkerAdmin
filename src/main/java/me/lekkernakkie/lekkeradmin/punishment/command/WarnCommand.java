@@ -1,9 +1,7 @@
 package me.lekkernakkie.lekkeradmin.punishment.command;
 
 import me.lekkernakkie.lekkeradmin.LekkerAdmin;
-import me.lekkernakkie.lekkeradmin.config.PunishmentsConfig;
 import me.lekkernakkie.lekkeradmin.punishment.service.WarnService;
-import me.lekkernakkie.lekkeradmin.punishment.util.PunishmentFormatter;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -18,23 +16,27 @@ public class WarnCommand implements CommandExecutor, TabCompleter {
 
     private final LekkerAdmin plugin;
     private final WarnService warnService;
-    private final PunishmentsConfig config;
 
     public WarnCommand(LekkerAdmin plugin) {
         this.plugin = plugin;
         this.warnService = plugin.getWarnService();
-        this.config = plugin.getConfigManager().getPunishmentsConfig();
     }
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (!sender.hasPermission("lekkeradmin.punishment.warn")) {
-            sender.sendMessage(color(config.getNoPermissionMessage()));
+            sender.sendMessage(plugin.lang().message(
+                    "general.no-permission",
+                    "&cDaar edde gij het lef ni vur.."
+            ));
             return true;
         }
 
         if (args.length < 1) {
-            sender.sendMessage(color(config.getUsageWarnMessage()));
+            sender.sendMessage(plugin.lang().message(
+                    "punishments.warn.usage",
+                    "&7Gebruik: &b/warn <speler> [reden]"
+            ));
             return true;
         }
 
@@ -49,12 +51,15 @@ public class WarnCommand implements CommandExecutor, TabCompleter {
                 .thenAccept(result -> {
                     if (!result.success()) {
                         plugin.getServer().getScheduler().runTask(plugin,
-                                () -> sender.sendMessage(color(result.message())));
+                                () -> sender.sendMessage(result.message()));
                     }
                 })
                 .exceptionally(throwable -> {
                     plugin.getServer().getScheduler().runTask(plugin,
-                            () -> sender.sendMessage(color("&cEr ging iets mis bij het warnen.")));
+                            () -> sender.sendMessage(plugin.lang().message(
+                                    "punishments.warn.async-failed",
+                                    "&cEr ging iets mis bij het warnen."
+                            )));
                     plugin.debug("Warn async error: " + throwable.getMessage());
                     return null;
                 });
@@ -78,9 +83,5 @@ public class WarnCommand implements CommandExecutor, TabCompleter {
         }
 
         return List.of();
-    }
-
-    private String color(String input) {
-        return PunishmentFormatter.colorize(input);
     }
 }

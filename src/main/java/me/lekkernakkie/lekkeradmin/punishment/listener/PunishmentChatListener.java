@@ -17,8 +17,10 @@ public class PunishmentChatListener implements Listener {
 
     private final PunishmentService punishmentService;
     private final PunishmentsConfig config;
+    private final LekkerAdmin plugin;
 
     public PunishmentChatListener(LekkerAdmin plugin) {
+        this.plugin = plugin;
         this.punishmentService = plugin.getPunishmentService();
         this.config = plugin.getConfigManager().getPunishmentsConfig();
     }
@@ -43,7 +45,12 @@ public class PunishmentChatListener implements Listener {
         );
 
         List<String> lines = PunishmentFormatter.apply(
-                config.getMuteBlockedChatMessage(),
+                plugin.lang().getList("punishments.mute.blocked-chat-message", List.of(
+                        "&cJe bent momenteel gemute.",
+                        "&7Reden: &b{reason}",
+                        "&7Door: &b{actor}",
+                        "&7Nog: &b{remaining}"
+                )),
                 entry.getMinecraftName(),
                 PunishmentFormatter.valueOrUnknown(entry.getIssuedByName()),
                 PunishmentFormatter.valueOrUnknown(entry.getReason()),

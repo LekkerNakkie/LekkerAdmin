@@ -36,8 +36,7 @@ public class MigrationRunner {
 
         List<Migration> migrations = List.of(
                 new Migration("V1", "Single whitelist_entries schema", getV1Statements()),
-                new Migration("V2", "Create punishments table and indexes", getV2Statements()),
-                new Migration("V3", "Create pending_changes table", getV3Statements())
+                new Migration("V2", "Create punishments table and indexes", getV2Statements())
         );
 
         for (Migration migration : migrations) {
@@ -51,8 +50,6 @@ public class MigrationRunner {
         ensureWhitelistEntriesNonUniqueConstraints();
         ensurePunishmentsColumns();
         ensurePunishmentsIndexes();
-        ensurePendingChangesColumns();
-        ensurePendingChangesIndexes();
     }
 
     private void ensureMigrationsTable() {
@@ -250,10 +247,6 @@ public class MigrationRunner {
 
     private List<String> getV2Statements() {
         return normalizeDatabaseType().equals("MYSQL") ? getMySqlV2Statements() : getSqliteV2Statements();
-    }
-
-    private List<String> getV3Statements() {
-        return normalizeDatabaseType().equals("MYSQL") ? getMySqlV3Statements() : getSqliteV3Statements();
     }
 
     private List<String> getSqliteV1Statements() {
@@ -464,63 +457,6 @@ public class MigrationRunner {
                     INDEX idx_punishments_expires_at (expires_at),
                     INDEX idx_punishments_minecraft_name (minecraft_name),
                     INDEX idx_punishments_discord_id (discord_id)
-                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
-                """);
-
-        return statements;
-    }
-
-    private List<String> getSqliteV3Statements() {
-        List<String> statements = new ArrayList<>();
-
-        statements.add("""
-                CREATE TABLE IF NOT EXISTS pending_changes (
-                    minecraft_name TEXT NOT NULL,
-                    minecraft_uuid TEXT NOT NULL UNIQUE,
-                    discord_name TEXT,
-                    discord_id TEXT,
-                    inventory_data TEXT,
-                    enderchest_data TEXT,
-                    last_online TEXT,
-                    last_edited TEXT,
-                    last_applied TEXT,
-                    edited_by TEXT,
-                    has_pending_changes INTEGER NOT NULL DEFAULT 0
-                )
-                """);
-
-        statements.add("""
-                CREATE INDEX IF NOT EXISTS idx_pending_changes_minecraft_name
-                ON pending_changes(minecraft_name)
-                """);
-
-        statements.add("""
-                CREATE INDEX IF NOT EXISTS idx_pending_changes_discord_id
-                ON pending_changes(discord_id)
-                """);
-
-        return statements;
-    }
-
-    private List<String> getMySqlV3Statements() {
-        List<String> statements = new ArrayList<>();
-
-        statements.add("""
-                CREATE TABLE IF NOT EXISTS pending_changes (
-                    minecraft_name VARCHAR(16) NOT NULL,
-                    minecraft_uuid VARCHAR(36) NOT NULL,
-                    discord_name VARCHAR(100) NULL,
-                    discord_id VARCHAR(64) NULL,
-                    inventory_data LONGTEXT NULL,
-                    enderchest_data LONGTEXT NULL,
-                    last_online DATETIME(3) NULL,
-                    last_edited DATETIME(3) NULL,
-                    last_applied DATETIME(3) NULL,
-                    edited_by VARCHAR(100) NULL,
-                    has_pending_changes BOOLEAN NOT NULL DEFAULT FALSE,
-                    PRIMARY KEY (minecraft_uuid),
-                    INDEX idx_pending_changes_minecraft_name (minecraft_name),
-                    INDEX idx_pending_changes_discord_id (discord_id)
                 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
                 """);
 
@@ -781,52 +717,6 @@ public class MigrationRunner {
             executeSimple("""
                     CREATE INDEX IF NOT EXISTS idx_punishments_discord_id
                     ON punishments(discord_id)
-                    """);
-        }
-    }
-
-    private void ensurePendingChangesColumns() {
-        String databaseType = normalizeDatabaseType();
-
-        if (databaseType.equals("MYSQL")) {
-            ensureMysqlPendingChangesColumn("minecraft_name", "VARCHAR(16) NOT NULL");
-            ensureMysqlPendingChangesColumn("discord_name", "VARCHAR(100) NULL");
-            ensureMysqlPendingChangesColumn("discord_id", "VARCHAR(64) NULL");
-            ensureMysqlPendingChangesColumn("inventory_data", "LONGTEXT NULL");
-            ensureMysqlPendingChangesColumn("enderchest_data", "LONGTEXT NULL");
-            ensureMysqlPendingChangesColumn("last_online", "DATETIME(3) NULL");
-            ensureMysqlPendingChangesColumn("last_edited", "DATETIME(3) NULL");
-            ensureMysqlPendingChangesColumn("last_applied", "DATETIME(3) NULL");
-            ensureMysqlPendingChangesColumn("edited_by", "VARCHAR(100) NULL");
-            ensureMysqlPendingChangesColumn("has_pending_changes", "BOOLEAN NOT NULL DEFAULT FALSE");
-        } else {
-            ensureSqlitePendingChangesColumn("minecraft_name", "TEXT NOT NULL");
-            ensureSqlitePendingChangesColumn("discord_name", "TEXT");
-            ensureSqlitePendingChangesColumn("discord_id", "TEXT");
-            ensureSqlitePendingChangesColumn("inventory_data", "TEXT");
-            ensureSqlitePendingChangesColumn("enderchest_data", "TEXT");
-            ensureSqlitePendingChangesColumn("last_online", "TEXT");
-            ensureSqlitePendingChangesColumn("last_edited", "TEXT");
-            ensureSqlitePendingChangesColumn("last_applied", "TEXT");
-            ensureSqlitePendingChangesColumn("edited_by", "TEXT");
-            ensureSqlitePendingChangesColumn("has_pending_changes", "INTEGER NOT NULL DEFAULT 0");
-        }
-    }
-
-    private void ensurePendingChangesIndexes() {
-        String databaseType = normalizeDatabaseType();
-
-        if (databaseType.equals("MYSQL")) {
-            ensureMysqlIndex("pending_changes", "idx_pending_changes_minecraft_name", "CREATE INDEX idx_pending_changes_minecraft_name ON pending_changes(minecraft_name)");
-            ensureMysqlIndex("pending_changes", "idx_pending_changes_discord_id", "CREATE INDEX idx_pending_changes_discord_id ON pending_changes(discord_id)");
-        } else {
-            executeSimple("""
-                    CREATE INDEX IF NOT EXISTS idx_pending_changes_minecraft_name
-                    ON pending_changes(minecraft_name)
-                    """);
-            executeSimple("""
-                    CREATE INDEX IF NOT EXISTS idx_pending_changes_discord_id
-                    ON pending_changes(discord_id)
                     """);
         }
     }
@@ -1103,58 +993,6 @@ public class MigrationRunner {
 
         } catch (Exception ex) {
             throw new RuntimeException("Failed to ensure SQLite punishments column: " + columnName, ex);
-        }
-    }
-
-    private void ensureMysqlPendingChangesColumn(String columnName, String definition) {
-        String checkSql = """
-                SELECT COUNT(*)
-                FROM INFORMATION_SCHEMA.COLUMNS
-                WHERE TABLE_SCHEMA = DATABASE()
-                  AND TABLE_NAME = 'pending_changes'
-                  AND COLUMN_NAME = ?
-                """;
-
-        try (Connection connection = databaseManager.getConnection();
-             PreparedStatement check = connection.prepareStatement(checkSql)) {
-
-            check.setString(1, columnName);
-
-            try (ResultSet rs = check.executeQuery()) {
-                if (rs.next() && rs.getInt(1) > 0) {
-                    return;
-                }
-            }
-
-            try (Statement statement = connection.createStatement()) {
-                statement.executeUpdate("ALTER TABLE pending_changes ADD COLUMN " + columnName + " " + definition);
-            }
-
-        } catch (Exception ex) {
-            throw new RuntimeException("Failed to ensure MySQL pending_changes column: " + columnName, ex);
-        }
-    }
-
-    private void ensureSqlitePendingChangesColumn(String columnName, String definition) {
-        String sql = "PRAGMA table_info(pending_changes)";
-
-        try (Connection connection = databaseManager.getConnection();
-             PreparedStatement statement = connection.prepareStatement(sql);
-             ResultSet rs = statement.executeQuery()) {
-
-            while (rs.next()) {
-                String existing = rs.getString("name");
-                if (columnName.equalsIgnoreCase(existing)) {
-                    return;
-                }
-            }
-
-            try (Statement alter = connection.createStatement()) {
-                alter.executeUpdate("ALTER TABLE pending_changes ADD COLUMN " + columnName + " " + definition);
-            }
-
-        } catch (Exception ex) {
-            throw new RuntimeException("Failed to ensure SQLite pending_changes column: " + columnName, ex);
         }
     }
 

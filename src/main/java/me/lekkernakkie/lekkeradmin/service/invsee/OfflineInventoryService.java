@@ -33,7 +33,7 @@ public class OfflineInventoryService {
         );
     }
 
-    public void save(OfflinePlayer target, Inventory gui, String editorName) {
+    public void save(OfflinePlayer target, Inventory gui) {
         MainConfig config = plugin.getConfigManager().getMainConfig();
 
         ItemStack[] contents = new ItemStack[36];
@@ -69,22 +69,13 @@ public class OfflineInventoryService {
         return inventory;
     }
 
-    public void saveEnderChest(OfflinePlayer target, Inventory gui, String editorName) {
+    public void saveEnderChest(OfflinePlayer target, Inventory gui) {
         ItemStack[] contents = new ItemStack[27];
         for (int i = 0; i < 27; i++) {
             contents[i] = clone(gui.getItem(i));
         }
 
         dataStore.saveEnderChest(target, contents);
-    }
-
-    public void saveOnlineSnapshot(org.bukkit.entity.Player player) {
-        // Niet meer nodig voor echte offline invsee.
-    }
-
-    public boolean applyPendingChanges(org.bukkit.entity.Player player) {
-        // Niet meer nodig voor echte offline invsee.
-        return false;
     }
 
     private ItemStack clone(ItemStack item) {

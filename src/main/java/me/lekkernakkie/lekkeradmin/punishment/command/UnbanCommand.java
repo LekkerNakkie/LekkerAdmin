@@ -1,9 +1,7 @@
 package me.lekkernakkie.lekkeradmin.punishment.command;
 
 import me.lekkernakkie.lekkeradmin.LekkerAdmin;
-import me.lekkernakkie.lekkeradmin.config.PunishmentsConfig;
 import me.lekkernakkie.lekkeradmin.punishment.service.PunishmentService;
-import me.lekkernakkie.lekkeradmin.punishment.util.PunishmentFormatter;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
@@ -19,23 +17,27 @@ public class UnbanCommand implements CommandExecutor, TabCompleter {
 
     private final LekkerAdmin plugin;
     private final PunishmentService punishmentService;
-    private final PunishmentsConfig config;
 
     public UnbanCommand(LekkerAdmin plugin) {
         this.plugin = plugin;
         this.punishmentService = plugin.getPunishmentService();
-        this.config = plugin.getConfigManager().getPunishmentsConfig();
     }
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (!sender.hasPermission("lekkeradmin.punishment.unban")) {
-            sender.sendMessage(color(config.getNoPermissionMessage()));
+            sender.sendMessage(plugin.lang().message(
+                    "general.no-permission",
+                    "&cDaar edde gij het lef ni vur.."
+            ));
             return true;
         }
 
         if (args.length < 1) {
-            sender.sendMessage(color(config.getUsageUnbanMessage()));
+            sender.sendMessage(plugin.lang().message(
+                    "punishments.unban.usage",
+                    "&7Gebruik: &b/unban <speler> [reden]"
+            ));
             return true;
         }
 
@@ -50,12 +52,15 @@ public class UnbanCommand implements CommandExecutor, TabCompleter {
                 .thenAccept(result -> {
                     if (!result.success()) {
                         plugin.getServer().getScheduler().runTask(plugin,
-                                () -> sender.sendMessage(color(result.message())));
+                                () -> sender.sendMessage(result.message()));
                     }
                 })
                 .exceptionally(throwable -> {
                     plugin.getServer().getScheduler().runTask(plugin,
-                            () -> sender.sendMessage(color("&cEr ging iets mis bij het unbannen.")));
+                            () -> sender.sendMessage(plugin.lang().message(
+                                    "punishments.unban.async-failed",
+                                    "&cEr ging iets mis bij het unbannen."
+                            )));
                     plugin.debug("Unban async error: " + throwable.getMessage());
                     return null;
                 });
@@ -83,9 +88,5 @@ public class UnbanCommand implements CommandExecutor, TabCompleter {
         }
 
         return List.of();
-    }
-
-    private String color(String input) {
-        return PunishmentFormatter.colorize(input);
     }
 }

@@ -15,6 +15,7 @@ import org.bukkit.entity.Player;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -32,15 +33,19 @@ public class ClearHistoryCommand implements CommandExecutor, TabCompleter {
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        var config = plugin.getConfigManager().getPunishmentsConfig();
-
         if (!sender.hasPermission("lekkeradmin.punishment.clearhistory")) {
-            sender.sendMessage(color(config.getNoPermissionMessage()));
+            sender.sendMessage(plugin.lang().message(
+                    "general.no-permission",
+                    "&cDaar edde gij het lef ni vur.."
+            ));
             return true;
         }
 
         if (args.length < 3) {
-            sender.sendMessage(color(config.getClearHistoryUsageMessage()));
+            sender.sendMessage(plugin.lang().message(
+                    "punishments.clearhistory.usage",
+                    "&7Gebruik: &b/clearhistory <speler> <punishmentID/all> <reden>"
+            ));
             return true;
         }
 
@@ -49,7 +54,10 @@ public class ClearHistoryCommand implements CommandExecutor, TabCompleter {
         String reason = String.join(" ", Arrays.copyOfRange(args, 2, args.length)).trim();
 
         if (reason.isBlank()) {
-            sender.sendMessage(color(config.getReasonRequiredMessage()));
+            sender.sendMessage(plugin.lang().message(
+                    "punishments.clearhistory.reason-required",
+                    "&cJe moet een reden opgeven."
+            ));
             return true;
         }
 
@@ -88,15 +96,23 @@ public class ClearHistoryCommand implements CommandExecutor, TabCompleter {
 
                 Bukkit.getScheduler().runTask(plugin, () -> {
                     if (finalChanged <= 0) {
-                        sender.sendMessage(color(config.getClearHistoryNoEntriesMessage()
-                                .replace("{player}", targetName)));
+                        sender.sendMessage(plugin.lang().formatMessage(
+                                "punishments.clearhistory.no-entries",
+                                "&cGeen history entries gevonden om te clearen voor &b{player}&c.",
+                                Map.of("player", targetName)
+                        ));
                         return;
                     }
 
-                    sender.sendMessage(color(config.getClearHistoryAllSuccessMessage()
-                            .replace("{amount}", String.valueOf(finalChanged))
-                            .replace("{suffix}", finalChanged == 1 ? "y" : "ies")
-                            .replace("{player}", targetName)));
+                    sender.sendMessage(plugin.lang().formatMessage(
+                            "punishments.clearhistory.all-success",
+                            "&7{amount} history entr{suffix} verborgen voor &b{player}&7.",
+                            Map.of(
+                                    "amount", String.valueOf(finalChanged),
+                                    "suffix", finalChanged == 1 ? "y" : "ies",
+                                    "player", targetName
+                            )
+                    ));
                 });
                 return;
             }
@@ -106,7 +122,10 @@ public class ClearHistoryCommand implements CommandExecutor, TabCompleter {
                 punishmentId = Long.parseLong(targetArg);
             } catch (NumberFormatException ex) {
                 Bukkit.getScheduler().runTask(plugin, () ->
-                        sender.sendMessage(color(config.getClearHistoryIdInvalidMessage()))
+                        sender.sendMessage(plugin.lang().message(
+                                "punishments.clearhistory.invalid-id",
+                                "&cPunishment ID moet een nummer zijn of &ball&c."
+                        ))
                 );
                 return;
             }
@@ -115,8 +134,11 @@ public class ClearHistoryCommand implements CommandExecutor, TabCompleter {
 
             if (optionalEntry.isEmpty()) {
                 Bukkit.getScheduler().runTask(plugin, () ->
-                        sender.sendMessage(color(config.getClearHistoryEntryNotFoundMessage()
-                                .replace("{id}", String.valueOf(punishmentId))))
+                        sender.sendMessage(plugin.lang().formatMessage(
+                                "punishments.clearhistory.entry-not-found",
+                                "&cGeen punishment gevonden met ID &b{id}&c.",
+                                Map.of("id", String.valueOf(punishmentId))
+                        ))
                 );
                 return;
             }
@@ -125,22 +147,31 @@ public class ClearHistoryCommand implements CommandExecutor, TabCompleter {
 
             if (entry.getMinecraftName() == null || !entry.getMinecraftName().equalsIgnoreCase(targetName)) {
                 Bukkit.getScheduler().runTask(plugin, () ->
-                        sender.sendMessage(color(config.getClearHistoryWrongPlayerMessage()
-                                .replace("{player}", targetName)))
+                        sender.sendMessage(plugin.lang().formatMessage(
+                                "punishments.clearhistory.wrong-player",
+                                "&cDit punishment ID hoort niet bij speler &b{player}&c.",
+                                Map.of("player", targetName)
+                        ))
                 );
                 return;
             }
 
             if (entry.getStatus() == PunishmentStatus.ACTIVE) {
                 Bukkit.getScheduler().runTask(plugin, () ->
-                        sender.sendMessage(color(config.getClearHistoryActiveBlockedMessage()))
+                        sender.sendMessage(plugin.lang().message(
+                                "punishments.clearhistory.active-blocked",
+                                "&cJe kan geen actieve punishment clearen&7. Gebruik eerst &bunban&7 of &bunmute&7 indien nodig."
+                        ))
                 );
                 return;
             }
 
             if (entry.getRemoveReason() != null && entry.getRemoveReason().startsWith(HISTORY_CLEAR_PREFIX)) {
                 Bukkit.getScheduler().runTask(plugin, () ->
-                        sender.sendMessage(color(config.getClearHistoryAlreadyHiddenMessage()))
+                        sender.sendMessage(plugin.lang().message(
+                                "punishments.clearhistory.already-hidden",
+                                "&cDeze history entry is al verborgen."
+                        ))
                 );
                 return;
             }
@@ -163,9 +194,14 @@ public class ClearHistoryCommand implements CommandExecutor, TabCompleter {
             }
 
             Bukkit.getScheduler().runTask(plugin, () ->
-                    sender.sendMessage(color(config.getClearHistorySingleSuccessMessage()
-                            .replace("{id}", String.valueOf(entry.getId()))
-                            .replace("{player}", targetName)))
+                    sender.sendMessage(plugin.lang().formatMessage(
+                            "punishments.clearhistory.single-success",
+                            "&7Punishment ID &b{id} &7is verborgen uit history voor &b{player}&7.",
+                            Map.of(
+                                    "id", String.valueOf(entry.getId()),
+                                    "player", targetName
+                            )
+                    ))
             );
         });
 
@@ -217,9 +253,5 @@ public class ClearHistoryCommand implements CommandExecutor, TabCompleter {
             return player.getUniqueId().toString();
         }
         return null;
-    }
-
-    private String color(String input) {
-        return PunishmentFormatter.colorize(input);
     }
 }

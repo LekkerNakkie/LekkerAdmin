@@ -44,11 +44,17 @@ public class WarnService {
             ResolvedTarget target = resolveTarget(targetName);
 
             if (target.minecraftName() == null || target.minecraftName().isBlank()) {
-                return Result.fail(config.getPlayerNotFoundMessage());
+                return Result.fail(plugin.lang().get(
+                        "punishments.common.player-not-found",
+                        "&cSpeler niet gevonden."
+                ));
             }
 
             if (isSelfPunish(sender, target)) {
-                return Result.fail(config.getCannotPunishSelfMessage());
+                return Result.fail(plugin.lang().get(
+                        "punishments.common.cannot-punish-self",
+                        "&cJe kan jezelf niet straffen."
+                ));
             }
 
             String finalReason = normalizeReason(reason);
@@ -60,7 +66,10 @@ public class WarnService {
                 notifyPlayerIfOnline(entry);
                 broadcastStaff(entry);
                 sender.sendMessage(PunishmentFormatter.apply(
-                        config.getWarnSenderMessage(),
+                        plugin.lang().get(
+                                "punishments.warn.sender-message",
+                                "&7Speler &b{player} &7is gewaarschuwd. Reden: &b{reason}"
+                        ),
                         entry.getMinecraftName(),
                         PunishmentFormatter.valueOrUnknown(entry.getIssuedByName()),
                         PunishmentFormatter.valueOrUnknown(entry.getReason()),
@@ -143,7 +152,13 @@ public class WarnService {
         );
 
         List<String> lines = PunishmentFormatter.apply(
-                config.getWarnPlayerMessage(),
+                plugin.lang().getList("punishments.warn.player-message", List.of(
+                        "&cJe hebt een waarschuwing gekregen.",
+                        "",
+                        "&7Door: &b{actor}",
+                        "&7Reden: &b{reason}",
+                        "&7Datum: &b{date}"
+                )),
                 entry.getMinecraftName(),
                 PunishmentFormatter.valueOrUnknown(entry.getIssuedByName()),
                 PunishmentFormatter.valueOrUnknown(entry.getReason()),
@@ -158,7 +173,10 @@ public class WarnService {
 
     private void broadcastStaff(PunishmentEntry entry) {
         String message = PunishmentFormatter.apply(
-                config.getWarnStaffMessage(),
+                plugin.lang().get(
+                        "punishments.warn.staff-message",
+                        "&b{player} &7werd gewaarschuwd door &b{actor} &7- &b{reason}"
+                ),
                 entry.getMinecraftName(),
                 PunishmentFormatter.valueOrUnknown(entry.getIssuedByName()),
                 PunishmentFormatter.valueOrUnknown(entry.getReason()),

@@ -1,7 +1,6 @@
 package me.lekkernakkie.lekkeradmin.command.subcommands;
 
 import me.lekkernakkie.lekkeradmin.LekkerAdmin;
-import me.lekkernakkie.lekkeradmin.punishment.util.PunishmentFormatter;
 import org.bukkit.command.CommandSender;
 
 import java.util.Arrays;
@@ -16,12 +15,18 @@ public class PlanRestartSubCommand {
 
     public boolean execute(CommandSender sender, String[] args) {
         if (!sender.hasPermission("lekkeradmin.restart") && !sender.hasPermission("lekkeradmin.admin")) {
-            sender.sendMessage(color(plugin.getConfigManager().getMainConfig().getPlanRestartNoPermissionMessage()));
+            sender.sendMessage(plugin.lang().message(
+                    "general.no-permission",
+                    "&cDaar edde gij het lef ni vur.."
+            ));
             return true;
         }
 
         if (args.length < 2) {
-            sender.sendMessage(color(plugin.getConfigManager().getMainConfig().getPlanRestartUsageMessage()));
+            sender.sendMessage(plugin.lang().message(
+                    "restart.usage",
+                    "&7Gebruik: &b/planrestart <time> <reden...>"
+            ));
             return true;
         }
 
@@ -36,9 +41,5 @@ public class PlanRestartSubCommand {
 
         plugin.getRestartService().scheduleManualRestart(sender, timeInput, reason);
         return true;
-    }
-
-    private String color(String text) {
-        return PunishmentFormatter.colorize(text);
     }
 }

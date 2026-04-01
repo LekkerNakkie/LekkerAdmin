@@ -2,6 +2,7 @@ package me.lekkernakkie.lekkeradmin;
 
 import me.lekkernakkie.lekkeradmin.command.*;
 import me.lekkernakkie.lekkeradmin.config.ConfigManager;
+import me.lekkernakkie.lekkeradmin.config.LangConfig;
 import me.lekkernakkie.lekkeradmin.database.DatabaseManager;
 import me.lekkernakkie.lekkeradmin.database.migration.MigrationRunner;
 import me.lekkernakkie.lekkeradmin.discord.*;
@@ -27,6 +28,7 @@ import org.bukkit.command.TabCompleter;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
+import java.util.Map;
 
 public class LekkerAdmin extends JavaPlugin {
 
@@ -116,7 +118,7 @@ public class LekkerAdmin extends JavaPlugin {
         long start = System.currentTimeMillis();
 
         console("&b&m-------------------&9 LekkerAdmin Reload &b&m-------------------");
-        console("&7Reload gestart...");
+        console(lang().message("reload.started", "&7Reload gestart..."));
 
         if (restartService != null) {
             restartService.shutdown();
@@ -166,19 +168,19 @@ public class LekkerAdmin extends JavaPlugin {
 
         long time = System.currentTimeMillis() - start;
 
-        console("&a✔ Config herladen");
-        console("&a✔ Database reconnect uitgevoerd");
-        console("&a✔ Discord bot herstart");
-        console("&a✔ Punishments herladen");
-        console("&a✔ Punishment cache herladen");
-        console("&a✔ Expirations opnieuw ingepland");
-        console("&a✔ Logs herladen");
-        console("&a✔ Invsee herladen");
-        console("&a✔ Restart systeem herladen");
-        console("&a✔ Maintenance systeem herladen");
-        console("&a✔ Explosion logs herladen");
-        console("&a✔ Pending changes herladen");
-        console("&7Reload voltooid in &e" + time + "ms");
+        console(lang().message("reload.config", "&a✔ &7Config herladen"));
+        console(lang().message("reload.database", "&a✔ &7Database reconnect uitgevoerd"));
+        console(lang().message("reload.discord", "&a✔ &7Discord bot herstart"));
+        console(lang().message("reload.punishments", "&a✔ &7Punishments herladen"));
+        console(lang().message("reload.punishment-cache", "&a✔ &7Punishment cache herladen"));
+        console(lang().message("reload.expirations", "&a✔ &7Expirations opnieuw ingepland"));
+        console(lang().message("reload.logs", "&a✔ &7Logs herladen"));
+        console(lang().message("reload.invsee", "&a✔ &7Invsee herladen"));
+        console(lang().message("reload.restart", "&a✔ &7Restart systeem herladen"));
+        console(lang().message("reload.maintenance", "&a✔ &7Maintenance systeem herladen"));
+        console(lang().message("reload.explosions", "&a✔ &7Explosion logs herladen"));
+        console(lang().message("reload.sessions", "&a✔ &7Offline sessies herladen"));
+        console(lang().formatMessage("reload.finished", "&7Reload voltooid in &b{time}ms&7.", Map.of("time", String.valueOf(time))));
         console("&b&m--------------------------------------------------------------");
     }
 
@@ -309,6 +311,11 @@ public class LekkerAdmin extends JavaPlugin {
         if (!logsFile.exists()) {
             saveResource("logs.yml", false);
         }
+
+        File langFile = new File(getDataFolder(), "lang_nl.yml");
+        if (!langFile.exists()) {
+            saveResource("lang_nl.yml", false);
+        }
     }
 
     private void printStartupBanner() {
@@ -343,7 +350,11 @@ public class LekkerAdmin extends JavaPlugin {
     }
 
     private void console(String message) {
-        Bukkit.getConsoleSender().sendMessage(org.bukkit.ChatColor.translateAlternateColorCodes('&', message));
+        Bukkit.getConsoleSender().sendMessage(message);
+    }
+
+    public LangConfig lang() {
+        return configManager.getLangConfig();
     }
 
     public static LekkerAdmin getInstance() {

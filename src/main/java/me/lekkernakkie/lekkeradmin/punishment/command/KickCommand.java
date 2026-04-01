@@ -1,9 +1,7 @@
 package me.lekkernakkie.lekkeradmin.punishment.command;
 
 import me.lekkernakkie.lekkeradmin.LekkerAdmin;
-import me.lekkernakkie.lekkeradmin.config.PunishmentsConfig;
 import me.lekkernakkie.lekkeradmin.punishment.service.PunishmentService;
-import me.lekkernakkie.lekkeradmin.punishment.util.PunishmentFormatter;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -18,23 +16,27 @@ public class KickCommand implements CommandExecutor, TabCompleter {
 
     private final LekkerAdmin plugin;
     private final PunishmentService punishmentService;
-    private final PunishmentsConfig config;
 
     public KickCommand(LekkerAdmin plugin) {
         this.plugin = plugin;
         this.punishmentService = plugin.getPunishmentService();
-        this.config = plugin.getConfigManager().getPunishmentsConfig();
     }
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (!sender.hasPermission("lekkeradmin.punishment.kick")) {
-            sender.sendMessage(color(config.getNoPermissionMessage()));
+            sender.sendMessage(plugin.lang().message(
+                    "general.no-permission",
+                    "&cDaar edde gij het lef ni vur.."
+            ));
             return true;
         }
 
         if (args.length < 1) {
-            sender.sendMessage(color(config.getUsageKickMessage()));
+            sender.sendMessage(plugin.lang().message(
+                    "punishments.kick.usage",
+                    "&7Gebruik: &b/kick <speler> [reden]"
+            ));
             return true;
         }
 
@@ -49,12 +51,15 @@ public class KickCommand implements CommandExecutor, TabCompleter {
                 .thenAccept(result -> {
                     if (!result.success()) {
                         plugin.getServer().getScheduler().runTask(plugin,
-                                () -> sender.sendMessage(color(result.message())));
+                                () -> sender.sendMessage(result.message()));
                     }
                 })
                 .exceptionally(throwable -> {
                     plugin.getServer().getScheduler().runTask(plugin,
-                            () -> sender.sendMessage(color("&cEr ging iets mis bij het kicken.")));
+                            () -> sender.sendMessage(plugin.lang().message(
+                                    "punishments.kick.async-failed",
+                                    "&cEr ging iets mis bij het kicken."
+                            )));
                     plugin.debug("Kick async error: " + throwable.getMessage());
                     return null;
                 });
@@ -78,9 +83,5 @@ public class KickCommand implements CommandExecutor, TabCompleter {
         }
 
         return List.of();
-    }
-
-    private String color(String input) {
-        return PunishmentFormatter.colorize(input);
     }
 }

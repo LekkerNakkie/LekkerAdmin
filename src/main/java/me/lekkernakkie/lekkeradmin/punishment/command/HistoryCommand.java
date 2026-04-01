@@ -19,6 +19,7 @@ import org.bukkit.entity.Player;
 
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class HistoryCommand implements CommandExecutor, TabCompleter {
@@ -35,15 +36,21 @@ public class HistoryCommand implements CommandExecutor, TabCompleter {
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        var config = plugin.getConfigManager().getPunishmentsConfig();
+        var punishmentsConfig = plugin.getConfigManager().getPunishmentsConfig();
 
         if (!sender.hasPermission("lekkeradmin.punishment.history")) {
-            sender.sendMessage(color(config.getNoPermissionMessage()));
+            sender.sendMessage(plugin.lang().message(
+                    "general.no-permission",
+                    "&cDaar edde gij het lef ni vur.."
+            ));
             return true;
         }
 
         if (args.length < 1) {
-            sender.sendMessage(color(config.getHistoryUsageMessage()));
+            sender.sendMessage(plugin.lang().message(
+                    "punishments.history.usage",
+                    "&7Gebruik: &b/history <speler> [pagina]"
+            ));
             return true;
         }
 
@@ -54,13 +61,19 @@ public class HistoryCommand implements CommandExecutor, TabCompleter {
             try {
                 page = Integer.parseInt(args[1]);
             } catch (NumberFormatException ex) {
-                sender.sendMessage(color(config.getHistoryInvalidPageMessage()));
+                sender.sendMessage(plugin.lang().message(
+                        "punishments.history.invalid-page",
+                        "&cPagina moet een nummer zijn."
+                ));
                 return true;
             }
         }
 
         if (page <= 0) {
-            sender.sendMessage(color(config.getHistoryPageTooLowMessage()));
+            sender.sendMessage(plugin.lang().message(
+                    "punishments.history.page-too-low",
+                    "&cPagina moet groter zijn dan &b0&c."
+            ));
             return true;
         }
 
@@ -72,8 +85,11 @@ public class HistoryCommand implements CommandExecutor, TabCompleter {
 
             if (requestedPage > totalPages && totalEntries > 0) {
                 Bukkit.getScheduler().runTask(plugin, () ->
-                        sender.sendMessage(color(config.getHistoryPageNotFoundMessage()
-                                .replace("{max_page}", String.valueOf(totalPages))))
+                        sender.sendMessage(plugin.lang().formatMessage(
+                                "punishments.history.page-not-found",
+                                "&cDie pagina bestaat niet&7. Max pagina: &b{max_page}&7.",
+                                Map.of("max_page", String.valueOf(totalPages))
+                        ))
                 );
                 return;
             }
@@ -83,17 +99,33 @@ public class HistoryCommand implements CommandExecutor, TabCompleter {
 
             Bukkit.getScheduler().runTask(plugin, () -> {
                 if (entries.isEmpty()) {
-                    sender.sendMessage(color(config.getHistoryEmptyMessage()
-                            .replace("{player}", targetName)));
+                    sender.sendMessage(plugin.lang().formatMessage(
+                            "punishments.history.empty",
+                            "&cGeen punishment history gevonden voor &b{player}&c.",
+                            Map.of("player", targetName)
+                    ));
                     return;
                 }
 
-                sender.sendMessage(color(config.getHistoryHeaderLine()));
-                sender.sendMessage(color(config.getHistoryTitle()
-                        .replace("{player}", targetName)
-                        .replace("{page}", String.valueOf(requestedPage))
-                        .replace("{max_page}", String.valueOf(totalPages))));
-                sender.sendMessage(color(config.getHistoryHeaderLine()));
+                sender.sendMessage(plugin.lang().get(
+                        "punishments.history.header-line",
+                        "&8&m------------------------------------------------"
+                ));
+
+                sender.sendMessage(plugin.lang().format(
+                        "punishments.history.title",
+                        "&9Punishment History &7» &b{player} &7(Pagina &b{page}&7/&b{max_page}&7)",
+                        Map.of(
+                                "player", targetName,
+                                "page", String.valueOf(requestedPage),
+                                "max_page", String.valueOf(totalPages)
+                        )
+                ));
+
+                sender.sendMessage(plugin.lang().get(
+                        "punishments.history.header-line",
+                        "&8&m------------------------------------------------"
+                ));
 
                 int globalIndex = offset + 1;
 
@@ -104,7 +136,10 @@ public class HistoryCommand implements CommandExecutor, TabCompleter {
 
                 sendPagination(sender, targetName, requestedPage, totalPages);
 
-                sender.sendMessage(color(config.getHistoryHeaderLine()));
+                sender.sendMessage(plugin.lang().get(
+                        "punishments.history.header-line",
+                        "&8&m------------------------------------------------"
+                ));
             });
         });
 
@@ -112,7 +147,7 @@ public class HistoryCommand implements CommandExecutor, TabCompleter {
     }
 
     private void sendEntry(CommandSender sender, PunishmentEntry entry, int index) {
-        var config = plugin.getConfigManager().getPunishmentsConfig();
+        var punishmentsConfig = plugin.getConfigManager().getPunishmentsConfig();
 
         String type = entry.getPunishmentType() == null ? "ONBEKEND" : entry.getPunishmentType().name();
         String issuedAt = formatDate(entry.getIssuedAt());
@@ -122,42 +157,74 @@ public class HistoryCommand implements CommandExecutor, TabCompleter {
 
         String statusPart = buildStatusDisplay(entry);
         if (!statusPart.isBlank()) {
-            statusPart = " " + color(config.getHistoryStatusLabel().replace("{status}", statusPart));
+            statusPart = " " + plugin.lang().format(
+                    "punishments.history.status-label",
+                    "&7| Status: {status}",
+                    Map.of("status", statusPart)
+            );
         }
 
-        String header = config.getHistoryEntryHeader()
-                .replace("{index}", String.valueOf(index))
-                .replace("{id}", String.valueOf(entry.getId()))
-                .replace("{type}", type)
-                .replace("{status_part}", statusPart);
+        sender.sendMessage(plugin.lang().format(
+                "punishments.history.entry-header",
+                "&7#&b{index} &7| ID: &b{id} &7| Type: &b{type}{status_part}",
+                Map.of(
+                        "index", String.valueOf(index),
+                        "id", String.valueOf(entry.getId()),
+                        "type", type,
+                        "status_part", statusPart
+                )
+        ));
 
-        sender.sendMessage(color(header));
-        sender.sendMessage(color(config.getHistoryEntryReason()
-                .replace("{reason}", safe(entry.getReason()))));
-        sender.sendMessage(color(config.getHistoryEntryIssued()
-                .replace("{actor}", safe(entry.getIssuedByName()))
-                .replace("{issued_at}", issuedAt)));
+        sender.sendMessage(plugin.lang().format(
+                "punishments.history.entry-reason",
+                "&7Reden: &b{reason}",
+                Map.of("reason", safe(entry.getReason()))
+        ));
+
+        sender.sendMessage(plugin.lang().format(
+                "punishments.history.entry-issued",
+                "&7Uitgedeeld door: &b{actor} &7| Op: &b{issued_at}",
+                Map.of(
+                        "actor", safe(entry.getIssuedByName()),
+                        "issued_at", issuedAt
+                )
+        ));
 
         if (entry.getDurationMs() != null) {
-            sender.sendMessage(color(config.getHistoryEntryDuration()
-                    .replace("{duration}", safe(duration))
-                    .replace("{expires_at}", expiresAt)));
+            sender.sendMessage(plugin.lang().format(
+                    "punishments.history.entry-duration",
+                    "&7Duur: &b{duration} &7| Verloopt: &b{expires_at}",
+                    Map.of(
+                            "duration", safe(duration),
+                            "expires_at", expiresAt
+                    )
+            ));
         }
 
         if (shouldShowHandledInfo(entry)) {
-            sender.sendMessage(color(config.getHistoryEntryHandledBy()
-                    .replace("{actor}", resolveRemovedBy(entry))
-                    .replace("{removed_at}", removedAt)));
-            sender.sendMessage(color(config.getHistoryEntryHandledReason()
-                    .replace("{reason}", safe(entry.getRemoveReason()))));
+            sender.sendMessage(plugin.lang().format(
+                    "punishments.history.entry-handled-by",
+                    "&7Afgehandeld door: &b{actor} &7| Op: &b{removed_at}",
+                    Map.of(
+                            "actor", resolveRemovedBy(entry),
+                            "removed_at", removedAt
+                    )
+            ));
+
+            sender.sendMessage(plugin.lang().format(
+                    "punishments.history.entry-handled-reason",
+                    "&7Afhandel reden: &b{reason}",
+                    Map.of("reason", safe(entry.getRemoveReason()))
+            ));
         }
 
-        sender.sendMessage(color(config.getHistoryHeaderLine()));
+        sender.sendMessage(plugin.lang().get(
+                "punishments.history.header-line",
+                "&8&m------------------------------------------------"
+        ));
     }
 
     private String buildStatusDisplay(PunishmentEntry entry) {
-        var config = plugin.getConfigManager().getPunishmentsConfig();
-
         if (entry == null || entry.getPunishmentType() == null || entry.getStatus() == null) {
             return "";
         }
@@ -170,10 +237,10 @@ public class HistoryCommand implements CommandExecutor, TabCompleter {
         }
 
         return switch (status) {
-            case "ACTIVE" -> color(config.getHistoryStatusActive());
-            case "EXPIRED" -> color(config.getHistoryStatusExpired());
-            case "REMOVED" -> color(config.getHistoryStatusRemoved());
-            default -> color("&7" + status);
+            case "ACTIVE" -> plugin.lang().get("punishments.history.status-active", "&cActief");
+            case "EXPIRED" -> plugin.lang().get("punishments.history.status-expired", "&bVerlopen");
+            case "REMOVED" -> plugin.lang().get("punishments.history.status-removed", "&aOpgeheven");
+            default -> "&7" + status;
         };
     }
 
@@ -199,13 +266,13 @@ public class HistoryCommand implements CommandExecutor, TabCompleter {
     }
 
     private void sendPagination(CommandSender sender, String targetName, int currentPage, int totalPages) {
-        var config = plugin.getConfigManager().getPunishmentsConfig();
-
-        TextComponent root = new TextComponent(color(config.getHistoryPaginationPrefix()));
+        TextComponent root = new TextComponent(
+                plugin.lang().get("punishments.history.pagination-prefix", "&7Pagina's: ")
+        );
 
         for (int page = 1; page <= totalPages; page++) {
             if (page > 1) {
-                root.addExtra(new TextComponent(color("&8, ")));
+                root.addExtra(new TextComponent("§8, "));
             }
 
             TextComponent part = new TextComponent("[" + page + "]");
@@ -222,7 +289,11 @@ public class HistoryCommand implements CommandExecutor, TabCompleter {
                 ));
                 part.setHoverEvent(new HoverEvent(
                         HoverEvent.Action.SHOW_TEXT,
-                        new Text(config.getHistoryPaginationHover().replace("{page}", String.valueOf(page)))
+                        new Text(plugin.lang().format(
+                                "punishments.history.pagination-hover",
+                                "&7Ga naar pagina &b{page}",
+                                Map.of("page", String.valueOf(page))
+                        ))
                 ));
             }
 
@@ -260,9 +331,5 @@ public class HistoryCommand implements CommandExecutor, TabCompleter {
         }
 
         return List.of();
-    }
-
-    private String color(String input) {
-        return PunishmentFormatter.colorize(input);
     }
 }

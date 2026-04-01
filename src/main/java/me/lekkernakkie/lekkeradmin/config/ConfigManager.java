@@ -16,10 +16,12 @@ public class ConfigManager {
     private MessagesConfig messagesConfig;
     private PunishmentsConfig punishmentsConfig;
     private LogsConfig logsConfig;
+    private LangConfig langConfig;
 
     private FileConfiguration dcBotYaml;
     private FileConfiguration punishmentsYaml;
     private FileConfiguration logsYaml;
+    private FileConfiguration langYaml;
 
     public ConfigManager(LekkerAdmin plugin) {
         this.plugin = plugin;
@@ -30,12 +32,14 @@ public class ConfigManager {
         loadDcBotYaml();
         loadPunishmentsYaml();
         loadLogsYaml();
+        loadLangYaml();
 
         this.mainConfig = new MainConfig(plugin.getConfig());
         this.dcBotConfig = new DCBotConfig(dcBotYaml);
         this.messagesConfig = new MessagesConfig(dcBotYaml);
         this.punishmentsConfig = new PunishmentsConfig(punishmentsYaml);
         this.logsConfig = new LogsConfig(logsYaml);
+        this.langConfig = new LangConfig(langYaml);
     }
 
     public void reloadAll() {
@@ -55,6 +59,11 @@ public class ConfigManager {
     private void loadLogsYaml() {
         File file = new File(plugin.getDataFolder(), "logs.yml");
         this.logsYaml = YamlConfiguration.loadConfiguration(file);
+    }
+
+    private void loadLangYaml() {
+        File file = new File(plugin.getDataFolder(), "lang_nl.yml");
+        this.langYaml = YamlConfiguration.loadConfiguration(file);
     }
 
     public MainConfig getMainConfig() {
@@ -77,6 +86,10 @@ public class ConfigManager {
         return logsConfig;
     }
 
+    public LangConfig getLangConfig() {
+        return langConfig;
+    }
+
     public FileConfiguration getDcBotYaml() {
         return dcBotYaml;
     }
@@ -87,5 +100,9 @@ public class ConfigManager {
 
     public FileConfiguration getLogsYaml() {
         return logsYaml;
+    }
+
+    public FileConfiguration getLangYaml() {
+        return langYaml;
     }
 }

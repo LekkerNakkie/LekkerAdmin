@@ -16,8 +16,10 @@ public class PunishmentLoginListener implements Listener {
 
     private final PunishmentService punishmentService;
     private final PunishmentsConfig config;
+    private final LekkerAdmin plugin;
 
     public PunishmentLoginListener(LekkerAdmin plugin) {
+        this.plugin = plugin;
         this.punishmentService = plugin.getPunishmentService();
         this.config = plugin.getConfigManager().getPunishmentsConfig();
     }
@@ -47,7 +49,14 @@ public class PunishmentLoginListener implements Listener {
         );
 
         List<String> lines = PunishmentFormatter.apply(
-                config.getBanDisconnectMessage(),
+                plugin.lang().getList("punishments.ban.disconnect-message", List.of(
+                        "&cJe bent geband van de server.",
+                        "",
+                        "&7Reden: &b{reason}",
+                        "&7Door: &b{actor}",
+                        "&7Duur: &b{duration}",
+                        "&7Tot: &b{expires_at}"
+                )),
                 entry.getMinecraftName(),
                 PunishmentFormatter.valueOrUnknown(entry.getIssuedByName()),
                 PunishmentFormatter.valueOrUnknown(entry.getReason()),

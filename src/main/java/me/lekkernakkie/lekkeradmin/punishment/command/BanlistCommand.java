@@ -1,7 +1,6 @@
 package me.lekkernakkie.lekkeradmin.punishment.command;
 
 import me.lekkernakkie.lekkeradmin.LekkerAdmin;
-import me.lekkernakkie.lekkeradmin.config.PunishmentsConfig;
 import me.lekkernakkie.lekkeradmin.model.punishment.PunishmentEntry;
 import me.lekkernakkie.lekkeradmin.punishment.service.PunishmentService;
 import me.lekkernakkie.lekkeradmin.punishment.util.PunishmentFormatter;
@@ -19,18 +18,19 @@ public class BanlistCommand implements CommandExecutor, TabCompleter {
 
     private final LekkerAdmin plugin;
     private final PunishmentService punishmentService;
-    private final PunishmentsConfig config;
 
     public BanlistCommand(LekkerAdmin plugin) {
         this.plugin = plugin;
         this.punishmentService = plugin.getPunishmentService();
-        this.config = plugin.getConfigManager().getPunishmentsConfig();
     }
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (!sender.hasPermission("lekkeradmin.punishment.banlist")) {
-            sender.sendMessage(color(config.getNoPermissionMessage()));
+            sender.sendMessage(plugin.lang().message(
+                    "general.no-permission",
+                    "&cDaar edde gij het lef ni vur.."
+            ));
             return true;
         }
 
@@ -40,13 +40,19 @@ public class BanlistCommand implements CommandExecutor, TabCompleter {
             try {
                 page = Integer.parseInt(args[0]);
             } catch (NumberFormatException ex) {
-                sender.sendMessage(color(config.getBanlistInvalidPageMessage()));
+                sender.sendMessage(plugin.lang().message(
+                        "punishments.banlist.invalid-page",
+                        "&cOngeldige pagina."
+                ));
                 return true;
             }
         }
 
         if (page <= 0) {
-            sender.sendMessage(color(config.getBanlistInvalidPageMessage()));
+            sender.sendMessage(plugin.lang().message(
+                    "punishments.banlist.invalid-page",
+                    "&cOngeldige pagina."
+            ));
             return true;
         }
 
@@ -55,25 +61,38 @@ public class BanlistCommand implements CommandExecutor, TabCompleter {
         punishmentService.getBanPageCountAsync().thenCompose(maxPage -> {
             if (requestedPage > maxPage) {
                 plugin.getServer().getScheduler().runTask(plugin,
-                        () -> sender.sendMessage(color(config.getBanlistInvalidPageMessage())));
+                        () -> sender.sendMessage(plugin.lang().message(
+                                "punishments.banlist.invalid-page",
+                                "&cOngeldige pagina."
+                        )));
                 return CompletableFuture.completedFuture(null);
             }
 
             return punishmentService.getActiveBansPageAsync(requestedPage).thenApply(entries -> {
                 plugin.getServer().getScheduler().runTask(plugin, () -> {
                     if (entries == null || entries.isEmpty()) {
-                        sender.sendMessage(color(config.getBanlistEmptyMessage()));
+                        sender.sendMessage(plugin.lang().message(
+                                "punishments.banlist.empty",
+                                "&7Er zijn momenteel geen actieve bans."
+                        ));
                         return;
                     }
 
-                    sender.sendMessage(color(config.getBanlistHeader()));
-                    sender.sendMessage(color(
-                            config.getBanlistTitle()
-                                    .replace("{page}", String.valueOf(requestedPage))
-                                    .replace("{max_page}", String.valueOf(maxPage))
+                    sender.sendMessage(plugin.lang().get(
+                            "punishments.banlist.header",
+                            "&8&m----------------------------------------"
                     ));
 
-                    int startIndex = (requestedPage - 1) * config.getBanlistEntriesPerPage();
+                    sender.sendMessage(plugin.lang().format(
+                            "punishments.banlist.title",
+                            "&9Actieve bans &7(Pagina &b{page}&7/&b{max_page}&7)",
+                            java.util.Map.of(
+                                    "page", String.valueOf(requestedPage),
+                                    "max_page", String.valueOf(maxPage)
+                            )
+                    ));
+
+                    int startIndex = (requestedPage - 1) * plugin.getConfigManager().getPunishmentsConfig().getBanlistEntriesPerPage();
 
                     for (int i = 0; i < entries.size(); i++) {
                         PunishmentEntry entry = entries.get(i);
@@ -81,31 +100,47 @@ public class BanlistCommand implements CommandExecutor, TabCompleter {
                         String duration = PunishmentFormatter.formatDuration(entry.getDurationMs());
                         String expiresAt = PunishmentFormatter.formatDate(
                                 entry.getExpiresAt(),
-                                config.getDateFormat(),
-                                config.getTimezone()
+                                plugin.getConfigManager().getPunishmentsConfig().getDateFormat(),
+                                plugin.getConfigManager().getPunishmentsConfig().getTimezone()
                         );
 
-                        String entryLine = config.getBanlistEntry()
-                                .replace("{index}", String.valueOf(startIndex + i + 1))
-                                .replace("{player}", PunishmentFormatter.valueOrUnknown(entry.getMinecraftName()))
-                                .replace("{reason}", PunishmentFormatter.valueOrUnknown(entry.getReason()));
+                        String entryLine = plugin.lang().format(
+                                "punishments.banlist.entry",
+                                "&7#&b{index} &b{player} &7- &b{reason}",
+                                java.util.Map.of(
+                                        "index", String.valueOf(startIndex + i + 1),
+                                        "player", PunishmentFormatter.valueOrUnknown(entry.getMinecraftName()),
+                                        "reason", PunishmentFormatter.valueOrUnknown(entry.getReason())
+                                )
+                        );
 
-                        String subEntryLine = config.getBanlistSubEntry()
-                                .replace("{actor}", PunishmentFormatter.valueOrUnknown(entry.getIssuedByName()))
-                                .replace("{duration}", duration)
-                                .replace("{expires_at}", expiresAt);
+                        String subEntryLine = plugin.lang().format(
+                                "punishments.banlist.sub-entry",
+                                "&7Door: &b{actor} &7| Duur: &b{duration} &7| Tot: &b{expires_at}",
+                                java.util.Map.of(
+                                        "actor", PunishmentFormatter.valueOrUnknown(entry.getIssuedByName()),
+                                        "duration", duration,
+                                        "expires_at", expiresAt
+                                )
+                        );
 
-                        sender.sendMessage(color(entryLine));
-                        sender.sendMessage(color(subEntryLine));
+                        sender.sendMessage(entryLine);
+                        sender.sendMessage(subEntryLine);
                     }
 
-                    sender.sendMessage(color(config.getBanlistFooter()));
+                    sender.sendMessage(plugin.lang().get(
+                            "punishments.banlist.footer",
+                            "&8&m----------------------------------------"
+                    ));
                 });
                 return null;
             });
         }).exceptionally(throwable -> {
             plugin.getServer().getScheduler().runTask(plugin,
-                    () -> sender.sendMessage(color("&cEr ging iets mis bij het laden van de banlist.")));
+                    () -> sender.sendMessage(plugin.lang().message(
+                            "punishments.banlist.load-failed",
+                            "&cEr ging iets mis bij het laden van de banlist."
+                    )));
             plugin.debug("Banlist async error: " + throwable.getMessage());
             return null;
         });
@@ -127,9 +162,5 @@ public class BanlistCommand implements CommandExecutor, TabCompleter {
         }
 
         return List.of();
-    }
-
-    private String color(String input) {
-        return PunishmentFormatter.colorize(input);
     }
 }

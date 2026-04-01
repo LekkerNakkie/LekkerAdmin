@@ -1,10 +1,8 @@
 package me.lekkernakkie.lekkeradmin.punishment.command;
 
 import me.lekkernakkie.lekkeradmin.LekkerAdmin;
-import me.lekkernakkie.lekkeradmin.config.PunishmentsConfig;
 import me.lekkernakkie.lekkeradmin.punishment.service.PunishmentService;
 import me.lekkernakkie.lekkeradmin.punishment.util.PunishmentDurationParser;
-import me.lekkernakkie.lekkeradmin.punishment.util.PunishmentFormatter;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -19,32 +17,41 @@ public class BanCommand implements CommandExecutor, TabCompleter {
 
     private final LekkerAdmin plugin;
     private final PunishmentService punishmentService;
-    private final PunishmentsConfig config;
 
     public BanCommand(LekkerAdmin plugin) {
         this.plugin = plugin;
         this.punishmentService = plugin.getPunishmentService();
-        this.config = plugin.getConfigManager().getPunishmentsConfig();
     }
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (!sender.hasPermission("lekkeradmin.punishment.ban")) {
-            sender.sendMessage(color(config.getNoPermissionMessage()));
+            sender.sendMessage(plugin.lang().message(
+                    "general.no-permission",
+                    "&cDaar edde gij het lef ni vur.."
+            ));
             return true;
         }
 
         if (args.length < 2) {
-            sender.sendMessage(color(config.getUsageBanMessage()));
+            sender.sendMessage(plugin.lang().message(
+                    "punishments.ban.usage",
+                    "&7Gebruik: &b/ban <speler> <tijd|perm> [reden]"
+            ));
             return true;
         }
 
         String targetName = args[0];
         String durationInput = args[1];
 
-        PunishmentDurationParser.ParseResult parseResult = PunishmentDurationParser.parse(durationInput, config);
+        PunishmentDurationParser.ParseResult parseResult =
+                PunishmentDurationParser.parse(durationInput, plugin.getConfigManager().getPunishmentsConfig());
+
         if (!parseResult.valid()) {
-            sender.sendMessage(color(config.getInvalidDurationMessage()));
+            sender.sendMessage(plugin.lang().message(
+                    "punishments.ban.invalid-duration",
+                    "&cOngeldige tijd&7. Gebruik bv: &b10m&7, &b1h&7, &b7d&7, &b1h30m&7, &bperm"
+            ));
             return true;
         }
 
@@ -57,12 +64,15 @@ public class BanCommand implements CommandExecutor, TabCompleter {
                 .thenAccept(result -> {
                     if (!result.success()) {
                         plugin.getServer().getScheduler().runTask(plugin,
-                                () -> sender.sendMessage(color(result.message())));
+                                () -> sender.sendMessage(result.message()));
                     }
                 })
                 .exceptionally(throwable -> {
                     plugin.getServer().getScheduler().runTask(plugin,
-                            () -> sender.sendMessage(color("&cEr ging iets mis bij het bannen.")));
+                            () -> sender.sendMessage(plugin.lang().message(
+                                    "punishments.ban.async-failed",
+                                    "&cEr ging iets mis bij het bannen."
+                            )));
                     plugin.debug("Ban async error: " + throwable.getMessage());
                     return null;
                 });
@@ -92,9 +102,5 @@ public class BanCommand implements CommandExecutor, TabCompleter {
         }
 
         return List.of();
-    }
-
-    private String color(String input) {
-        return PunishmentFormatter.colorize(input);
     }
 }

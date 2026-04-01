@@ -34,11 +34,11 @@ public class PunishmentService {
     private final LinkService linkService;
     private final DiscordPunishmentDMService discordPunishmentDMService;
 
-    private final Map<String, PunishmentEntry> activeBanCacheByName = new ConcurrentHashMap<>();
-    private final Map<String, PunishmentEntry> activeBanCacheByUuid = new ConcurrentHashMap<>();
-    private final Map<String, PunishmentEntry> activeMuteCacheByName = new ConcurrentHashMap<>();
-    private final Map<String, PunishmentEntry> activeMuteCacheByUuid = new ConcurrentHashMap<>();
-    private final Map<Long, BukkitTask> scheduledExpirations = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<String, PunishmentEntry> activeBanCacheByName = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<String, PunishmentEntry> activeBanCacheByUuid = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<String, PunishmentEntry> activeMuteCacheByName = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<String, PunishmentEntry> activeMuteCacheByUuid = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<Long, BukkitTask> scheduledExpirations = new ConcurrentHashMap<>();
 
     public PunishmentService(LekkerAdmin plugin) {
         this.plugin = plugin;
@@ -89,8 +89,12 @@ public class PunishmentService {
         return plugin.getDatabaseManager().supplyAsync(() -> {
             ResolvedTarget target = resolveTarget(targetName);
 
+            if (target.minecraftName() == null || target.minecraftName().isBlank()) {
+                return Result.fail(lang("punishments.common.player-not-found", "&cSpeler niet gevonden."));
+            }
+
             if (isSelfPunish(sender, target)) {
-                return Result.fail(config.getCannotPunishSelfMessage());
+                return Result.fail(lang("punishments.common.cannot-punish-self", "&cJe kan jezelf niet straffen."));
             }
 
             Optional<PunishmentEntry> activeBan = repository.findActivePunishment(
@@ -100,7 +104,7 @@ public class PunishmentService {
             );
 
             if (activeBan.isPresent()) {
-                return Result.fail(config.getAlreadyBannedMessage());
+                return Result.fail(lang("punishments.common.already-banned", "&cDeze speler heeft al een actieve ban."));
             }
 
             String finalReason = normalizeReason("ban", reason);
@@ -114,10 +118,12 @@ public class PunishmentService {
                 }
 
                 kickIfOnline(target.minecraftName(), buildBanDisconnectMessage(entry));
-                broadcastStaff(config.getBanStaffMessage(), entry);
+                broadcastStaff(lang("punishments.ban.staff-message",
+                        "&b{player} &7werd geband door &b{actor} &7(&b{duration}&7) - &b{reason}"), entry);
 
                 sender.sendMessage(PunishmentFormatter.apply(
-                        config.getBanSenderMessage(),
+                        lang("punishments.ban.sender-message",
+                                "&7Speler &b{player} &7is geband voor &b{duration}&7. Reden: &b{reason}"),
                         entry.getMinecraftName(),
                         entry.getIssuedByName(),
                         entry.getReason(),
@@ -146,7 +152,7 @@ public class PunishmentService {
             );
 
             if (activeBan.isEmpty()) {
-                return Result.fail(config.getNotBannedMessage());
+                return Result.fail(lang("punishments.common.not-banned", "&cDeze speler heeft geen actieve ban."));
             }
 
             String finalReason = normalizeReason("unban", reason);
@@ -168,7 +174,8 @@ public class PunishmentService {
                 cancelScheduledExpiration(entry.getId());
 
                 sender.sendMessage(PunishmentFormatter.apply(
-                        config.getUnbanSenderMessage(),
+                        lang("punishments.unban.sender-message",
+                                "&7Speler &b{player} &7is ge-unbanned. Reden: &b{reason}"),
                         entry.getMinecraftName(),
                         getActorName(sender),
                         finalReason,
@@ -177,7 +184,9 @@ public class PunishmentService {
                         null
                 ));
 
-                broadcastStaff(config.getUnbanStaffMessage(), entry, getActorName(sender), finalReason);
+                broadcastStaff(lang("punishments.unban.staff-message",
+                                "&b{player} &7werd ge-unbanned door &b{actor} &7- &b{reason}"),
+                        entry, getActorName(sender), finalReason);
             });
 
             logAudit("UNBAN", sender, entry);
@@ -192,8 +201,12 @@ public class PunishmentService {
         return plugin.getDatabaseManager().supplyAsync(() -> {
             ResolvedTarget target = resolveTarget(targetName);
 
+            if (target.minecraftName() == null || target.minecraftName().isBlank()) {
+                return Result.fail(lang("punishments.common.player-not-found", "&cSpeler niet gevonden."));
+            }
+
             if (isSelfPunish(sender, target)) {
-                return Result.fail(config.getCannotPunishSelfMessage());
+                return Result.fail(lang("punishments.common.cannot-punish-self", "&cJe kan jezelf niet straffen."));
             }
 
             Optional<PunishmentEntry> activeMute = repository.findActivePunishment(
@@ -203,7 +216,7 @@ public class PunishmentService {
             );
 
             if (activeMute.isPresent()) {
-                return Result.fail(config.getAlreadyMutedMessage());
+                return Result.fail(lang("punishments.common.already-muted", "&cDeze speler heeft al een actieve mute."));
             }
 
             String finalReason = normalizeReason("mute", reason);
@@ -216,10 +229,18 @@ public class PunishmentService {
                     scheduleExpiration(entry);
                 }
 
-                notifyPlayerIfOnline(target.minecraftName(), config.getMutePlayerMessage(), entry);
+                notifyPlayerIfOnline(target.minecraftName(),
+                        listLang("punishments.mute.player-message", List.of(
+                                "&cJe bent gemute.",
+                                "",
+                                "&7Door: &b{actor}",
+                                "&7Reden: &b{reason}",
+                                "&7Duur: &b{duration}"
+                        )), entry);
 
                 sender.sendMessage(PunishmentFormatter.apply(
-                        config.getMuteSenderMessage(),
+                        lang("punishments.mute.sender-message",
+                                "&7Speler &b{player} &7is gemute voor &b{duration}&7. Reden: &b{reason}"),
                         entry.getMinecraftName(),
                         entry.getIssuedByName(),
                         entry.getReason(),
@@ -228,7 +249,8 @@ public class PunishmentService {
                         null
                 ));
 
-                broadcastStaff(config.getMuteStaffMessage(), entry);
+                broadcastStaff(lang("punishments.mute.staff-message",
+                        "&b{player} &7werd gemute door &b{actor} &7(&b{duration}&7) - &b{reason}"), entry);
             });
 
             logAudit("MUTE", sender, entry);
@@ -250,7 +272,7 @@ public class PunishmentService {
             );
 
             if (activeMute.isEmpty()) {
-                return Result.fail(config.getNotMutedMessage());
+                return Result.fail(lang("punishments.common.not-muted", "&cDeze speler heeft geen actieve mute."));
             }
 
             String finalReason = normalizeReason("unmute", reason);
@@ -272,7 +294,8 @@ public class PunishmentService {
                 cancelScheduledExpiration(entry.getId());
 
                 sender.sendMessage(PunishmentFormatter.apply(
-                        config.getUnmuteSenderMessage(),
+                        lang("punishments.unmute.sender-message",
+                                "&7Speler &b{player} &7is ge-unmute. Reden: &b{reason}"),
                         entry.getMinecraftName(),
                         getActorName(sender),
                         finalReason,
@@ -281,8 +304,17 @@ public class PunishmentService {
                         null
                 ));
 
-                notifySimplePlayerIfOnline(target.minecraftName(), config.getUnmutePlayerMessage(), getActorName(sender), finalReason);
-                broadcastStaff(config.getUnmuteStaffMessage(), entry, getActorName(sender), finalReason);
+                notifySimplePlayerIfOnline(target.minecraftName(),
+                        listLang("punishments.unmute.player-message", List.of(
+                                "&7Je mute is &aopgeheven&7.",
+                                "&7Door: &b{actor}",
+                                "&7Reden: &b{reason}"
+                        )),
+                        getActorName(sender), finalReason);
+
+                broadcastStaff(lang("punishments.unmute.staff-message",
+                                "&b{player} &7werd ge-unmute door &b{actor} &7- &b{reason}"),
+                        entry, getActorName(sender), finalReason);
             });
 
             logAudit("UNMUTE", sender, entry);
@@ -297,8 +329,12 @@ public class PunishmentService {
         return plugin.getDatabaseManager().supplyAsync(() -> {
             ResolvedTarget target = resolveTarget(targetName);
 
+            if (target.minecraftName() == null || target.minecraftName().isBlank()) {
+                return Result.fail(lang("punishments.common.player-not-found", "&cSpeler niet gevonden."));
+            }
+
             if (isSelfPunish(sender, target)) {
-                return Result.fail(config.getCannotPunishSelfMessage());
+                return Result.fail(lang("punishments.common.cannot-punish-self", "&cJe kan jezelf niet straffen."));
             }
 
             String finalReason = normalizeReason("kick", reason);
@@ -312,7 +348,8 @@ public class PunishmentService {
                 kickIfOnline(target.minecraftName(), buildKickDisconnectMessage(entry));
 
                 sender.sendMessage(PunishmentFormatter.apply(
-                        config.getKickSenderMessage(),
+                        lang("punishments.kick.sender-message",
+                                "&7Speler &b{player} &7is gekickt. Reden: &b{reason}"),
                         entry.getMinecraftName(),
                         entry.getIssuedByName(),
                         entry.getReason(),
@@ -321,7 +358,8 @@ public class PunishmentService {
                         null
                 ));
 
-                broadcastStaff(config.getKickStaffMessage(), entry);
+                broadcastStaff(lang("punishments.kick.staff-message",
+                        "&b{player} &7werd gekickt door &b{actor} &7- &b{reason}"), entry);
             });
 
             logAudit("KICK", sender, entry);
@@ -407,7 +445,10 @@ public class PunishmentService {
             Player player = Bukkit.getPlayerExact(entry.getMinecraftName());
             if (player != null) {
                 List<String> lines = PunishmentFormatter.apply(
-                        config.getUnbanExpiredMessage(),
+                        listLang("punishments.unban.expired-message", List.of(
+                                "&7Je ban is &averlopen&7.",
+                                "&7Welkom terug op &b{server}&7."
+                        )),
                         entry.getMinecraftName(),
                         "Automatisch",
                         "Ban verlopen",
@@ -436,7 +477,11 @@ public class PunishmentService {
             Player player = Bukkit.getPlayerExact(entry.getMinecraftName());
             if (player != null) {
                 List<String> lines = PunishmentFormatter.apply(
-                        config.getUnmutePlayerMessage(),
+                        listLang("punishments.unmute.player-message", List.of(
+                                "&7Je mute is &aopgeheven&7.",
+                                "&7Door: &b{actor}",
+                                "&7Reden: &b{reason}"
+                        )),
                         entry.getMinecraftName(),
                         "Automatisch",
                         "Mute verlopen",
@@ -605,8 +650,7 @@ public class PunishmentService {
         if (target == null) {
             return;
         }
-        String message = String.join("\n", lines);
-        target.kickPlayer(message);
+        target.kickPlayer(String.join("\n", lines));
     }
 
     private void notifyPlayerIfOnline(String minecraftName, List<String> template, PunishmentEntry entry) {
@@ -640,7 +684,14 @@ public class PunishmentService {
 
     private List<String> buildBanDisconnectMessage(PunishmentEntry entry) {
         return PunishmentFormatter.apply(
-                config.getBanDisconnectMessage(),
+                listLang("punishments.ban.disconnect-message", List.of(
+                        "&cJe bent geband van de server.",
+                        "",
+                        "&7Reden: &b{reason}",
+                        "&7Door: &b{actor}",
+                        "&7Duur: &b{duration}",
+                        "&7Tot: &b{expires_at}"
+                )),
                 entry.getMinecraftName(),
                 entry.getIssuedByName(),
                 entry.getReason(),
@@ -652,7 +703,12 @@ public class PunishmentService {
 
     private List<String> buildKickDisconnectMessage(PunishmentEntry entry) {
         return PunishmentFormatter.apply(
-                config.getKickDisconnectMessage(),
+                listLang("punishments.kick.disconnect-message", List.of(
+                        "&cJe bent gekickt van de server.",
+                        "",
+                        "&7Reden: &b{reason}",
+                        "&7Door: &b{actor}"
+                )),
                 entry.getMinecraftName(),
                 entry.getIssuedByName(),
                 entry.getReason(),
@@ -721,6 +777,14 @@ public class PunishmentService {
             return PunishmentSource.MINECRAFT;
         }
         return PunishmentSource.CONSOLE;
+    }
+
+    private String lang(String path, String fallback) {
+        return plugin.lang().get(path, fallback);
+    }
+
+    private List<String> listLang(String path, List<String> fallback) {
+        return plugin.lang().getList(path, fallback);
     }
 
     public record Result(boolean success, String message, PunishmentEntry entry) {

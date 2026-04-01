@@ -1,0 +1,130 @@
+punishments:
+  common:
+    player-not-found: "&cSpeler niet gevonden."
+    player-name-required: "&cJe moet een speler opgeven."
+    reason-required: "&cJe moet een reden opgeven."
+    duration-required: "&cJe moet een tijd of &bperm&c opgeven."
+    already-banned: "&cDeze speler heeft al een actieve ban."
+    not-banned: "&cDeze speler heeft geen actieve ban."
+    already-muted: "&cDeze speler heeft al een actieve mute."
+    not-muted: "&cDeze speler heeft geen actieve mute."
+    cannot-punish-self: "&cJe kan jezelf niet straffen."
+
+  ban:
+    usage: "&7Gebruik: &b/ban <speler> <tijd|perm> [reden]"
+    invalid-duration: "&cOngeldige tijd&7. Gebruik bv: &b10m&7, &b1h&7, &b7d&7, &b1h30m&7, &bperm"
+    async-failed: "&cEr ging iets mis bij het bannen."
+    sender-message: "&7Speler &b{player} &7is geband voor &b{duration}&7. Reden: &b{reason}"
+    staff-message: "&b{player} &7werd geband door &b{actor} &7(&b{duration}&7) - &b{reason}"
+    disconnect-message:
+      - "&cJe bent geband van de server."
+      - ""
+      - "&7Reden: &b{reason}"
+      - "&7Door: &b{actor}"
+      - "&7Duur: &b{duration}"
+      - "&7Tot: &b{expires_at}"
+
+  unban:
+    usage: "&7Gebruik: &b/unban <speler> [reden]"
+    async-failed: "&cEr ging iets mis bij het unbannen."
+    sender-message: "&7Speler &b{player} &7is ge-unbanned. Reden: &b{reason}"
+    staff-message: "&b{player} &7werd ge-unbanned door &b{actor} &7- &b{reason}"
+    expired-message:
+      - "&7Je ban is &averlopen&7."
+      - "&7Welkom terug op &b{server}&7."
+
+  mute:
+    usage: "&7Gebruik: &b/mute <speler> <tijd|perm> [reden]"
+    invalid-duration: "&cOngeldige tijd&7. Gebruik bv: &b10m&7, &b1h&7, &b7d&7, &b1h30m&7, &bperm"
+    async-failed: "&cEr ging iets mis bij het muten."
+    sender-message: "&7Speler &b{player} &7is gemute voor &b{duration}&7. Reden: &b{reason}"
+    staff-message: "&b{player} &7werd gemute door &b{actor} &7(&b{duration}&7) - &b{reason}"
+    player-message:
+      - "&cJe bent gemute."
+      - ""
+      - "&7Door: &b{actor}"
+      - "&7Reden: &b{reason}"
+      - "&7Duur: &b{duration}"
+    blocked-chat-message:
+      - "&cJe bent momenteel gemute."
+      - "&7Reden: &b{reason}"
+      - "&7Door: &b{actor}"
+      - "&7Nog: &b{remaining}"
+
+  unmute:
+    usage: "&7Gebruik: &b/unmute <speler> [reden]"
+    async-failed: "&cEr ging iets mis bij het unmuten."
+    sender-message: "&7Speler &b{player} &7is ge-unmute. Reden: &b{reason}"
+    staff-message: "&b{player} &7werd ge-unmute door &b{actor} &7- &b{reason}"
+    player-message:
+      - "&7Je mute is &aopgeheven&7."
+      - "&7Door: &b{actor}"
+      - "&7Reden: &b{reason}"
+
+  kick:
+    usage: "&7Gebruik: &b/kick <speler> [reden]"
+    async-failed: "&cEr ging iets mis bij het kicken."
+    sender-message: "&7Speler &b{player} &7is gekickt. Reden: &b{reason}"
+    staff-message: "&b{player} &7werd gekickt door &b{actor} &7- &b{reason}"
+    disconnect-message:
+      - "&cJe bent gekickt van de server."
+      - ""
+      - "&7Reden: &b{reason}"
+      - "&7Door: &b{actor}"
+
+  warn:
+    usage: "&7Gebruik: &b/warn <speler> [reden]"
+    async-failed: "&cEr ging iets mis bij het warnen."
+    sender-message: "&7Speler &b{player} &7is gewaarschuwd. Reden: &b{reason}"
+    staff-message: "&b{player} &7werd gewaarschuwd door &b{actor} &7- &b{reason}"
+    player-message:
+      - "&cJe hebt een waarschuwing gekregen."
+      - ""
+      - "&7Door: &b{actor}"
+      - "&7Reden: &b{reason}"
+      - "&7Datum: &b{date}"
+
+  banlist:
+    usage: "&7Gebruik: &b/banlist [pagina]"
+    invalid-page: "&cOngeldige pagina."
+    load-failed: "&cEr ging iets mis bij het laden van de banlist."
+    header: "&8&m----------------------------------------"
+    title: "&9Actieve bans &7(Pagina &b{page}&7/&b{max_page}&7)"
+    entry: "&7#&b{index} &b{player} &7- &b{reason}"
+    sub-entry: "&7Door: &b{actor} &7| Duur: &b{duration} &7| Tot: &b{expires_at}"
+    footer: "&8&m----------------------------------------"
+    empty: "&7Er zijn momenteel geen actieve bans."
+
+  history:
+    usage: "&7Gebruik: &b/history <speler> [pagina]"
+    invalid-page: "&cPagina moet een nummer zijn."
+    page-too-low: "&cPagina moet groter zijn dan &b0&c."
+    page-not-found: "&cDie pagina bestaat niet&7. Max pagina: &b{max_page}&7."
+    empty: "&cGeen punishment history gevonden voor &b{player}&c."
+    load-failed: "&cEr ging iets mis bij het laden van de history."
+    header-line: "&8&m------------------------------------------------"
+    title: "&9Punishment History &7» &b{player} &7(Pagina &b{page}&7/&b{max_page}&7)"
+    entry-header: "&7#&b{index} &7| ID: &b{id} &7| Type: &b{type}{status_part}"
+    entry-reason: "&7Reden: &b{reason}"
+    entry-issued: "&7Uitgedeeld door: &b{actor} &7| Op: &b{issued_at}"
+    entry-duration: "&7Duur: &b{duration} &7| Verloopt: &b{expires_at}"
+    entry-handled-by: "&7Afgehandeld door: &b{actor} &7| Op: &b{removed_at}"
+    entry-handled-reason: "&7Afhandel reden: &b{reason}"
+    pagination-prefix: "&7Pagina's: "
+    pagination-hover: "&7Ga naar pagina &b{page}"
+    status-label: "&7| Status: {status}"
+    status-active: "&cActief"
+    status-expired: "&bVerlopen"
+    status-removed: "&aOpgeheven"
+
+  clearhistory:
+    usage: "&7Gebruik: &b/clearhistory <speler> <punishmentID/all> <reden>"
+    invalid-id: "&cPunishment ID moet een nummer zijn of &ball&c."
+    reason-required: "&cJe moet een reden opgeven."
+    entry-not-found: "&cGeen punishment gevonden met ID &b{id}&c."
+    wrong-player: "&cDit punishment ID hoort niet bij speler &b{player}&c."
+    active-blocked: "&cJe kan geen actieve punishment clearen&7. Gebruik eerst &bunban&7 of &bunmute&7 indien nodig."
+    already-hidden: "&cDeze history entry is al verborgen."
+    no-entries: "&cGeen history entries gevonden om te clearen voor &b{player}&c."
+    all-success: "&7{amount} history entr{suffix} verborgen voor &b{player}&7."
+    single-success: "&7Punishment ID &b{id} &7is verborgen uit history voor &b{player}&7."
