@@ -1,0 +1,174 @@
+name: LekkerAdmin
+version: 2.0
+main: me.lekkernakkie.lekkeradmin.LekkerAdmin
+api-version: '1.21'
+author: LekkerNakkie
+description: LekkerAdmin 2.0
+
+softdepend:
+  - PlaceholderAPI
+  - LuckPerms
+
+commands:
+  lekkeradmin:
+    description: Main command of LekkerAdmin
+    usage: /lekkeradmin
+    aliases: [la]
+
+  invsee:
+    description: Alias for /lekkeradmin invsee
+    usage: /invsee <player>
+
+  enderchest:
+    description: Alias for /lekkeradmin enderchest
+    usage: /enderchest [player]
+    aliases: [echest]
+
+  planrestart:
+    description: Plan a restart
+    usage: /planrestart <time> <reden...>
+
+  cancelrestart:
+    description: Cancel a planned restart
+    usage: /cancelrestart
+
+  maintenance:
+    description: Toggle maintenance mode
+    usage: /maintenance
+
+  ban:
+    description: Ban a player
+    usage: /ban <player> <time|perm> [reason]
+
+  unban:
+    description: Unban a player
+    usage: /unban <player> [reason]
+
+  mute:
+    description: Mute a player
+    usage: /mute <player> <time|perm> [reason]
+
+  unmute:
+    description: Unmute a player
+    usage: /unmute <player> [reason]
+
+  kick:
+    description: Kick a player
+    usage: /kick <player> [reason]
+
+  banlist:
+    description: View active bans
+    usage: /banlist [page]
+
+  warn:
+    description: Warn a player
+    usage: /warn <player> [reason]
+
+  history:
+    description: View punishment history of a player
+    usage: /history <player> [page]
+
+  clearhistory:
+    description: Mark punishment history as removed
+    usage: /clearhistory <player> <punishmentID/all> <reason>
+
+permissions:
+  lekkeradmin.admin:
+    description: Full access to LekkerAdmin
+    default: op
+
+  lekkeradmin.help:
+    description: Access to help command
+    default: op
+
+  lekkeradmin.reload:
+    description: Reload LekkerAdmin configs
+    default: op
+
+  lekkeradmin.whitelist:
+    description: Access whitelist admin functions
+    default: op
+
+  lekkeradmin.linklookup:
+    description: Lookup Discord/Minecraft links
+    default: op
+
+  lekkeradmin.invsee:
+    description: Use invsee
+    default: op
+
+  lekkeradmin.invsee.offline:
+    description: Use invsee on offline players
+    default: op
+
+  lekkeradmin.invsee.modify:
+    description: Modify inventories through invsee
+    default: op
+
+  lekkeradmin.enderchest:
+    description: Use enderchest
+    default: op
+
+  lekkeradmin.enderchest.offline:
+    description: Use enderchest on offline players
+    default: op
+
+  lekkeradmin.enderchest.modify:
+    description: Modify enderchests
+    default: op
+
+  lekkeradmin.restart:
+    description: Plan and cancel restarts
+    default: op
+
+  lekkeradmin.maintenance:
+    description: Toggle maintenance mode
+    default: op
+
+  lekkeradmin.maintenance.bypass:
+    description: Join while maintenance mode is enabled
+    default: op
+
+  lekkeradmin.punishment.notify:
+    description: Receive punishment staff messages
+    default: op
+
+  lekkeradmin.punishment.ban:
+    description: Ban players
+    default: op
+
+  lekkeradmin.punishment.unban:
+    description: Unban players
+    default: op
+
+  lekkeradmin.punishment.mute:
+    description: Mute players
+    default: op
+
+  lekkeradmin.punishment.unmute:
+    description: Unmute players
+    default: op
+
+  lekkeradmin.punishment.kick:
+    description: Kick players
+    default: op
+
+  lekkeradmin.punishment.banlist:
+    description: View ban list
+    default: op
+
+  lekkeradmin.punishment.warn:
+    description: Warn players
+    default: op
+
+  lekkeradmin.punishment.history:
+    description: View punishment history
+    default: op
+
+  lekkeradmin.punishment.clearhistory:
+    description: Clear punishment history entries
+    default: op
+
+  lekkeradmin.discord.playerinfo:
+    description: Use Discord playerinfo command
+    default: op

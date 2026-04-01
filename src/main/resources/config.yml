@@ -1,0 +1,118 @@
+prefix: "&7[&9LekkerAdmin&7] "
+debug: false
+
+invsee:
+  enabled: true
+  allow-offline: true
+  allow-modify: true
+  title: "&bInvsee &7• &f{player}"
+  rows: 6
+
+  layout:
+    slots:
+      helmet: 46
+      chestplate: 47
+      leggings: 48
+      boots: 49
+      offhand: 53
+
+    label-slots:
+      helmet: 37
+      chestplate: 38
+      leggings: 39
+      boots: 40
+      offhand: 44
+
+    labels:
+      helmet: "&bHelm"
+      chestplate: "&bChestplate"
+      leggings: "&bLeggings"
+      boots: "&bBoots"
+      offhand: "&bOffhand"
+
+enderchest:
+  enabled: true
+  allow-offline: true
+  allow-modify: true
+  title: "&bEnderchest &7• &f{player}"
+
+leave-tracking:
+  enabled: true
+  classify-kicks: true
+  fallback-quit-reason: "QUIT"
+
+restart:
+  timezone: "Europe/Brussels"
+  enabled: true
+
+  auto:
+    enabled: true
+    times:
+      - "03:00"
+      - "15:00"
+    skip-if-planned-running: true
+    default-reason: "Automatische restart"
+
+  announce-seconds:
+    - 3600
+    - 1800
+    - 600
+    - 300
+    - 60
+    - 30
+    - 10
+    - 5
+    - 4
+    - 3
+    - 2
+    - 1
+
+  messages:
+    prefix: "&7[&cRestart&7] &7"
+    chat: "{prefix}&7Server restart over &e{time}&7. Reden: &e{reason}"
+    chat-now: "{prefix}&cServer restart nu! Reden: &f{reason}"
+
+  title:
+    enabled: true
+    fade-in: 10
+    stay: 40
+    fade-out: 10
+    main: "&7Restart over &e{time}"
+    sub: "&7Reden: &f{reason}"
+
+  disconnect:
+    enabled: true
+    kick-message: "&cServer restart!\n\n&7Reden: &f{reason}\n&7Je kan direct terug joinen."
+
+  action:
+    type: "stop"
+    command: "stop"
+
+planrestart:
+  allow-override: true
+  default-reason: "Geen reden opgegeven."
+
+  messages:
+    no-permission: "&cDaar edde gij het lef ni vur.."
+    usage: "&eGebruik: &7/planrestart <time> <reden...>"
+    bad-time: "&cOngeldige tijd. Gebruik bv: &710s, 5m, 2h, 1h30m"
+    already-planned: "&cEr is al een restart gepland en overschrijven is uitgeschakeld."
+    planned: "&7Restart gepland over &e{time}&7. Reden: &e{reason}&7. Uitvoering om &e{target-time}&7."
+
+cancelrestart:
+  messages:
+    no-permission: "&cDaar edde gij het lef ni vur.."
+    none-running: "&cEr is momenteel geen restart gepland."
+    cancelled: "&eDe geplande restart is geannuleerd."
+
+maintenance:
+  enabled: false
+
+  messages:
+    no-permission: "&cDaar edde gij het lef ni vur.."
+    toggled-on: "&aMaintenance mode is ingeschakeld."
+    toggled-off: "&cMaintenance mode is uitgeschakeld."
+
+  kick:
+    online-message: "&cServer staat in maintenance mode.\n\n&7Probeer later opnieuw."
+    join-message: "&cServer staat in maintenance mode.\n\n&7Probeer later opnieuw."

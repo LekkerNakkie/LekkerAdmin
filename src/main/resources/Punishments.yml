@@ -1,0 +1,213 @@
+settings:
+  enabled: true
+  timezone: "Europe/Brussels"
+  date-format: "dd-MM-yyyy HH:mm:ss"
+  server-name: "Sakurahelm"
+
+  permanent-keywords:
+    - "perm"
+    - "permanent"
+
+  offline-notifications: true
+  allow-self-punishment: true
+  expiry-check-seconds: 2
+
+messages:
+  no-permission: "&cDaar edde gij het lef ni vur.."
+  player-not-found: "&cSpeler niet gevonden."
+  player-name-required: "&cJe moet een speler opgeven."
+  reason-required: "&cJe moet een reden opgeven."
+  duration-required: "&cJe moet een tijd of &eperm &copgeven."
+  invalid-duration: "&cOngeldige tijd. Gebruik bv: &710m, 1h, 7d, 1h30m, perm"
+  already-banned: "&cDeze speler heeft al een actieve ban."
+  not-banned: "&cDeze speler heeft geen actieve ban."
+  already-muted: "&cDeze speler heeft al een actieve mute."
+  not-muted: "&cDeze speler heeft geen actieve mute."
+  cannot-punish-self: "&cJe kan jezelf niet straffen."
+
+  usage-ban: "&eGebruik: &7/ban <speler> <tijd|perm> [reden]"
+  usage-unban: "&eGebruik: &7/unban <speler> [reden]"
+  usage-mute: "&eGebruik: &7/mute <speler> <tijd|perm> [reden]"
+  usage-unmute: "&eGebruik: &7/unmute <speler> [reden]"
+  usage-kick: "&eGebruik: &7/kick <speler> [reden]"
+  usage-warn: "&eGebruik: &7/warn <speler> [reden]"
+  usage-banlist: "&eGebruik: &7/banlist [pagina]"
+
+  command-only-for-players: "&cDit commando kan enkel door spelers gebruikt worden."
+
+punishments:
+  warn:
+    enabled: true
+    default-reason: "Geen reden opgegeven."
+    notify-staff: true
+
+    sender-message: "&a{player} is gewaarschuwd. Reden: &f{reason}"
+    staff-message: "&e{player} werd gewaarschuwd door {actor} &8- &7{reason}"
+
+    player-message:
+      - "&c⚠ Waarschuwing ontvangen"
+      - ""
+      - "&7Door: &f{actor}"
+      - "&7Reden: &f{reason}"
+      - "&7Datum: &f{date}"
+
+  ban:
+    enabled: true
+    default-reason: "Geen reden opgegeven."
+    broadcast: false
+    notify-staff: true
+
+    sender-message: "&a{player} is geband voor &e{duration}&a. Reden: &f{reason}"
+    staff-message: "&c{player} werd geband door {actor} &8(&7{duration}&8) &8- &7{reason}"
+
+    disconnect-message:
+      - "&cJe bent geband van de server."
+      - ""
+      - "&7Reden: &f{reason}"
+      - "&7Door: &f{actor}"
+      - "&7Duur: &f{duration}"
+      - "&7Tot: &f{expires_at}"
+
+  unban:
+    enabled: true
+    default-reason: "Geen reden opgegeven."
+
+    sender-message: "&a{player} is ge-unbanned. Reden: &f{reason}"
+    staff-message: "&a{player} werd ge-unbanned door {actor} &8- &7{reason}"
+
+    expired-message:
+      - "&aJe ban is verlopen."
+      - "&7Welkom terug op {server}."
+
+  mute:
+    enabled: true
+    default-reason: "Geen reden opgegeven."
+
+    sender-message: "&a{player} is gemute voor &e{duration}&a. Reden: &f{reason}"
+    staff-message: "&e{player} werd gemute door {actor} &8(&7{duration}&8) &8- &7{reason}"
+
+    player-message:
+      - "&cJe bent gemute."
+      - ""
+      - "&7Door: &f{actor}"
+      - "&7Reden: &f{reason}"
+      - "&7Duur: &f{duration}"
+
+    blocked-chat-message:
+      - "&cJe bent momenteel gemute."
+      - "&7Reden: &f{reason}"
+      - "&7Door: &f{actor}"
+      - "&7Nog: &f{remaining}"
+
+  unmute:
+    enabled: true
+    default-reason: "Geen reden opgegeven."
+
+    sender-message: "&a{player} is ge-unmute. Reden: &f{reason}"
+    staff-message: "&a{player} werd ge-unmute door {actor} &8- &7{reason}"
+
+    player-message:
+      - "&aJe mute is opgeheven."
+      - "&7Door: &f{actor}"
+      - "&7Reden: &f{reason}"
+
+  kick:
+    enabled: true
+    default-reason: "Geen reden opgegeven."
+
+    sender-message: "&a{player} is gekickt. Reden: &f{reason}"
+    staff-message: "&6{player} werd gekickt door {actor} &8- &7{reason}"
+
+    disconnect-message:
+      - "&cJe bent gekickt van de server."
+      - ""
+      - "&7Reden: &f{reason}"
+      - "&7Door: &f{actor}"
+
+banlist:
+  entries-per-page: 10
+  header: "&8&m----------------------------------------"
+  title: "&cActieve bans &7(Pagina &f{page}&7/&f{max_page}&7)"
+  entry: "&7#{index} &f{player} &8- &c{reason}"
+  sub-entry: "&8   &7Door: &f{actor} &8| &7Duur: &f{duration} &8| &7Tot: &f{expires_at}"
+  footer: "&8&m----------------------------------------"
+  empty: "&aEr zijn momenteel geen actieve bans."
+  invalid-page: "&cOngeldige pagina."
+
+history:
+  usage: "&eGebruik: &7/history <speler> [pagina]"
+  invalid-page: "&cPagina moet een nummer zijn."
+  page-too-low: "&cPagina moet groter zijn dan 0."
+  page-not-found: "&cDie pagina bestaat niet. Max pagina: &f{max_page}&c."
+  empty: "&cGeen punishment history gevonden voor &f{player}&c."
+
+  header-line: "&8&m------------------------------------------------"
+  title: "&cPunishment History &8» &f{player} &8(&7Pagina &f{page}&7/&f{max_page}&8)"
+
+  entry-header: "&6#{index} &8| &7ID: &f{id} &8| &7Type: &f{type}{status_part}"
+  entry-reason: "&8  &7Reden: &f{reason}"
+  entry-issued: "&8  &7Uitgedeeld door: &f{actor} &8| &7Op: &f{issued_at}"
+  entry-duration: "&8  &7Duur: &f{duration} &8| &7Verloopt: &f{expires_at}"
+  entry-handled-by: "&8  &7Afgehandeld door: &f{actor} &8| &7Op: &f{removed_at}"
+  entry-handled-reason: "&8  &7Afhandel reden: &f{reason}"
+
+  pagination-prefix: "&7Pagina's: "
+  pagination-hover: "Ga naar pagina {page}"
+
+  status-label: "&8| &7Status: {status}"
+  status-active: "&cActief"
+  status-expired: "&bVerlopen"
+  status-removed: "&aOpgeheven"
+
+clearhistory:
+  usage: "&eGebruik: &7/clearhistory <speler> <punishmentID/all> <reden>"
+  invalid-id: "&cPunishment ID moet een nummer zijn of &fall&c."
+  entry-not-found: "&cGeen punishment gevonden met ID &f{id}&c."
+  wrong-player: "&cDit punishment ID hoort niet bij speler &f{player}&c."
+  active-blocked: "&cJe kan geen actieve punishment clearen. Gebruik eerst unban/unmute indien nodig."
+  already-hidden: "&cDeze history entry is al verborgen."
+  no-entries: "&cGeen history entries gevonden om te clearen voor &f{player}&c."
+  all-success: "&a{amount} history entr{suffix} verborgen voor &f{player}&a."
+  single-success: "&aPunishment ID &f{id} &ais verborgen uit history voor &f{player}&a."
+
+discord-dm:
+  enabled: true
+
+  warn:
+    enabled: true
+    title: "⚠️ Je ontving een waarschuwing"
+    color: "#F1C40F"
+
+  mute:
+    enabled: true
+    title: "🔇 Je bent gemute"
+    color: "#E67E22"
+
+  ban:
+    enabled: true
+    title: "🔨 Je bent gebanned"
+    color: "#E74C3C"
+
+  kick:
+    enabled: true
+    title: "👢 Je bent gekicked"
+    color: "#F39C12"
+
+  unban:
+    enabled: true
+    title: "🔓 Je bent unbanned"
+    color: "#2ECC71"
+
+  unmute:
+    enabled: true
+    title: "🔊 Je bent unmuted"
+    color: "#3498DB"
+
+playerinfo:
+  enabled: true
+  required-role-id: ""
+  skin-head-url: "https://mc-heads.net/avatar/{minecraft_name}/256"
+  active-limit: 5
+  expired-limit: 5
+  no-results-message: "Geen speler gevonden."
+  unknown-value: "Onbekend"

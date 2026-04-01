@@ -1,0 +1,412 @@
+# =========================================================
+# LekkerAdmin - Discord Bot Config
+# =========================================================
+# Vul hieronder je bot token en guild/server ID in.
+# Deze file regelt whitelist, suggesties, logging en Discord integratie.
+# =========================================================
+
+bot:
+  enabled: true
+  token: "PASTE_BOT_TOKEN_HERE"
+  guild-id: "000000000000000000"
+
+  # -------------------------------------------------------
+  # Bot status / presence rotatie
+  # Mogelijke types: PLAYING / WATCHING / LISTENING
+  # Placeholder: {online}
+  # -------------------------------------------------------
+  status:
+    enabled: true
+    interval-seconds: 10
+    messages:
+      - "🌸 Sakurahelm Season 2"
+      - "👥 {online} spelers online"
+    type: PLAYING
+
+# =========================================================
+# Discord kanalen
+# =========================================================
+channels:
+  # Kanaal waar whitelist aanvragen voor staff terechtkomen
+  review-channel-id: "000000000000000000"
+
+  # Algemeen logkanaal voor whitelist audit logs
+  log-channel-id: "000000000000000000"
+
+# =========================================================
+# Discord webhook logging
+# =========================================================
+webhooks:
+  moderation-log:
+    # Alleen nodig als je via webhook wilt loggen
+    enabled: false
+    url: ""
+    username: "LekkerAdmin Logs"
+    avatar-url: ""
+
+# =========================================================
+# Database
+# SQLITE = lokaal bestand
+# MYSQL  = externe database
+# =========================================================
+database:
+  type: "SQLITE" # SQLITE or MYSQL
+
+  sqlite:
+    file: "data.db"
+
+  mysql:
+    host: "localhost"
+    port: 3306
+    database: "lekkeradmin"
+    username: "root"
+    password: ""
+    ssl: false
+    pool-size: 10
+
+# =========================================================
+# Whitelist instellingen
+# =========================================================
+whitelist:
+  enabled: true
+  auto-link-on-approve: true
+  auto-whitelist-on-valid-name: true
+  require-review-before-whitelist: true
+  allow-name-retry-after-approval: true
+  max-name-retries: 3
+  notify-staff-on-name-failure: true
+  notify-player-on-name-failure: true
+  case-sensitive-name-check: false
+  allow-multiple-open-applications: false
+  command-cooldown-seconds: 60
+
+  # -------------------------------------------------------
+  # Ingame staff melding bij nieuwe whitelist aanvraag
+  # Alleen spelers met deze permission krijgen de melding
+  # Placeholder(s): {discord}, {minecraft}, {application_id}
+  # -------------------------------------------------------
+  ingame-notify:
+    enabled: true
+    permission: "lekkeradmin.notify.whitelist"
+    message: "&7[&bWhitelist&7] &fNieuwe aanvraag van &b{discord}&f voor &b{minecraft}&f."
+    sound: "ENTITY_EXPERIENCE_ORB_PICKUP"
+    volume: 0.7
+    pitch: 1.4
+
+  # -------------------------------------------------------
+  # Auto thread onder review bericht in Discord
+  # Placeholder(s): {minecraft}, {discord}, {application_id}
+  # -------------------------------------------------------
+  review-thread:
+    enabled: true
+    name-format: "Whitelist • {minecraft}"
+
+# =========================================================
+# Minecraft naam validatie
+# =========================================================
+validation:
+  minecraft-name:
+    enabled: true
+    min-length: 3
+    max-length: 16
+    regex: "^[A-Za-z0-9_]+$"
+    check-profile-exists: true
+
+# =========================================================
+# Whitelist formulier
+# =========================================================
+forms:
+  whitelist:
+    title: "Whitelist aanvraag"
+
+    dm-message:
+      enabled: true
+      content:
+        - "Welkom bij Sakurahelm!"
+        - "Klik op de knop hieronder om je whitelist aanvraag te starten."
+      button-text: "Formulier openen"
+
+    confirm-message:
+      title: "Controleer je aanvraag"
+      description:
+        - "Lees alles goed na voor je bevestigt."
+      confirm-button: "Bevestigen"
+      edit-button: "Opnieuw invullen"
+      cancel-button: "Annuleren"
+
+    # -----------------------------------------------------
+    # Velden in het whitelist formulier
+    # SHORT of PARAGRAPH
+    # -----------------------------------------------------
+    fields:
+      minecraft_name:
+        enabled: true
+        label: "Minecraft naam"
+        style: "SHORT"
+        placeholder: "Bijv. LekkerNakkie"
+        required: true
+        min-length: 3
+        max-length: 16
+        order: 1
+
+      age:
+        enabled: true
+        label: "Leeftijd"
+        style: "SHORT"
+        placeholder: "Bijv. 18"
+        required: true
+        min-length: 1
+        max-length: 3
+        order: 2
+
+      motivation:
+        enabled: true
+        label: "Waarom wil je joinen?"
+        style: "PARAGRAPH"
+        placeholder: "Leg kort uit waarom je graag wil joinen"
+        required: true
+        min-length: 10
+        max-length: 400
+        order: 3
+
+      rules:
+        enabled: true
+        label: "Heb je de regels gelezen?"
+        style: "SHORT"
+        placeholder: "Ja / Nee"
+        required: true
+        min-length: 2
+        max-length: 10
+        order: 4
+
+# =========================================================
+# Naamcorrectie na approval
+# =========================================================
+name-retry:
+  modal:
+    title: "Minecraft naam corrigeren"
+    field:
+      label: "Juiste Minecraft naam"
+      style: "SHORT"
+      placeholder: "Bijv. LekkerNakkie"
+      required: true
+      min-length: 3
+      max-length: 16
+
+# =========================================================
+# Berichten
+# =========================================================
+messages:
+  slash:
+    whitelist-started: "Ik heb je een DM gestuurd met je whitelist formulier."
+    dm-failed: "Ik kan je geen DM sturen. Zet je privéberichten aan en probeer opnieuw."
+    suggest-submitted: "Je suggestie is ingestuurd."
+    suggest-disabled: "Suggesties zijn momenteel uitgeschakeld."
+    suggest-missing-channel: "Het suggestiekanaal is niet correct ingesteld."
+    suggest-invalid-length: "Je suggestie moet tussen {min} en {max} tekens lang zijn."
+
+  dm:
+    application-submitted: "Je whitelist aanvraag is doorgestuurd naar staff."
+    application-cancelled: "Je aanvraag is geannuleerd."
+    application-approved: "Je aanvraag is goedgekeurd! Je bent toegevoegd aan de whitelist."
+    application-denied: "Je aanvraag is afgekeurd."
+    application-denied-with-reason: "Je aanvraag is afgekeurd. Reden: {reason}"
+    invalid-minecraft-name: "De Minecraft naam die je hebt opgegeven klopt niet."
+    retry-name-success: "Je naam is correct verwerkt. Je bent nu toegevoegd aan de whitelist."
+    retry-name-failed: "Deze naam is nog steeds ongeldig. Probeer opnieuw."
+    blocked-open-application: "Je hebt al een lopende aanvraag. Wacht op staff of gebruik je bestaande aanvraag."
+    blocked-already-whitelisted: "Je bent al gewhitelist. Je kan geen nieuwe aanvraag indienen."
+    blocked-discord-already-linked: "Je Discord account is al gekoppeld aan een Minecraft account. Je kan geen nieuwe aanvraag indienen."
+    blocked-minecraft-already-linked: "Deze Minecraft naam is al gekoppeld aan een ander Discord account."
+
+  staff:
+    review-title: "Nieuwe whitelist aanvraag"
+    approved: "Aanvraag goedgekeurd."
+    denied: "Aanvraag afgekeurd."
+    pending-name-fix: "Aanvraag goedgekeurd, maar Minecraft naam is ongeldig."
+    retry-processed: "Naamcorrectie succesvol verwerkt."
+
+# =========================================================
+# Discord buttons
+# Mogelijke styles: PRIMARY / SUCCESS / DANGER / SECONDARY
+# =========================================================
+buttons:
+  open-form:
+    text: "Formulier openen"
+    style: "PRIMARY"
+
+  approve:
+    text: "Goedkeuren"
+    style: "SUCCESS"
+
+  approve-reason:
+    text: "Goedkeuren met reden"
+    style: "SUCCESS"
+
+  deny:
+    text: "Afkeuren"
+    style: "DANGER"
+
+  deny-reason:
+    text: "Afkeuren met reden"
+    style: "DANGER"
+
+  retry-name:
+    text: "Naam opnieuw ingeven"
+    style: "PRIMARY"
+
+# =========================================================
+# Embeds
+# =========================================================
+embeds:
+  colors:
+    review: "#00C8FF"
+    approved: "#33CC66"
+    denied: "#FF4D4D"
+    pending-fix: "#FFB347"
+    log: "#7289DA"
+
+  texts:
+    whitelist-start:
+      title: "Whitelist Aanvraag"
+      description: "Welkom bij Sakurahelm!\nKlik op de knop hieronder om je whitelist aanvraag te starten."
+      footer: ""
+
+    submitted:
+      title: "Whitelist Aanvraag Verzonden"
+      description: "Je aanvraag is succesvol doorgestuurd naar staff."
+      footer: ""
+
+    approved:
+      title: "Whitelist Toegelaten"
+      description: "Je aanvraag is goedgekeurd! Je bent toegevoegd aan de whitelist.\nJe kan de server joinen via het IP: **play.sakurahelm.com**"
+      footer: ""
+
+    denied:
+      title: "Whitelist Geweigerd"
+      description: "Je aanvraag is afgekeurd."
+      footer: ""
+
+    invalid-name:
+      title: "Minecraft naam ongeldig"
+      description: "De Minecraft naam die je hebt opgegeven klopt niet."
+      footer: ""
+
+    review:
+      title: "Nieuwe whitelist aanvraag"
+      description: ""
+      footer: ""
+
+    fields:
+      reason: "Reden"
+      minecraft-name: "Minecraft naam"
+      discord: "Discord"
+      reviewer: "Reviewer"
+      problem: "Probleem"
+
+# =========================================================
+# Logging
+# =========================================================
+logging:
+  webhook:
+    enabled: false
+    log-approvals: true
+    log-denials: true
+    log-name-failures: true
+    log-name-retries: true
+    log-auto-completions: true
+
+  # Placeholder(s):
+  # {reviewer}, {application_id}, {discord_user}, {minecraft_name},
+  # {reason}, {old_name}, {new_name}
+  formats:
+    approval: "{reviewer} keurde aanvraag {application_id} goed voor {discord_user} / {minecraft_name}"
+    denial: "{reviewer} keurde aanvraag {application_id} af voor {discord_user} / {minecraft_name}. Reden: {reason}"
+    invalid-name: "Naam validatie mislukt voor aanvraag {application_id}. Ingegeven naam: {minecraft_name}"
+    retry-success: "Naamcorrectie succesvol voor aanvraag {application_id}. Oude naam: {old_name}, nieuwe naam: {new_name}"
+
+# =========================================================
+# Rollen / permissies
+# =========================================================
+roles:
+  # Leeg = iedereen met toegang tot buttons/modals kan reviewen
+  # Vul hier staff role IDs in als je het wilt beperken
+  review-role-ids: []
+
+  # Geef automatisch een Discord rol bij approval
+  give-on-approve:
+    enabled: false
+    role-id: ""
+
+# =========================================================
+# /playerinfo permissies
+# =========================================================
+playerinfo:
+  allowed-role-ids:
+    - ""
+  allowed-user-ids:
+    - ""
+
+# =========================================================
+# Suggesties
+# =========================================================
+suggestions:
+  enabled: true
+
+  # Publiek suggestiekanaal
+  channel-id: ""
+
+  # Staff log/review kanaal voor suggesties
+  log-channel-id: ""
+
+  limits:
+    min-length: 5
+    max-length: 500
+
+  # -------------------------------------------------------
+  # Community voting
+  # -------------------------------------------------------
+  voting:
+    upvote-emoji: "👍"
+    downvote-emoji: "👎"
+    prevent-double-vote: true
+
+  # -------------------------------------------------------
+  # Staff review via emoji
+  # Alleen rollen hieronder mogen reviewen
+  # -------------------------------------------------------
+  review:
+    enabled: true
+    approve-emoji: "🟢"
+    deny-emoji: "🔴"
+    allowed-role-ids:
+      - ""
+
+  # -------------------------------------------------------
+  # Suggestie embeds
+  # -------------------------------------------------------
+  embed:
+    title: "Nieuwe suggestie"
+    log-title: "Nieuwe suggestie • Staff review"
+    footer: "Sakurahelm Suggesties"
+
+    color-pending: "#F1C40F"
+    color-approved: "#2ECC71"
+    color-denied: "#E74C3C"
+
+    status:
+      pending: "In behandeling"
+      approved: "Goedgekeurd"
+      denied: "Afgekeurd"
+
+    fields:
+      submitter: "Ingestuurd door"
+      status: "Status"
+      reviewer: "Beoordeeld door"
+
+# =========================================================
+# Expiry / verloop
+# =========================================================
+expiry:
+  application-hours: 24
+  retry-name-hours: 24

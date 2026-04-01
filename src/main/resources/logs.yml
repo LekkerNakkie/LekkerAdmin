@@ -1,0 +1,408 @@
+enabled: true
+timezone: "Europe/Brussels"
+debug: false
+
+defaults:
+  use-embeds: true
+  delivery-mode: "BOT" # BOT, WEBHOOK, BOTH, NONE
+
+  split-large-item-lists: true
+  max-items-shown: 12
+  max-field-length: 1024
+
+  show-enchantments: true
+  show-lore: false
+  show-world: true
+  show-coordinates: true
+  show-timestamp: true
+  show-player-head-thumbnail: true
+
+  only-log-if-enchanted: false
+  min-amount: 1
+  deduplicate-death-drops: true
+
+  ignored-worlds: []
+  ignored-materials: []
+
+  aggregation:
+    enabled: true
+    flush-after-ticks: 40
+    track-destruction: true
+    track-pickups: true
+    include-destroyed-items: true
+
+  bot:
+    channel-id: ""
+
+  webhook:
+    url: ""
+    username: "LekkerAdmin Logs"
+    avatar-url: ""
+
+  embed:
+    color: "#5865F2"
+    footer: "LekkerAdmin Logs"
+    use-timestamp: true
+
+    fields:
+      player: "Speler"
+      world: "Wereld"
+      coordinates: "Coördinaten"
+      item: "Items"
+      amount: "Aantal"
+      item-name: "Item naam"
+      enchantments: "Enchantments"
+      cause: "Doodsoorzaak"
+      killer: "Killer"
+      dropped-items: "Gedropte items"
+      pickup-type: "Pickup type"
+      drop-type: "Drop type"
+      xp: "XP"
+      keep-inventory: "KeepInventory"
+      reason: "Reden"
+      health: "Health"
+      food: "Food"
+      gamemode: "Gamemode"
+
+logs:
+  player-drops:
+    enabled: true
+    use-embeds: true
+    delivery-mode: "BOT"
+
+    aggregation:
+      enabled: true
+      flush-after-ticks: 40
+      track-destruction: true
+      track-pickups: true
+      include-destroyed-items: true
+
+    bot:
+      channel-id: "1485283783346491524"
+
+    webhook:
+      url: "https://discord.com/api/webhooks/1485284298939564084/ZVG0j9LFfWvO3eiyX-Z1OFq1RhMe6E4eAurvfwRNUZT0FMkDZPoPOaTuJFj2xg7PuBXk"
+      username: "Drop Logs"
+      avatar-url: ""
+
+    filters:
+      ignored-worlds: []
+      ignored-materials: []
+      only-log-if-enchanted: false
+      min-amount: 1
+      split-large-item-lists: true
+      max-items-shown: 12
+      deduplicate-death-drops: true
+
+    embed:
+      title: "Player Drop"
+      description: "{player} dropte item(s)."
+      color: "#3498DB"
+      footer: "LekkerAdmin • Drops"
+      use-timestamp: true
+      show-player-head-thumbnail: true
+      show-enchantments: true
+      show-lore: false
+      show-world: true
+      show-coordinates: true
+      max-field-length: 1024
+
+      fields:
+        player: "Speler"
+        world: "Wereld"
+        coordinates: "Coördinaten"
+        item: "Items"
+        amount: "Aantal"
+        item-name: "Item naam"
+        enchantments: "Enchantments"
+        drop-type: "Drop type"
+
+  player-pickups:
+    enabled: true
+    use-embeds: true
+    delivery-mode: "BOT"
+
+    aggregation:
+      enabled: true
+      flush-after-ticks: 40
+      track-destruction: false
+      track-pickups: true
+      include-destroyed-items: false
+
+    bot:
+      channel-id: "1485283811745988699"
+
+    webhook:
+      url: ""
+      username: "Pickup Logs"
+      avatar-url: ""
+
+    filters:
+      ignored-worlds: []
+      ignored-materials: []
+      only-log-if-enchanted: false
+      min-amount: 1
+      split-large-item-lists: true
+      max-items-shown: 12
+      deduplicate-death-drops: false
+
+    embed:
+      title: "Player Pickup"
+      description: "{player} pakte item(s) op."
+      color: "#2ECC71"
+      footer: "LekkerAdmin • Pickups"
+      use-timestamp: true
+      show-player-head-thumbnail: true
+      show-enchantments: true
+      show-lore: false
+      show-world: true
+      show-coordinates: true
+      max-field-length: 1024
+
+      fields:
+        player: "Speler"
+        world: "Wereld"
+        coordinates: "Coördinaten"
+        item: "Items"
+        amount: "Aantal"
+        item-name: "Item naam"
+        enchantments: "Enchantments"
+        pickup-type: "Pickup type"
+
+  player-deaths:
+    enabled: true
+    use-embeds: true
+    delivery-mode: "BOT"
+
+    aggregation:
+      enabled: true
+      flush-after-ticks: 60
+      track-destruction: true
+      track-pickups: false
+      include-destroyed-items: true
+
+    bot:
+      channel-id: "1485283765277163571"
+
+    webhook:
+      url: ""
+      username: "Death Logs"
+      avatar-url: ""
+
+    filters:
+      ignored-worlds: []
+      ignored-materials: []
+      only-log-if-enchanted: false
+      min-amount: 1
+      split-large-item-lists: true
+      max-items-shown: 20
+      deduplicate-death-drops: false
+
+    embed:
+      title: "Player Death"
+      description: "{player} is gestorven."
+      color: "#E74C3C"
+      footer: "LekkerAdmin • Deaths"
+      use-timestamp: true
+      show-player-head-thumbnail: true
+      show-enchantments: true
+      show-lore: false
+      show-world: true
+      show-coordinates: true
+      max-field-length: 1024
+
+      fields:
+        player: "Speler"
+        world: "Wereld"
+        coordinates: "Coördinaten"
+        cause: "Doodsoorzaak"
+        killer: "Killer"
+        dropped-items: "Gedropte items"
+        xp: "XP"
+        keep-inventory: "KeepInventory"
+
+  player-joins:
+    enabled: true
+    use-embeds: true
+    delivery-mode: "BOT"
+
+    bot:
+      channel-id: ""
+
+    webhook:
+      url: ""
+      username: "Join Logs"
+      avatar-url: ""
+
+    embed:
+      title: "Player Join"
+      description: "{player} is gejoint."
+      color: "#57F287"
+      footer: "LekkerAdmin • Joins"
+      use-timestamp: true
+      show-player-head-thumbnail: true
+      show-world: true
+      show-coordinates: true
+      max-field-length: 1024
+
+      fields:
+        player: "Speler"
+        reason: "Reden"
+        world: "Wereld"
+        coordinates: "Laatste locatie"
+        health: "Health"
+        food: "Food"
+        gamemode: "Gamemode"
+
+  player-leaves:
+    enabled: true
+    use-embeds: true
+    delivery-mode: "BOT"
+
+    bot:
+      channel-id: ""
+
+    webhook:
+      url: ""
+      username: "Leave Logs"
+      avatar-url: ""
+
+    embed:
+      title: "Player Leave"
+      description: "{player} heeft de server verlaten."
+      color: "#FEE75C"
+      footer: "LekkerAdmin • Leaves"
+      use-timestamp: true
+      show-player-head-thumbnail: true
+      show-world: true
+      show-coordinates: true
+      max-field-length: 1024
+
+      fields:
+        player: "Speler"
+        reason: "Reden"
+        world: "Wereld"
+        coordinates: "Laatste locatie"
+        health: "Health"
+        food: "Food"
+        gamemode: "Gamemode"
+
+  invsee:
+    enabled: true
+    use-embeds: true
+    delivery-mode: "BOT"
+
+    bot:
+      channel-id: ""
+
+    webhook:
+      url: ""
+      username: "Invsee Logs"
+      avatar-url: ""
+
+    embed:
+      title: "Invsee Session"
+      description: "Invsee sessie afgerond."
+      color: "#9B59B6"
+      footer: "LekkerAdmin • Invsee"
+      use-timestamp: true
+      show-player-head-thumbnail: false
+      show-world: false
+      show-coordinates: false
+      max-field-length: 1024
+
+  enderchest:
+    enabled: true
+    use-embeds: true
+    delivery-mode: "BOT"
+
+    bot:
+      channel-id: ""
+
+    webhook:
+      url: ""
+      username: "Enderchest Logs"
+      avatar-url: ""
+
+    embed:
+      title: "Enderchest Session"
+      description: "Enderchest sessie afgerond."
+      color: "#8E44AD"
+      footer: "LekkerAdmin • Enderchest"
+      use-timestamp: true
+      show-player-head-thumbnail: false
+      show-world: false
+      show-coordinates: false
+      max-field-length: 1024
+
+  punishments:
+    enabled: true
+    use-embeds: true
+    delivery-mode: "BOT"
+
+    bot:
+      channel-id: ""
+
+    webhook:
+      url: ""
+      username: "Punishment Logs"
+      avatar-url: ""
+
+    embed:
+      title: "{action}"
+      description: ""
+      color: "#E67E22"
+      footer: "LekkerAdmin • Punishments"
+      use-timestamp: true
+      show-player-head-thumbnail: true
+      show-world: false
+      show-coordinates: false
+      max-field-length: 1024
+
+  history-clear:
+    enabled: true
+    use-embeds: true
+    delivery-mode: "BOT"
+
+    bot:
+      channel-id: ""
+
+    webhook:
+      url: ""
+      username: "History Logs"
+      avatar-url: ""
+
+    embed:
+      title: "History Cleared"
+      description: "{actor} heeft history aangepast."
+      color: "#95A5A6"
+      footer: "LekkerAdmin • History"
+      use-timestamp: true
+      show-player-head-thumbnail: false
+      show-world: false
+      show-coordinates: false
+      max-field-length: 1024
+
+  explosion-logs:
+    enabled: true
+    use-embeds: true
+    delivery-mode: "BOT"
+
+    bot:
+      channel-id: ""
+
+    webhook:
+      url: ""
+      username: "Explosion Logs"
+      avatar-url: ""
+
+    embed:
+      title: "Explosion Log"
+      description: "{type} explosion geregistreerd."
+      color: "#FF6B35"
+      footer: "LekkerAdmin • Explosions"
+      use-timestamp: true
+      show-player-head-thumbnail: false
+      show-world: true
+      show-coordinates: true
+      max-field-length: 1024
