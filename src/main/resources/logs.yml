@@ -406,3 +406,39 @@ logs:
       show-world: true
       show-coordinates: true
       max-field-length: 1024
+
+  vanish:
+    enabled: true
+    use-embeds: true
+    delivery-mode: "BOT"
+
+    flags:
+      log-enable: true
+      log-disable: true
+      log-rejoin-restore: true
+
+    bot:
+      channel-id: ""
+
+    webhook:
+      url: ""
+      username: "Vanish Logs"
+      avatar-url: ""
+
+    embed:
+      title: "Vanish"
+      description: ""
+      color: "#9B59B6"
+      footer: "LekkerAdmin • Vanish"
+      use-timestamp: true
+      show-player-head-thumbnail: true
+      show-world: true
+      show-coordinates: true
+      max-field-length: 1024
+
+      fields:
+        player: "Speler"
+        world: "Wereld"
+        coordinates: "Coördinaten"
+        reason: "Bron"
+        gamemode: "Gamemode"

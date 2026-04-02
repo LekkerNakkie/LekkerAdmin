@@ -9,6 +9,7 @@ import me.lekkernakkie.lekkeradmin.discord.*;
 import me.lekkernakkie.lekkeradmin.discord.log.*;
 import me.lekkernakkie.lekkeradmin.hook.*;
 import me.lekkernakkie.lekkeradmin.listener.MaintenanceLoginListener;
+import me.lekkernakkie.lekkeradmin.listener.VanishListener;
 import me.lekkernakkie.lekkeradmin.listener.inventory.PendingChangesPlayerListener;
 import me.lekkernakkie.lekkeradmin.listener.invsee.InvseeClickListener;
 import me.lekkernakkie.lekkeradmin.listener.invsee.InvseeCloseListener;
@@ -21,6 +22,7 @@ import me.lekkernakkie.lekkeradmin.service.MaintenanceService;
 import me.lekkernakkie.lekkeradmin.service.RestartService;
 import me.lekkernakkie.lekkeradmin.service.invsee.InvseeService;
 import me.lekkernakkie.lekkeradmin.service.log.ExplosionTrackerService;
+import me.lekkernakkie.lekkeradmin.service.vanish.VanishService;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.PluginCommand;
@@ -50,6 +52,7 @@ public class LekkerAdmin extends JavaPlugin {
     private RestartService restartService;
     private MaintenanceService maintenanceService;
     private ExplosionTrackerService explosionTrackerService;
+    private VanishService vanishService;
 
     @Override
     public void onEnable() {
@@ -129,6 +132,7 @@ public class LekkerAdmin extends JavaPlugin {
         console(lang().message("reload.maintenance", "&a✔ &7Maintenance systeem herladen"));
         console(lang().message("reload.explosions", "&a✔ &7Explosion logs herladen"));
         console(lang().message("reload.sessions", "&a✔ &7Offline sessies herladen"));
+        console(lang().message("reload.vanish", "&a✔ &7Vanish herladen"));
         console(lang().formatMessage("reload.finished", "&7Reload voltooid in &b{time}ms&7.", Map.of("time", String.valueOf(time))));
         console("&b&m--------------------------------------------------------------");
     }
@@ -144,6 +148,7 @@ public class LekkerAdmin extends JavaPlugin {
         this.restartService = new RestartService(this);
         this.maintenanceService = new MaintenanceService(this);
         this.explosionTrackerService = new ExplosionTrackerService(this);
+        this.vanishService = new VanishService(this);
     }
 
     private void startRuntimeServices() {
@@ -165,6 +170,10 @@ public class LekkerAdmin extends JavaPlugin {
 
         if (punishmentService != null) {
             punishmentService.cancelAllScheduledExpirations();
+        }
+
+        if (vanishService != null) {
+            vanishService.shutdown();
         }
 
         if (discordManager != null) {
@@ -235,6 +244,13 @@ public class LekkerAdmin extends JavaPlugin {
             whois.setTabCompleter(whoisCommand);
         }
 
+        PluginCommand vanish = getCommand("vanish");
+        if (vanish == null) {
+            getLogger().warning("Command 'vanish' not found in plugin.yml");
+        } else {
+            vanish.setExecutor(new VanishCommand(this));
+        }
+
         BanCommand banCommand = new BanCommand(this);
         UnbanCommand unbanCommand = new UnbanCommand(this);
         MuteCommand muteCommand = new MuteCommand(this);
@@ -286,6 +302,7 @@ public class LekkerAdmin extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new InvseeCloseListener(this, invseeService), this);
         getServer().getPluginManager().registerEvents(new PendingChangesPlayerListener(this), this);
         getServer().getPluginManager().registerEvents(new MaintenanceLoginListener(this), this);
+        getServer().getPluginManager().registerEvents(new VanishListener(this), this);
     }
 
     private void startDiscord() {
@@ -329,6 +346,7 @@ public class LekkerAdmin extends JavaPlugin {
         console("&bInvsee&7: &f" + (configManager.getMainConfig().isInvseeEnabled() ? "Enabled" : "Disabled"));
         console("&bEnderchest&7: &f" + (configManager.getMainConfig().isEnderchestEnabled() ? "Enabled" : "Disabled"));
         console("&bWhois&7: &f" + (configManager.getMainConfig().isWhoisEnabled() ? "Enabled" : "Disabled"));
+        console("&bVanish&7: &f" + (configManager.getMainConfig().isVanishEnabled() ? "Enabled" : "Disabled"));
         console("&bRestart&7: &f" + (configManager.getMainConfig().isRestartEnabled() ? "Enabled" : "Disabled"));
         console("&bMaintenance&7: &f" + (configManager.getMainConfig().isMaintenanceEnabled() ? "Enabled" : "Disabled"));
         console("&bExplosionLogs&7: &f" + (configManager.getLogsConfig() != null && configManager.getLogsConfig().getExplosionLogs().isEnabled() ? "Enabled" : "Disabled"));
@@ -414,5 +432,9 @@ public class LekkerAdmin extends JavaPlugin {
 
     public ExplosionTrackerService getExplosionTrackerService() {
         return explosionTrackerService;
+    }
+
+    public VanishService getVanishService() {
+        return vanishService;
     }
 }

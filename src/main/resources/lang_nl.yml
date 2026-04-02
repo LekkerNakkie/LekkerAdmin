@@ -337,3 +337,20 @@ whois:
     permanent: "&cPermanent"
     not-linked: "&7Niet gekoppeld"
     not-whitelisted: "&cNiet gewhitelist"
+
+# =========================================================
+#  Vanish
+# =========================================================
+vanish:
+  player-only: "&cDit commando kan enkel door spelers gebruikt worden."
+  no-permission: "&cDaar edde gij het lef ni vur.."
+  disabled-feature: "&cVanish staat uitgeschakeld."
+
+  enabled: "&7Vanish is nu &aingeschakeld&7."
+  disabled: "&7Vanish is nu &cuitgeschakeld&7."
+  restored: "&7Je vanish status werd opnieuw toegepast."
+
+  bossbar: "&dJe bent momenteel in vanish"
+
+  log-enabled: "&b{player} &7heeft vanish &aingeschakeld&7. &8(&7{source}&8)"
+  log-disabled: "&b{player} &7heeft vanish &cuitgeschakeld&7. &8(&7{source}&8)"

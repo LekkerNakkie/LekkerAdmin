@@ -192,6 +192,7 @@ public class MainConfig {
     public boolean isMaintenanceEnabled() {
         return config.getBoolean("maintenance.enabled", false);
     }
+
     public boolean isWhoisEnabled() {
         return config.getBoolean("whois.enabled", true);
     }
@@ -230,5 +231,45 @@ public class MainConfig {
 
     public List<String> getWhoisPageFields(int page) {
         return config.getStringList("whois.layout.page-" + page);
+    }
+
+    public boolean isVanishEnabled() {
+        return config.getBoolean("vanish.enabled", true);
+    }
+
+    public boolean isVanishBossBarEnabled() {
+        return config.getBoolean("vanish.bossbar.enabled", true);
+    }
+
+    public String getVanishBossBarColor() {
+        return config.getString("vanish.bossbar.color", "PURPLE");
+    }
+
+    public String getVanishBossBarStyle() {
+        return config.getString("vanish.bossbar.style", "SOLID");
+    }
+
+    public boolean isVanishStaffGlowEnabled() {
+        return config.getBoolean("vanish.staff-visibility.glow-for-staff", true);
+    }
+
+    public boolean isVanishSuppressJoinMessage() {
+        return config.getBoolean("vanish.hide.suppress-join-message", true);
+    }
+
+    public boolean isVanishSuppressQuitMessage() {
+        return config.getBoolean("vanish.hide.suppress-quit-message", true);
+    }
+
+    public boolean isVanishBlockMobTargeting() {
+        return config.getBoolean("vanish.hide.block-mob-targeting", true);
+    }
+
+    public boolean isVanishBlockItemPickup() {
+        return config.getBoolean("vanish.hide.block-item-pickup", true);
+    }
+
+    public boolean isVanishHideDroppedItems() {
+        return config.getBoolean("vanish.hide.hide-dropped-items", true);
     }
 }

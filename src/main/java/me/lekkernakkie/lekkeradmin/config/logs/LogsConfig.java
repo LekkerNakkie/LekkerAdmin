@@ -66,6 +66,22 @@ public class LogsConfig {
         return loadType("explosion-logs");
     }
 
+    public LogTypeSettings getVanishLogs() {
+        return loadType("vanish");
+    }
+
+    public boolean isVanishLogEnableEnabled() {
+        return config.getBoolean("logs.vanish.flags.log-enable", true);
+    }
+
+    public boolean isVanishLogDisableEnabled() {
+        return config.getBoolean("logs.vanish.flags.log-disable", true);
+    }
+
+    public boolean isVanishLogRestoreEnabled() {
+        return config.getBoolean("logs.vanish.flags.log-rejoin-restore", true);
+    }
+
     private LogTypeSettings loadType(String path) {
         String root = "logs." + path;
         String defaults = "defaults";

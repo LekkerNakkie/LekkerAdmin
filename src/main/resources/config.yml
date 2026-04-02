@@ -155,3 +155,27 @@ whois:
       - afk
       - ip
       - alt-accounts
+
+vanish:
+  enabled: true
+  persistent: true
+
+  bossbar:
+    enabled: true
+    title: "&bJe bent momenteel in vanish"
+    color: "PURPLE"
+    style: "SOLID"
+
+  staff-visibility:
+    enabled: true
+    glow-for-staff: true
+
+  hide:
+    suppress-join-message: true
+    suppress-quit-message: true
+    block-mob-targeting: true
+    block-item-pickup: true
+    hide-dropped-items: true
+
+  logging:
+    enabled: true

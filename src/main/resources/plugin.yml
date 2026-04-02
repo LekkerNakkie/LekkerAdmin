@@ -76,6 +76,10 @@ commands:
     description: Bekijk uitgebreide spelerinformatie
     usage: /whois <player> [page]
 
+  vanish:
+    description: Toggle vanish
+    usage: /vanish
+
 permissions:
   lekkeradmin.admin:
     description: Full access to LekkerAdmin
@@ -183,4 +187,12 @@ permissions:
 
   lekkeradmin.whois.ip:
     description: View IP and alt accounts in /whois
+    default: op
+
+  lekkeradmin.vanish:
+    description: Use vanish
+    default: op
+
+  lekkeradmin.vanish.see:
+    description: See vanished staff
     default: op
