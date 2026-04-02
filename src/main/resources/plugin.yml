@@ -79,6 +79,7 @@ commands:
   vanish:
     description: Toggle vanish
     usage: /vanish
+    aliases: [v]
 
 permissions:
   lekkeradmin.admin:

@@ -350,7 +350,7 @@ vanish:
   disabled: "&7Vanish is nu &cuitgeschakeld&7."
   restored: "&7Je vanish status werd opnieuw toegepast."
 
-  bossbar: "&dJe bent momenteel in vanish"
+  bossbar: "&bJe bent momenteel in vanish"
 
   log-enabled: "&b{player} &7heeft vanish &aingeschakeld&7. &8(&7{source}&8)"
   log-disabled: "&b{player} &7heeft vanish &cuitgeschakeld&7. &8(&7{source}&8)"
