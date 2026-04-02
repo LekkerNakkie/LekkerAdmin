@@ -85,3 +85,73 @@ planrestart:
 
 maintenance:
   enabled: false
+
+whois:
+  enabled: true
+
+  hooks:
+    essentials: true
+    placeholderapi: true
+
+  placeholders:
+    balance: "%vault_eco_balance_formatted%"
+    level: "%lekkerleveling_level%"
+
+  pages:
+    default-page: 1
+    max-pages: 2
+    clickable-navigation: true
+
+  fields:
+    minecraft-name: true
+    nickname: true
+    mc-uuid: true
+    discord-name: true
+    discord-id: true
+    location: true
+    playtime: true
+    last-online: true
+    balance: true
+    ip: true
+    hp: true
+    hunger: true
+    exp: true
+    whitelist-status: true
+    gamemode: true
+    god: true
+    fly: true
+    speed: true
+    jailed: true
+    muted: true
+    afk: true
+    op: true
+    alt-accounts: true
+    level: true
+
+  layout:
+    page-1:
+      - minecraft-name
+      - nickname
+      - mc-uuid
+      - discord-name
+      - discord-id
+      - whitelist-status
+      - gamemode
+      - op
+      - level
+      - balance
+      - playtime
+      - last-online
+    page-2:
+      - location
+      - hp
+      - hunger
+      - exp
+      - god
+      - fly
+      - speed
+      - jailed
+      - muted
+      - afk
+      - ip
+      - alt-accounts

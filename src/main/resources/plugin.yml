@@ -72,6 +72,10 @@ commands:
     description: Mark punishment history as removed
     usage: /clearhistory <player> <punishmentID/all> <reason>
 
+  whois:
+    description: Bekijk uitgebreide spelerinformatie
+    usage: /whois <player> [page]
+
 permissions:
   lekkeradmin.admin:
     description: Full access to LekkerAdmin
@@ -171,4 +175,12 @@ permissions:
 
   lekkeradmin.discord.playerinfo:
     description: Use Discord playerinfo command
+    default: op
+
+  lekkeradmin.whois:
+    description: Use /whois
+    default: op
+
+  lekkeradmin.whois.ip:
+    description: View IP and alt accounts in /whois
     default: op

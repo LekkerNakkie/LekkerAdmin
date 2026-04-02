@@ -192,4 +192,43 @@ public class MainConfig {
     public boolean isMaintenanceEnabled() {
         return config.getBoolean("maintenance.enabled", false);
     }
+    public boolean isWhoisEnabled() {
+        return config.getBoolean("whois.enabled", true);
+    }
+
+    public boolean isWhoisUseEssentials() {
+        return config.getBoolean("whois.hooks.essentials", true);
+    }
+
+    public boolean isWhoisUsePlaceholderApi() {
+        return config.getBoolean("whois.hooks.placeholderapi", true);
+    }
+
+    public String getWhoisBalancePlaceholder() {
+        return config.getString("whois.placeholders.balance", "%vault_eco_balance_formatted%");
+    }
+
+    public String getWhoisLevelPlaceholder() {
+        return config.getString("whois.placeholders.level", "%lekkerleveling_level%");
+    }
+
+    public int getWhoisDefaultPage() {
+        return Math.max(1, config.getInt("whois.pages.default-page", 1));
+    }
+
+    public int getWhoisMaxPages() {
+        return Math.max(1, config.getInt("whois.pages.max-pages", 2));
+    }
+
+    public boolean isWhoisClickableNavigation() {
+        return config.getBoolean("whois.pages.clickable-navigation", true);
+    }
+
+    public boolean isWhoisFieldEnabled(String field) {
+        return config.getBoolean("whois.fields." + field, true);
+    }
+
+    public List<String> getWhoisPageFields(int page) {
+        return config.getStringList("whois.layout.page-" + page);
+    }
 }

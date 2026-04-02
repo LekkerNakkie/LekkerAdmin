@@ -226,6 +226,15 @@ public class LekkerAdmin extends JavaPlugin {
             cancelRestartAlias.setTabCompleter(restartAliasCommand);
         }
 
+        WhoisCommand whoisCommand = new WhoisCommand(this);
+        PluginCommand whois = getCommand("whois");
+        if (whois == null) {
+            getLogger().warning("Command 'whois' not found in plugin.yml");
+        } else {
+            whois.setExecutor(whoisCommand);
+            whois.setTabCompleter(whoisCommand);
+        }
+
         BanCommand banCommand = new BanCommand(this);
         UnbanCommand unbanCommand = new UnbanCommand(this);
         MuteCommand muteCommand = new MuteCommand(this);
@@ -319,6 +328,7 @@ public class LekkerAdmin extends JavaPlugin {
         console("&bLogs&7: &f" + (configManager.getLogsConfig() != null && configManager.getLogsConfig().isEnabled() ? "Enabled" : "Disabled"));
         console("&bInvsee&7: &f" + (configManager.getMainConfig().isInvseeEnabled() ? "Enabled" : "Disabled"));
         console("&bEnderchest&7: &f" + (configManager.getMainConfig().isEnderchestEnabled() ? "Enabled" : "Disabled"));
+        console("&bWhois&7: &f" + (configManager.getMainConfig().isWhoisEnabled() ? "Enabled" : "Disabled"));
         console("&bRestart&7: &f" + (configManager.getMainConfig().isRestartEnabled() ? "Enabled" : "Disabled"));
         console("&bMaintenance&7: &f" + (configManager.getMainConfig().isMaintenanceEnabled() ? "Enabled" : "Disabled"));
         console("&bExplosionLogs&7: &f" + (configManager.getLogsConfig() != null && configManager.getLogsConfig().getExplosionLogs().isEnabled() ? "Enabled" : "Disabled"));

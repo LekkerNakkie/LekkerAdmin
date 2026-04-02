@@ -280,3 +280,60 @@ punishments:
     no-entries: "&cGeen history entries gevonden om te clearen voor &b{player}&c."
     all-success: "&7{amount} history entr{suffix} verborgen voor &b{player}&7."
     single-success: "&7Punishment ID &b{id} &7is verborgen uit history voor &b{player}&7."
+
+# =========================================================
+#  Whois
+# =========================================================
+whois:
+  usage: "&7Gebruik: &b/whois <speler> [pagina]"
+  disabled: "&cWhois staat uitgeschakeld."
+  no-permission: "&cDaar edde gij het lef ni vur.."
+  player-not-found: "&cDie speler bestaat niet of heeft nog nooit gejoint."
+
+  header: "&8&m----------------------------------------"
+  title: "&9Whois &7» &b{player} &7(Pagina &b{page}&7/&b{max-pages}&7)"
+  footer: "&8&m----------------------------------------"
+
+  navigation:
+    previous: "&b« Vorige"
+    next: "&bVolgende »"
+    current: "&7Pagina &b{page}&7/&b{max-pages}"
+
+  labels:
+    minecraft-name: "&7Minecraft naam: &b{value}"
+    nickname: "&7Nickname: &b{value}"
+    mc-uuid: "&7UUID: &b{value}"
+    discord-name: "&7Discord naam: &b{value}"
+    discord-id: "&7Discord ID: &b{value}"
+    location: "&7Locatie: &b{value}"
+    playtime: "&7Playtime: &b{value}"
+    last-online: "&7Last online: &b{value}"
+    balance: "&7Balance: &b{value}"
+    ip: "&7IP: &b{value}"
+    hp: "&7HP: &b{value}"
+    hunger: "&7Honger: &b{value}"
+    exp: "&7EXP: &b{value}"
+    whitelist-status: "&7Whitelist status: &b{value}"
+    gamemode: "&7Gamemode: &b{value}"
+    god: "&7God: &b{value}"
+    fly: "&7Fly: &b{value}"
+    speed: "&7Speed: &b{value}"
+    jailed: "&7Jailed: &b{value}"
+    muted: "&7Muted: &b{value}"
+    afk: "&7AFK: &b{value}"
+    op: "&7OP: &b{value}"
+    alt-accounts: "&7Alt accounts: &b{value}"
+    level: "&7Level: &b{value}"
+
+  values:
+    yes: "&aJa"
+    no: "&cNee"
+    active: "&aActief"
+    inactive: "&cNiet actief"
+    online-now: "&aNu online"
+    hidden: "&7Verborgen"
+    unknown: "&7Onbekend"
+    none: "&7Geen"
+    permanent: "&cPermanent"
+    not-linked: "&7Niet gekoppeld"
+    not-whitelisted: "&cNiet gewhitelist"
