@@ -551,6 +551,6 @@ public class FreezeService {
             } catch (Exception ignored) {
                 return new Color(0x3498DB);
             }
-        }t
+        }
     }
 }
