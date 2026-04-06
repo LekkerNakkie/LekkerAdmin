@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - master
+  workflow_dispatch:
 
 jobs:
   notify:
@@ -12,35 +13,54 @@ jobs:
 
     steps:
       - name: Send embed to Discord
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+          REPOSITORY: ${{ github.repository }}
+          ACTOR: ${{ github.actor }}
+          BRANCH: ${{ github.ref_name }}
+          COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
+          COMMIT_URL: ${{ github.event.head_commit.url }}
         run: |
-          curl -H "Content-Type: application/json" \
-          -X POST \
-          -d "{
-            \"embeds\": [{
-              \"title\": \"🚀 Nieuwe GitHub Update\",
-              \"description\": \"**${{ github.repository }}**\",
-              \"color\": 3447003,
-              \"fields\": [
-                {
-                  \"name\": \"👤 Auteur\",
-                  \"value\": \"${{ github.actor }}\",
-                  \"inline\": true
-                },
-                {
-                  \"name\": \"🌿 Branch\",
-                  \"value\": \"${{ github.ref_name }}\",
-                  \"inline\": true
-                },
-                {
-                  \"name\": \"💬 Commit\",
-                  \"value\": \"${{ github.event.head_commit.message }}\"
-                }
-              ],
-              \"url\": \"${{ github.event.head_commit.url }}\",
-              \"footer\": {
-                \"text\": \"Sakurahelm Dev Logs\"
-              },
-              \"timestamp\": \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"
-            }]
-          }" \
-          ${{ secrets.DISCORD_WEBHOOK }}
+          python3 - <<'PY' > payload.json
+          import json
+          import os
+          from datetime import datetime, timezone
+
+          payload = {
+              "embeds": [
+                  {
+                      "title": "🚀 Nieuwe GitHub Update",
+                      "description": f"**{os.environ.get('REPOSITORY', 'Onbekende repo')}**",
+                      "color": 3447003,
+                      "fields": [
+                          {
+                              "name": "👤 Auteur",
+                              "value": os.environ.get("ACTOR", "Onbekend"),
+                              "inline": True
+                          },
+                          {
+                              "name": "🌿 Branch",
+                              "value": os.environ.get("BRANCH", "Onbekend"),
+                              "inline": True
+                          },
+                          {
+                              "name": "💬 Commit",
+                              "value": os.environ.get("COMMIT_MESSAGE", "Geen commit message")[:1024]
+                          }
+                      ],
+                      "url": os.environ.get("COMMIT_URL", ""),
+                      "footer": {
+                          "text": "Sakurahelm Dev Logs"
+                      },
+                      "timestamp": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
+                  }
+              ]
+          }
+
+          print(json.dumps(payload))
+          PY
+
+          curl -sS -H "Content-Type: application/json" \
+            -X POST \
+            -d @payload.json \
+            "$DISCORD_WEBHOOK"
