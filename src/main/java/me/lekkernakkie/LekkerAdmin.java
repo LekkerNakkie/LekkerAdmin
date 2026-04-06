@@ -23,13 +23,14 @@ import me.lekkernakkie.lekkeradmin.service.RestartService;
 import me.lekkernakkie.lekkeradmin.service.invsee.InvseeService;
 import me.lekkernakkie.lekkeradmin.service.log.ExplosionTrackerService;
 import me.lekkernakkie.lekkeradmin.service.vanish.VanishService;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.event.HandlerList;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.ChatColor;
 
 import java.io.File;
 import java.util.Map;
@@ -95,7 +96,7 @@ public class LekkerAdmin extends JavaPlugin {
         long start = System.currentTimeMillis();
 
         console("&b&m-------------------&9 LekkerAdmin Reload &b&m-------------------");
-        console(lang().message("reload.started", "&7Reload gestart..."));
+        console(lang().format("reload.started", "&7Reload gestart...", null));
 
         shutdownRuntimeServices();
 
@@ -121,20 +122,20 @@ public class LekkerAdmin extends JavaPlugin {
 
         long time = System.currentTimeMillis() - start;
 
-        console(lang().message("reload.config", "&a✔ &7Config herladen"));
-        console(lang().message("reload.database", "&a✔ &7Database reconnect uitgevoerd"));
-        console(lang().message("reload.discord", "&a✔ &7Discord bot herstart"));
-        console(lang().message("reload.punishments", "&a✔ &7Punishments herladen"));
-        console(lang().message("reload.punishment-cache", "&a✔ &7Punishment cache herladen"));
-        console(lang().message("reload.expirations", "&a✔ &7Expirations opnieuw ingepland"));
-        console(lang().message("reload.logs", "&a✔ &7Logs herladen"));
-        console(lang().message("reload.invsee", "&a✔ &7Invsee herladen"));
-        console(lang().message("reload.restart", "&a✔ &7Restart systeem herladen"));
-        console(lang().message("reload.maintenance", "&a✔ &7Maintenance systeem herladen"));
-        console(lang().message("reload.explosions", "&a✔ &7Explosion logs herladen"));
-        console(lang().message("reload.sessions", "&a✔ &7Offline sessies herladen"));
-        console(lang().message("reload.vanish", "&a✔ &7Vanish herladen"));
-        console(lang().formatMessage("reload.finished", "&7Reload voltooid in &b{time}ms&7.", Map.of("time", String.valueOf(time))));
+        console(lang().format("reload.config", "&a✔ &7Config herladen", null));
+        console(lang().format("reload.database", "&a✔ &7Database reconnect uitgevoerd", null));
+        console(lang().format("reload.discord", "&a✔ &7Discord bot herstart", null));
+        console(lang().format("reload.punishments", "&a✔ &7Punishments herladen", null));
+        console(lang().format("reload.punishment-cache", "&a✔ &7Punishment cache herladen", null));
+        console(lang().format("reload.expirations", "&a✔ &7Expirations opnieuw ingepland", null));
+        console(lang().format("reload.logs", "&a✔ &7Logs herladen", null));
+        console(lang().format("reload.invsee", "&a✔ &7Invsee herladen", null));
+        console(lang().format("reload.restart", "&a✔ &7Restart systeem herladen", null));
+        console(lang().format("reload.maintenance", "&a✔ &7Maintenance systeem herladen", null));
+        console(lang().format("reload.explosions", "&a✔ &7Explosion logs herladen", null));
+        console(lang().format("reload.sessions", "&a✔ &7Offline sessies herladen", null));
+        console(lang().format("reload.vanish", "&a✔ &7Vanish herladen", null));
+        console(lang().format("reload.finished", "&7Reload voltooid in &b{time}ms&7.", Map.of("time", String.valueOf(time))));
         console("&b&m--------------------------------------------------------------");
     }
 
@@ -373,10 +374,14 @@ public class LekkerAdmin extends JavaPlugin {
         }
     }
 
-
-
     private void console(String message) {
-        Bukkit.getConsoleSender().sendMessage(ChatColor.translateAlternateColorCodes('&', message));
+        if (message == null) {
+            return;
+        }
+
+        String normalized = message.replace('§', '&');
+        Component component = LegacyComponentSerializer.legacyAmpersand().deserialize(normalized);
+        Bukkit.getConsoleSender().sendMessage(component);
     }
 
     public LangConfig lang() {

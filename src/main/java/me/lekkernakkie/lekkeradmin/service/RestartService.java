@@ -12,7 +12,13 @@ import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -83,9 +89,9 @@ public class RestartService {
 
         plugin.debug("Manual restart gepland door " + sender.getName() + " om " + target + " met reden: " + this.scheduledReason);
 
-        sender.sendMessage(plugin.lang().formatMessage(
+        sender.sendMessage(plugin.lang().format(
                 "restart.planned",
-                "&7Restart gepland over &b{time}&7. Reden: &b{reason}",
+                "{prefix}&7Restart gepland over &b{time}&7. Reden: &b{reason}",
                 Map.of(
                         "time", getRemainingFormatted(),
                         "reason", this.scheduledReason
@@ -108,7 +114,7 @@ public class RestartService {
         clearScheduledRestart();
         sender.sendMessage(plugin.lang().message(
                 "restart.cancelled",
-                "&7De geplande restart is &cgeannuleerd&7."
+                "{prefix}&7De geplande restart is &cgeannuleerd&7."
         ));
 
         scheduleNextAutoRestartIfNeeded();
@@ -119,16 +125,16 @@ public class RestartService {
         if (index <= 0) {
             sender.sendMessage(plugin.lang().message(
                     "restart.cancel-invalid-index",
-                    "&cOngeldige restart index. Gebruik bv: &b/cancelrestart 2"
+                    "{prefix}&cOngeldige restart index. Gebruik bv: &b/cancelrestart 2"
             ));
             return false;
         }
 
         List<UpcomingRestart> upcoming = getUpcomingRestarts(Math.max(3, index));
         if (upcoming.size() < index) {
-            sender.sendMessage(plugin.lang().formatMessage(
+            sender.sendMessage(plugin.lang().format(
                     "restart.cancel-index-not-found",
-                    "&cEr is geen komende restart met index &b{index}&c.",
+                    "{prefix}&cEr is geen komende restart met index &b{index}&c.",
                     Map.of("index", String.valueOf(index))
             ));
             return false;
@@ -141,9 +147,9 @@ public class RestartService {
                 return cancelManualRestart(sender);
             }
 
-            sender.sendMessage(plugin.lang().formatMessage(
+            sender.sendMessage(plugin.lang().format(
                     "restart.cancel-index-not-found",
-                    "&cEr is geen komende restart met index &b{index}&c.",
+                    "{prefix}&cEr is geen komende restart met index &b{index}&c.",
                     Map.of("index", String.valueOf(index))
             ));
             return false;
@@ -156,9 +162,9 @@ public class RestartService {
             scheduleNextAutoRestartIfNeeded();
         }
 
-        sender.sendMessage(plugin.lang().formatMessage(
+        sender.sendMessage(plugin.lang().format(
                 "restart.cancelled-auto-once",
-                "&7Automatische restart &b#{index} &7werd eenmalig &cgeskipt&7. Gepland moment: &b{target-time}&7.",
+                "{prefix}&7Automatische restart &b#{index} &7werd eenmalig &cgeskipt&7.",
                 Map.of(
                         "index", String.valueOf(index),
                         "target-time", formatTargetTime(selected.time())
@@ -292,12 +298,10 @@ public class RestartService {
 
         String formattedTime = formatDuration(remainingSeconds);
 
-        String prefix = plugin.lang().get("restart.prefix", "&7[&cRestart&7] &7");
         String chatMessage = plugin.lang().format(
                 "restart.chat",
-                "{prefix}&7Server restart over &b{time}&7. Reden: &b{reason}",
+                "{restart-prefix}&7Server restart over &b{time}&7. Reden: &b{reason}",
                 Map.of(
-                        "prefix", prefix,
                         "time", formattedTime,
                         "reason", scheduledReason == null ? "" : scheduledReason
                 )
@@ -333,12 +337,10 @@ public class RestartService {
     private void executeRestart() {
         MainConfig config = plugin.getConfigManager().getMainConfig();
 
-        String prefix = plugin.lang().get("restart.prefix", "&7[&cRestart&7] &7");
         String nowMessage = plugin.lang().format(
                 "restart.chat-now",
-                "{prefix}&cServer restart nu&7. Reden: &b{reason}",
+                "{restart-prefix}&cServer restart nu&7. Reden: &b{reason}",
                 Map.of(
-                        "prefix", prefix,
                         "reason", scheduledReason == null ? "" : scheduledReason
                 )
         );
@@ -418,7 +420,7 @@ public class RestartService {
         List<String> configuredTimes = config.getAutoRestartTimes();
 
         if (configuredTimes.isEmpty() || amount <= 0) {
-            return Collections.emptyList();
+            return List.of();
         }
 
         ZoneId zoneId = getZoneId();

@@ -1,62 +1,40 @@
 # =========================================================
-#  LekkerAdmin - Nederlandse language file
-# =========================================================
-# Kleurstijl:
-#   &7 = gewone zinsbouw
-#   &b = markering / belangrijke waarde
-#   &9 = titel / accent
-#   &a = succes / aan
-#   &c = fout / uit / geweigerd
-#
-# Placeholders:
-#   {player}      = spelernaam
-#   {actor}       = uitvoerder / staff
-#   {reason}      = reden
-#   {duration}    = duur
-#   {expires_at}  = vervalt op
-#   {remaining}   = resterende tijd
-#   {date}        = datum
-#   {page}        = huidige pagina
-#   {max_page}    = maximum pagina
-#   {id}          = punishment id
-#   {index}       = index in lijst
-#   {status}      = status
-#   {time}        = tijd
-#   {target-time} = exacte uitvoertijd
-#   {server}      = servernaam
+# LekkerAdmin - Nederlandse language file
 # =========================================================
 
 general:
-  prefix: "&7[&9LekkerAdmin&7] "
+  prefix: "&7[&9LekkerAdmin&7]"
 
-  no-permission: "&cDaar edde gij het lef ni vur.."
-  player-only: "&cDit commando kan enkel door spelers gebruikt worden."
-  player-not-found: "&cSpeler niet gevonden."
-  unknown-error: "&cEr is iets misgelopen."
-  reload-only-ingame: "&cDit commando kan enkel in-game gebruikt worden."
+  no-permission: "{prefix} &cDaar edde gij het lef ni vur.."
+  player-only: "{prefix} &cDit commando kan enkel door spelers gebruikt worden."
+  player-not-found: "{prefix} &cSpeler niet gevonden."
+  unknown-error: "{prefix} &cEr is iets misgelopen."
+  reload-only-ingame: "{prefix} &cDit commando kan enkel in-game gebruikt worden."
 
 # =========================================================
-#  Reload
+# Reload
 # =========================================================
+
 reload:
-  started: "&7Reload gestart..."
-  config: "&a✔ &7Config herladen"
-  database: "&a✔ &7Database reconnect uitgevoerd"
-  discord: "&a✔ &7Discord bot herstart"
-  punishments: "&a✔ &7Punishments herladen"
-  punishment-cache: "&a✔ &7Punishment cache herladen"
-  expirations: "&a✔ &7Expirations opnieuw ingepland"
-  logs: "&a✔ &7Logs herladen"
-  invsee: "&a✔ &7Invsee herladen"
-  restart: "&a✔ &7Restart systeem herladen"
-  maintenance: "&a✔ &7Maintenance systeem herladen"
-  explosions: "&a✔ &7Explosion logs herladen"
-  sessions: "&a✔ &7Offline sessies herladen"
-  finished: "&7Reload voltooid in &b{time}ms&7."
+  started: "{prefix} &7Reload gestart..."
+  config: "{prefix} &a✔ &7Config herladen"
+  database: "{prefix} &a✔ &7Database reconnect uitgevoerd"
+  discord: "{prefix} &a✔ &7Discord bot herstart"
+  punishments: "{prefix} &a✔ &7Punishments herladen"
+  punishment-cache: "{prefix} &a✔ &7Punishment cache herladen"
+  expirations: "{prefix} &a✔ &7Expirations opnieuw ingepland"
+  logs: "{prefix} &a✔ &7Logs herladen"
+  invsee: "{prefix} &a✔ &7Invsee herladen"
+  restart: "{prefix} &a✔ &7Restart systeem herladen"
+  maintenance: "{prefix} &a✔ &7Maintenance systeem herladen"
+  explosions: "{prefix} &a✔ &7Explosion logs herladen"
+  sessions: "{prefix} &a✔ &7Offline sessies herladen"
+  finished: "{prefix} &7Reload voltooid in &b{time}ms&7."
 
 # =========================================================
-#  Admin command help
+# Admin command help
 # =========================================================
+
 admin:
   help:
     header: "&8&m----------------------------------------"
@@ -74,297 +52,108 @@ admin:
     enderchest: "&7/enderchest <speler> &8- &bBekijk enderchest van speler"
     planrestart: "&7/planrestart <time> <reden...> &8- &bPlan een restart"
     nextrestart: "&7/nextrestart &8- &bToon de volgende 3 restarts"
-    cancelrestart: "&7/cancelrestart [id] &8- &bAnnuleer de eerstvolgende restart of skip een komende auto restart"
+    cancelrestart: "&7/cancelrestart [id] &8- &bAnnuleer restart"
     maintenance: "&7/maintenancemode &8- &bToggle maintenance mode"
-    whois: "&7/whois <speler> [pagina] &8- &bBekijk uitgebreide spelerinfo"
+    whois: "&7/whois <speler> [pagina] &8- &bBekijk spelerinfo"
     vanish: "&7/vanish, /v &8- &bToggle vanish mode"
     footer: "&8&m----------------------------------------"
 
-  punishment-help:
-    header: "&8&m----------------------------------------"
-    title: "&9Punishments &7- Commands"
-    ban: "&7/ban <speler> <tijd|perm> [reden]"
-    unban: "&7/unban <speler> [reden]"
-    mute: "&7/mute <speler> <tijd|perm> [reden]"
-    unmute: "&7/unmute <speler> [reden]"
-    kick: "&7/kick <speler> [reden]"
-    warn: "&7/warn <speler> [reden]"
-    banlist: "&7/banlist [pagina]"
-    history: "&7/history <speler> [pagina]"
-    clearhistory: "&7/clearhistory <speler> <punishmentID/all> [reden]"
-    footer: "&8&m----------------------------------------"
-
-  reload-complete: "&7LekkerAdmin is volledig &aherladen&7."
-
 # =========================================================
-#  Invsee / Enderchest commands
+# Invsee / Enderchest
 # =========================================================
+
 invsee-command:
-  player-only: "&cAlleen spelers kunnen dit command gebruiken."
-  disabled: "&cInvsee staat uitgeschakeld."
-  usage: "&7Gebruik: &b/lekkeradmin invsee <speler>"
-  offline-disabled: "&cOffline invsee staat uitgeschakeld."
-  player-never-joined: "&cDie speler bestaat niet of heeft nog nooit gejoint."
+  player-only: "{prefix} &cAlleen spelers kunnen dit command gebruiken."
+  disabled: "{prefix} &cInvsee staat uitgeschakeld."
+  usage: "{prefix} &7Gebruik: &b/lekkeradmin invsee <speler>"
+  offline-disabled: "{prefix} &cOffline invsee staat uitgeschakeld."
+  player-never-joined: "{prefix} &cDie speler bestaat niet of heeft nog nooit gejoint."
 
 enderchest-command:
-  player-only: "&cAlleen spelers kunnen dit command gebruiken."
-  disabled: "&cEnderchest bekijken staat uitgeschakeld."
-  offline-disabled: "&cOffline enderchest bekijken staat uitgeschakeld."
-  player-never-joined: "&cDie speler bestaat niet of heeft nog nooit gejoint."
+  player-only: "{prefix} &cAlleen spelers kunnen dit command gebruiken."
+  disabled: "{prefix} &cEnderchest bekijken staat uitgeschakeld."
+  offline-disabled: "{prefix} &cOffline enderchest bekijken staat uitgeschakeld."
+  player-never-joined: "{prefix} &cDie speler bestaat niet of heeft nog nooit gejoint."
 
 # =========================================================
-#  Invsee intern
+# Maintenance
 # =========================================================
-invsee:
-  offline-inventory-in-use: "&7Deze offline inventory wordt momenteel al door iemand anders &bbewerkt&7."
-  offline-enderchest-in-use: "&7Deze offline enderchest wordt momenteel al door iemand anders &bbewerkt&7."
-  offline-inventory-load-failed: "&cKon offline inventory niet laden: &7{error}"
-  offline-enderchest-load-failed: "&cKon offline enderchest niet laden: &7{error}"
-  save-failed: "&cKon wijzigingen niet opslaan: &7{error}"
-  flush-join-failed: "&cKon offline invsee sessie niet verwerken bij join van &b{player}&7."
 
-# =========================================================
-#  Maintenance
-# =========================================================
 maintenance:
-  enabled: "&7Maintenance mode is nu &aingeschakeld&7."
-  disabled: "&7Maintenance mode is nu &cuitgeschakeld&7."
+  enabled: "{prefix} &7Maintenance mode is nu &aingeschakeld&7."
+  disabled: "{prefix} &7Maintenance mode is nu &cuitgeschakeld&7."
   kick-online: "&cServer staat in maintenance mode.\n\n&7Probeer later opnieuw."
   kick-join: "&cServer staat in maintenance mode.\n\n&7Probeer later opnieuw."
-  alias-forward-failed: "&cKon &b/maintenance&c niet doorsturen naar &b/lekkeradmin maintenancemode&c."
+  alias-forward-failed: "{prefix} &cKon maintenance command niet uitvoeren."
 
 # =========================================================
-#  Restart
+# Restart
 # =========================================================
+
 restart:
-  prefix: "&7[&cRestart&7] &7"
-  chat: "{prefix}&7Server restart over &b{time}&7. Reden: &b{reason}"
-  chat-now: "{prefix}&cServer restart nu&7. Reden: &b{reason}"
+  prefix: "&7[&cRestart&7]"
+
+  chat: "{restart-prefix} &7Server restart over &b{time}&7. Reden: &b{reason}"
+  chat-now: "{restart-prefix} &cServer restart nu&7. Reden: &b{reason}"
+
   title-main: "&7Restart over &b{time}"
   title-sub: "&7Reden: &b{reason}"
+
   kick-message: "&cServer restart!\n\n&7Reden: &b{reason}\n&7Je kan direct terug joinen."
-  planned: "&7Restart gepland over &b{time}&7. Reden: &b{reason}"
-  cancelled: "&7De geplande restart is &cgeannuleerd&7."
-  none-running: "&cEr is momenteel geen restart gepland."
-  already-planned: "&cEr is al een restart gepland en overschrijven is uitgeschakeld."
-  invalid-time: "&cOngeldige tijd&7. Gebruik bv: &b10s&7, &b5m&7, &b2h&7, &b1h30m"
-  usage: "&7Gebruik: &b/planrestart <time> <reden...>"
-  cancel-invalid-index: "&cOngeldige restart index. Gebruik bv: &b/cancelrestart 2"
-  cancel-index-not-found: "&cEr is geen komende restart met index &b{index}&c."
-  cancelled-auto-once: "&7Automatische restart &b#{index} &7werd eenmalig &cgeskipt&7."
 
-nextrestart:
-  header: "&8&m----------------------------------------"
-  title: "&9Volgende Restarts"
-  none: "&7Er zijn momenteel geen komende restarts gevonden."
-  entry: "&7#&b{index} &8- &b{type} &8- &7{when} &8- &b{remaining}"
-  entry-reason: "&8  &7Reden: &b{reason}"
-  footer: "&8&m----------------------------------------"
+  planned: "{prefix} &7Restart gepland over &b{time}&7. Reden: &b{reason}"
+  cancelled: "{prefix} &7De geplande restart is &cgeannuleerd&7."
+  none-running: "{prefix} &cEr is momenteel geen restart gepland."
+  already-planned: "{prefix} &cEr is al een restart gepland."
+  invalid-time: "{prefix} &cOngeldige tijd."
+  usage: "{prefix} &7Gebruik: &b/planrestart <time> <reden...>"
+  cancel-invalid-index: "{prefix} &cOngeldige restart index."
+  cancel-index-not-found: "{prefix} &cGeen restart gevonden."
+  cancelled-auto-once: "{prefix} &7Auto restart werd eenmalig geskipt."
 
 # =========================================================
-#  Punishments
+# Punishments
 # =========================================================
+
 punishments:
   common:
-    player-not-found: "&cSpeler niet gevonden."
-    player-name-required: "&cJe moet een speler opgeven."
-    reason-required: "&cJe moet een reden opgeven."
-    duration-required: "&cJe moet een tijd of &bperm&c opgeven."
-    already-banned: "&cDeze speler heeft al een actieve ban."
-    not-banned: "&cDeze speler heeft geen actieve ban."
-    already-muted: "&cDeze speler heeft al een actieve mute."
-    not-muted: "&cDeze speler heeft geen actieve mute."
-    cannot-punish-self: "&cJe kan jezelf niet straffen."
+    player-not-found: "{prefix} &cSpeler niet gevonden."
+    player-name-required: "{prefix} &cJe moet een speler opgeven."
+    reason-required: "{prefix} &cJe moet een reden opgeven."
+    duration-required: "{prefix} &cJe moet een tijd opgeven."
+    already-banned: "{prefix} &cDeze speler is al geband."
+    not-banned: "{prefix} &cDeze speler is niet geband."
+    already-muted: "{prefix} &cDeze speler is al gemute."
+    not-muted: "{prefix} &cDeze speler is niet gemute."
 
   ban:
-    usage: "&7Gebruik: &b/ban <speler> <tijd|perm> [reden]"
-    invalid-duration: "&cOngeldige tijd&7. Gebruik bv: &b10m&7, &b1h&7, &b7d&7, &b1h30m&7, &bperm"
-    async-failed: "&cEr ging iets mis bij het bannen."
-    sender-message: "&7Speler &b{player} &7is geband voor &b{duration}&7. Reden: &b{reason}"
-    staff-message: "&b{player} &7werd geband door &b{actor} &7(&b{duration}&7) - &b{reason}"
-    disconnect-message:
-      - "&cJe bent geband van de server."
-      - ""
-      - "&7Reden: &b{reason}"
-      - "&7Door: &b{actor}"
-      - "&7Duur: &b{duration}"
-      - "&7Tot: &b{expires_at}"
-
-  unban:
-    usage: "&7Gebruik: &b/unban <speler> [reden]"
-    async-failed: "&cEr ging iets mis bij het unbannen."
-    sender-message: "&7Speler &b{player} &7is ge-unbanned. Reden: &b{reason}"
-    staff-message: "&b{player} &7werd ge-unbanned door &b{actor} &7- &b{reason}"
-    expired-message:
-      - "&7Je ban is &averlopen&7."
-      - "&7Welkom terug op &b{server}&7."
+    usage: "{prefix} &7Gebruik: &b/ban <speler> <tijd> [reden]"
+    invalid-duration: "{prefix} &cOngeldige tijd."
+    async-failed: "{prefix} &cFout bij bannen."
+    sender-message: "{prefix} &7Speler &b{player} &7is geband."
 
   mute:
-    usage: "&7Gebruik: &b/mute <speler> <tijd|perm> [reden]"
-    invalid-duration: "&cOngeldige tijd&7. Gebruik bv: &b10m&7, &b1h&7, &b7d&7, &b1h30m&7, &bperm"
-    async-failed: "&cEr ging iets mis bij het muten."
-    sender-message: "&7Speler &b{player} &7is gemute voor &b{duration}&7. Reden: &b{reason}"
-    staff-message: "&b{player} &7werd gemute door &b{actor} &7(&b{duration}&7) - &b{reason}"
-    player-message:
-      - "&cJe bent gemute."
-      - ""
-      - "&7Door: &b{actor}"
-      - "&7Reden: &b{reason}"
-      - "&7Duur: &b{duration}"
-    blocked-chat-message:
-      - "&cJe bent momenteel gemute."
-      - "&7Reden: &b{reason}"
-      - "&7Door: &b{actor}"
-      - "&7Nog: &b{remaining}"
-
-  unmute:
-    usage: "&7Gebruik: &b/unmute <speler> [reden]"
-    async-failed: "&cEr ging iets mis bij het unmuten."
-    sender-message: "&7Speler &b{player} &7is ge-unmute. Reden: &b{reason}"
-    staff-message: "&b{player} &7werd ge-unmute door &b{actor} &7- &b{reason}"
-    player-message:
-      - "&7Je mute is &aopgeheven&7."
-      - "&7Door: &b{actor}"
-      - "&7Reden: &b{reason}"
-
-  kick:
-    usage: "&7Gebruik: &b/kick <speler> [reden]"
-    async-failed: "&cEr ging iets mis bij het kicken."
-    sender-message: "&7Speler &b{player} &7is gekickt. Reden: &b{reason}"
-    staff-message: "&b{player} &7werd gekickt door &b{actor} &7- &b{reason}"
-    disconnect-message:
-      - "&cJe bent gekickt van de server."
-      - ""
-      - "&7Reden: &b{reason}"
-      - "&7Door: &b{actor}"
-
-  warn:
-    usage: "&7Gebruik: &b/warn <speler> [reden]"
-    async-failed: "&cEr ging iets mis bij het warnen."
-    sender-message: "&7Speler &b{player} &7is gewaarschuwd. Reden: &b{reason}"
-    staff-message: "&b{player} &7werd gewaarschuwd door &b{actor} &7- &b{reason}"
-    player-message:
-      - "&cJe hebt een waarschuwing gekregen."
-      - ""
-      - "&7Door: &b{actor}"
-      - "&7Reden: &b{reason}"
-      - "&7Datum: &b{date}"
-
-  banlist:
-    usage: "&7Gebruik: &b/banlist [pagina]"
-    invalid-page: "&cOngeldige pagina."
-    load-failed: "&cEr ging iets mis bij het laden van de banlist."
-    header: "&8&m----------------------------------------"
-    title: "&9Actieve bans &7(Pagina &b{page}&7/&b{max_page}&7)"
-    entry: "&7#&b{index} &b{player} &7- &b{reason}"
-    sub-entry: "&7Door: &b{actor} &7| Duur: &b{duration} &7| Tot: &b{expires_at}"
-    footer: "&8&m----------------------------------------"
-    empty: "&7Er zijn momenteel geen actieve bans."
-
-  history:
-    usage: "&7Gebruik: &b/history <speler> [pagina]"
-    invalid-page: "&cPagina moet een nummer zijn."
-    page-too-low: "&cPagina moet groter zijn dan &b0&c."
-    page-not-found: "&cDie pagina bestaat niet&7. Max pagina: &b{max_page}&7."
-    empty: "&cGeen punishment history gevonden voor &b{player}&c."
-    load-failed: "&cEr ging iets mis bij het laden van de history."
-    header-line: "&8&m------------------------------------------------"
-    title: "&9Punishment History &7» &b{player} &7(Pagina &b{page}&7/&b{max_page}&7)"
-    entry-header: "&7#&b{index} &7| ID: &b{id} &7| Type: &b{type}{status_part}"
-    entry-reason: "&7Reden: &b{reason}"
-    entry-issued: "&7Uitgedeeld door: &b{actor} &7| Op: &b{issued_at}"
-    entry-duration: "&7Duur: &b{duration} &7| Verloopt: &b{expires_at}"
-    entry-handled-by: "&7Afgehandeld door: &b{actor} &7| Op: &b{removed_at}"
-    entry-handled-reason: "&7Afhandel reden: &b{reason}"
-    pagination-prefix: "&7Pagina's: "
-    pagination-hover: "&7Ga naar pagina &b{page}"
-    status-label: "&7| Status: {status}"
-    status-active: "&cActief"
-    status-expired: "&bVerlopen"
-    status-removed: "&aOpgeheven"
-
-  clearhistory:
-    usage: "&7Gebruik: &b/clearhistory <speler> <punishmentID/all> <reden>"
-    invalid-id: "&cPunishment ID moet een nummer zijn of &ball&c."
-    reason-required: "&cJe moet een reden opgeven."
-    entry-not-found: "&cGeen punishment gevonden met ID &b{id}&c."
-    wrong-player: "&cDit punishment ID hoort niet bij speler &b{player}&c."
-    active-blocked: "&cJe kan geen actieve punishment clearen&7. Gebruik eerst &bunban&7 of &bunmute&7 indien nodig."
-    already-hidden: "&cDeze history entry is al verborgen."
-    no-entries: "&cGeen history entries gevonden om te clearen voor &b{player}&c."
-    all-success: "&7{amount} history entr{suffix} verborgen voor &b{player}&7."
-    single-success: "&7Punishment ID &b{id} &7is verborgen uit history voor &b{player}&7."
+    usage: "{prefix} &7Gebruik: &b/mute <speler> <tijd> [reden]"
+    async-failed: "{prefix} &cFout bij muten."
 
 # =========================================================
-#  Whois
+# Whois
 # =========================================================
+
 whois:
-  usage: "&7Gebruik: &b/whois <speler> [pagina]"
-  disabled: "&cWhois staat uitgeschakeld."
-  no-permission: "&cDaar edde gij het lef ni vur.."
-  player-not-found: "&cDie speler bestaat niet of heeft nog nooit gejoint."
-
-  header: "&8&m----------------------------------------"
-  title: "&9Whois &7» &b{player} &7(Pagina &b{page}&7/&b{max-pages}&7)"
-  footer: "&8&m----------------------------------------"
-
-  navigation:
-    previous: "&b« Vorige"
-    next: "&bVolgende »"
-    current: "&7Pagina &b{page}&7/&b{max-pages}"
-
-  labels:
-    minecraft-name: "&7Minecraft naam: &b{value}"
-    nickname: "&7Nickname: &b{value}"
-    mc-uuid: "&7UUID: &b{value}"
-    discord-name: "&7Discord naam: &b{value}"
-    discord-id: "&7Discord ID: &b{value}"
-    location: "&7Locatie: &b{value}"
-    playtime: "&7Playtime: &b{value}"
-    last-online: "&7Last online: &b{value}"
-    balance: "&7Balance: &b{value}"
-    ip: "&7IP: &b{value}"
-    hp: "&7HP: &b{value}"
-    hunger: "&7Honger: &b{value}"
-    exp: "&7EXP: &b{value}"
-    whitelist-status: "&7Whitelist status: &b{value}"
-    gamemode: "&7Gamemode: &b{value}"
-    god: "&7God: &b{value}"
-    fly: "&7Fly: &b{value}"
-    speed: "&7Speed: &b{value}"
-    jailed: "&7Jailed: &b{value}"
-    muted: "&7Muted: &b{value}"
-    afk: "&7AFK: &b{value}"
-    op: "&7OP: &b{value}"
-    alt-accounts: "&7Alt accounts: &b{value}"
-    level: "&7Level: &b{value}"
-
-  values:
-    yes: "&aJa"
-    no: "&cNee"
-    active: "&aActief"
-    inactive: "&cNiet actief"
-    online-now: "&aNu online"
-    hidden: "&7Verborgen"
-    unknown: "&7Onbekend"
-    none: "&7Geen"
-    permanent: "&cPermanent"
-    not-linked: "&7Niet gekoppeld"
-    not-whitelisted: "&cNiet gewhitelist"
+  usage: "{prefix} &7Gebruik: &b/whois <speler>"
+  disabled: "{prefix} &cWhois staat uit."
+  player-not-found: "{prefix} &cSpeler niet gevonden."
 
 # =========================================================
-#  Vanish
+# Vanish
 # =========================================================
+
 vanish:
-  player-only: "&cDit commando kan enkel door spelers gebruikt worden."
-  no-permission: "&cDaar edde gij het lef ni vur.."
-  disabled-feature: "&cVanish staat uitgeschakeld."
+  player-only: "{prefix} &cAlleen spelers."
+  no-permission: "{prefix} &cGeen permission."
+  disabled-feature: "{prefix} &cVanish uitgeschakeld."
 
-  enabled: "&7Vanish is nu &aingeschakeld&7."
-  disabled: "&7Vanish is nu &cuitgeschakeld&7."
-  restored: "&7Je vanish status werd opnieuw toegepast."
-
-  bossbar: "&bJe bent momenteel in vanish"
-
-  log-enabled: "&b{player} &7heeft vanish &aingeschakeld&7. &8(&7{source}&8)"
-  log-disabled: "&b{player} &7heeft vanish &cuitgeschakeld&7. &8(&7{source}&8)"
+  enabled: "{prefix} &7Vanish &aaan"
+  disabled: "{prefix} &7Vanish &cuit"
+  restored: "{prefix} &7Vanish hersteld"
