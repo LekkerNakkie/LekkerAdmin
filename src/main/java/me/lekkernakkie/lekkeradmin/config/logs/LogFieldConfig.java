@@ -3,6 +3,8 @@ package me.lekkernakkie.lekkeradmin.config.logs;
 public class LogFieldConfig {
 
     private final String player;
+    private final String actor;
+    private final String source;
     private final String world;
     private final String coordinates;
     private final String item;
@@ -23,6 +25,8 @@ public class LogFieldConfig {
 
     public LogFieldConfig(
             String player,
+            String actor,
+            String source,
             String world,
             String coordinates,
             String item,
@@ -42,6 +46,8 @@ public class LogFieldConfig {
             String gamemode
     ) {
         this.player = safe(player, "Speler");
+        this.actor = safe(actor, "Staff");
+        this.source = safe(source, "Actie");
         this.world = safe(world, "Wereld");
         this.coordinates = safe(coordinates, "Coördinaten");
         this.item = safe(item, "Item");
@@ -67,6 +73,14 @@ public class LogFieldConfig {
 
     public String getPlayer() {
         return player;
+    }
+
+    public String getActor() {
+        return actor;
+    }
+
+    public String getSource() {
+        return source;
     }
 
     public String getWorld() {

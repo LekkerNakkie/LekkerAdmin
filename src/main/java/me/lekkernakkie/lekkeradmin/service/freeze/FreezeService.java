@@ -1,7 +1,14 @@
 package me.lekkernakkie.lekkeradmin.service.freeze;
 
 import me.lekkernakkie.lekkeradmin.LekkerAdmin;
+import me.lekkernakkie.lekkeradmin.config.logs.LogTypeSettings;
 import me.lekkernakkie.lekkeradmin.model.freeze.FrozenPlayer;
+import me.lekkernakkie.lekkeradmin.discord.log.MinecraftBotLogger;
+import me.lekkernakkie.lekkeradmin.discord.log.MinecraftLogDeliveryMode;
+import me.lekkernakkie.lekkeradmin.discord.log.MinecraftLogMessage;
+import me.lekkernakkie.lekkeradmin.discord.log.MinecraftWebhookLogger;
+import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
@@ -10,6 +17,8 @@ import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
+import java.awt.Color;
+import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -19,8 +28,13 @@ public class FreezeService {
     private final Map<UUID, FrozenPlayer> frozenPlayers = new ConcurrentHashMap<>();
     private final Map<UUID, BossBar> bossBars = new ConcurrentHashMap<>();
 
+    private final MinecraftBotLogger botLogger;
+    private final MinecraftWebhookLogger webhookLogger;
+
     public FreezeService(LekkerAdmin plugin) {
         this.plugin = plugin;
+        this.botLogger = new MinecraftBotLogger(plugin);
+        this.webhookLogger = new MinecraftWebhookLogger(plugin);
     }
 
     public boolean isEnabled() {
@@ -131,10 +145,6 @@ public class FreezeService {
 
         hideBossBar(player);
 
-        if (plugin.getConfig().getBoolean("freeze.quit.log", true)) {
-            logQuitWhileFrozen(player);
-        }
-
         if (plugin.getConfig().getBoolean("freeze.quit.notify-staff", true)) {
             String msg = plugin.lang().format(
                     "freeze.quit-while-frozen",
@@ -146,6 +156,8 @@ public class FreezeService {
                     .filter(p -> p.hasPermission("lekkeradmin.freeze.notify") || p.hasPermission("lekkeradmin.admin"))
                     .forEach(p -> p.sendMessage(msg));
         }
+
+        logQuitWhileFrozen(player);
 
         if (!plugin.getConfig().getBoolean("freeze.quit.keep-frozen-on-rejoin", true)) {
             frozenPlayers.remove(player.getUniqueId());
@@ -300,24 +312,202 @@ public class FreezeService {
     }
 
     private void logFreeze(Player target, FrozenPlayer frozenPlayer) {
-        if (!plugin.getConfig().getBoolean("freeze.enabled", true)) {
+        LogTypeSettings settings = plugin.getConfigManager().getLogsConfig().getFreezeLogs();
+        if (settings == null || !settings.isEnabled()) {
+            return;
+        }
+        if (!plugin.getConfigManager().getLogsConfig().isFreezeLogFreezeEnabled()) {
             return;
         }
 
-        plugin.getLogger().info("[Freeze] " + frozenPlayer.getActorName() + " froze " + target.getName() + " reason=" + frozenPlayer.getReason());
+        String title = plugin.lang().get("freeze.log-freeze-title", "Freeze");
+        String description = plugin.lang().format(
+                "freeze.log-freeze-description",
+                "{actor} heeft {player} gefreezed.",
+                Map.of(
+                        "actor", frozenPlayer.getActorName(),
+                        "player", target.getName()
+                )
+        );
+
+        sendLog(settings, buildLogMessage(
+                settings,
+                target,
+                frozenPlayer.getActorName(),
+                frozenPlayer.getReason(),
+                "FREEZE",
+                title,
+                description,
+                "#3498DB"
+        ));
     }
 
     private void logUnfreeze(Player target, FrozenPlayer frozenPlayer, Player actor) {
+        LogTypeSettings settings = plugin.getConfigManager().getLogsConfig().getFreezeLogs();
+        if (settings == null || !settings.isEnabled()) {
+            return;
+        }
+        if (!plugin.getConfigManager().getLogsConfig().isFreezeLogUnfreezeEnabled()) {
+            return;
+        }
+
         String actorName = actor != null ? actor.getName() : "Console";
-        plugin.getLogger().info("[Freeze] " + actorName + " unfroze " + target.getName());
+        String title = plugin.lang().get("freeze.log-unfreeze-title", "Unfreeze");
+        String description = plugin.lang().format(
+                "freeze.log-unfreeze-description",
+                "{actor} heeft {player} ge-unfreezed.",
+                Map.of(
+                        "actor", actorName,
+                        "player", target.getName()
+                )
+        );
+
+        sendLog(settings, buildLogMessage(
+                settings,
+                target,
+                actorName,
+                frozenPlayer.getReason(),
+                "UNFREEZE",
+                title,
+                description,
+                "#2ECC71"
+        ));
     }
 
     private void logQuitWhileFrozen(Player player) {
-        plugin.getLogger().warning("[Freeze] " + player.getName() + " quit while frozen");
+        LogTypeSettings settings = plugin.getConfigManager().getLogsConfig().getFreezeLogs();
+        if (settings == null || !settings.isEnabled()) {
+            return;
+        }
+        if (!plugin.getConfig().getBoolean("freeze.quit.log", true)) {
+            return;
+        }
+        if (!plugin.getConfigManager().getLogsConfig().isFreezeLogQuitEnabled()) {
+            return;
+        }
+
+        FrozenPlayer frozen = getFrozen(player);
+        String actorName = frozen != null ? frozen.getActorName() : "Onbekend";
+        String reason = frozen != null ? frozen.getReason() : "/";
+
+        String title = plugin.lang().get("freeze.log-quit-title", "Quit While Frozen");
+        String description = plugin.lang().format(
+                "freeze.log-quit-description",
+                "{player} heeft de server verlaten terwijl hij gefreezed was.",
+                Map.of("player", player.getName())
+        );
+
+        sendLog(settings, buildLogMessage(
+                settings,
+                player,
+                actorName,
+                reason,
+                "QUIT_WHILE_FROZEN",
+                title,
+                description,
+                "#E74C3C"
+        ));
     }
 
     private void logRejoinRestore(Player player) {
-        plugin.getLogger().info("[Freeze] Restored frozen state for " + player.getName());
+        LogTypeSettings settings = plugin.getConfigManager().getLogsConfig().getFreezeLogs();
+        if (settings == null || !settings.isEnabled()) {
+            return;
+        }
+        if (!plugin.getConfigManager().getLogsConfig().isFreezeLogRestoreEnabled()) {
+            return;
+        }
+
+        FrozenPlayer frozen = getFrozen(player);
+        String actorName = frozen != null ? frozen.getActorName() : "Onbekend";
+        String reason = frozen != null ? frozen.getReason() : "/";
+
+        String title = plugin.lang().get("freeze.log-restore-title", "Freeze Restored");
+        String description = plugin.lang().format(
+                "freeze.log-restore-description",
+                "{player} kreeg zijn freeze-status terug bij relog.",
+                Map.of("player", player.getName())
+        );
+
+        sendLog(settings, buildLogMessage(
+                settings,
+                player,
+                actorName,
+                reason,
+                "REJOIN_RESTORE",
+                title,
+                description,
+                "#9B59B6"
+        ));
+    }
+
+    private MinecraftLogMessage buildLogMessage(LogTypeSettings settings,
+                                                Player player,
+                                                String actorName,
+                                                String reason,
+                                                String source,
+                                                String title,
+                                                String description,
+                                                String fallbackColor) {
+
+        if (!settings.isUseEmbeds()) {
+            String plain = player.getName()
+                    + " | " + title
+                    + " | actor=" + actorName
+                    + " | reden=" + reason
+                    + " | wereld=" + player.getWorld().getName()
+                    + " | xyz=" + formatLocation(player.getLocation())
+                    + " | gamemode=" + prettyGamemode(player.getGameMode())
+                    + " | source=" + source;
+            return new MinecraftLogMessage(plain, null, null);
+        }
+
+        EmbedBuilder embed = new EmbedBuilder();
+        embed.setTitle(title);
+        embed.setDescription(description);
+        embed.setColor(parseJavaColor(settings.getEmbedConfig().getColor(), fallbackColor));
+        embed.setFooter(settings.getEmbedConfig().getFooter());
+
+        if (settings.getEmbedConfig().isUseTimestamp()) {
+            embed.setTimestamp(Instant.now());
+        }
+
+        embed.addField(settings.getEmbedConfig().getFields().getPlayer(), player.getName(), true);
+        embed.addField(settings.getEmbedConfig().getFields().getActor(), actorName, true);
+        embed.addField(settings.getEmbedConfig().getFields().getReason(), reason, false);
+
+        if (settings.getEmbedConfig().isShowWorld()) {
+            embed.addField(settings.getEmbedConfig().getFields().getWorld(), player.getWorld().getName(), true);
+        }
+
+        if (settings.getEmbedConfig().isShowCoordinates()) {
+            embed.addField(settings.getEmbedConfig().getFields().getCoordinates(), formatLocation(player.getLocation()), true);
+        }
+
+        embed.addField(settings.getEmbedConfig().getFields().getGamemode(), prettyGamemode(player.getGameMode()), true);
+        embed.addField(settings.getEmbedConfig().getFields().getSource(), source, true);
+
+        if (settings.getEmbedConfig().isShowPlayerHeadThumbnail()) {
+            String uuid = player.getUniqueId().toString().replace("-", "");
+            embed.setThumbnail("https://crafatar.com/avatars/" + uuid + "?overlay=true");
+        }
+
+        MessageEmbed built = embed.build();
+        return new MinecraftLogMessage("", built, null);
+    }
+
+    private void sendLog(LogTypeSettings settings, MinecraftLogMessage message) {
+        MinecraftLogDeliveryMode mode = MinecraftLogDeliveryMode.fromString(settings.getDeliveryMode());
+
+        switch (mode) {
+            case BOT -> botLogger.send(settings, message);
+            case WEBHOOK -> webhookLogger.send(settings, message);
+            case BOTH -> {
+                botLogger.send(settings, message);
+                webhookLogger.send(settings, message);
+            }
+            case NONE -> plugin.debug("Freeze log skipped: delivery mode NONE.");
+        }
     }
 
     public String formatLocation(Location location) {
@@ -330,5 +520,37 @@ public class FreezeService {
     public String getGamemode(Player player) {
         GameMode gameMode = player.getGameMode();
         return gameMode != null ? gameMode.name() : "-";
+    }
+
+    private String prettyGamemode(GameMode gameMode) {
+        String lower = gameMode.name().toLowerCase(Locale.ROOT);
+        String[] parts = lower.split("_");
+        StringBuilder builder = new StringBuilder();
+
+        for (String part : parts) {
+            if (part.isBlank()) {
+                continue;
+            }
+
+            if (builder.length() > 0) {
+                builder.append(' ');
+            }
+
+            builder.append(Character.toUpperCase(part.charAt(0))).append(part.substring(1));
+        }
+
+        return builder.toString();
+    }
+
+    private Color parseJavaColor(String input, String fallback) {
+        try {
+            return Color.decode(input);
+        } catch (Exception ex) {
+            try {
+                return Color.decode(fallback);
+            } catch (Exception ignored) {
+                return new Color(0x3498DB);
+            }
+        }
     }
 }

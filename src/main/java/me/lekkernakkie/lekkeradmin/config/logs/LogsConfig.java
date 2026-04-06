@@ -70,6 +70,10 @@ public class LogsConfig {
         return loadType("vanish");
     }
 
+    public LogTypeSettings getFreezeLogs() {
+        return loadType("freeze");
+    }
+
     public boolean isVanishLogEnableEnabled() {
         return config.getBoolean("logs.vanish.flags.log-enable", true);
     }
@@ -80,6 +84,22 @@ public class LogsConfig {
 
     public boolean isVanishLogRestoreEnabled() {
         return config.getBoolean("logs.vanish.flags.log-rejoin-restore", true);
+    }
+
+    public boolean isFreezeLogFreezeEnabled() {
+        return config.getBoolean("logs.freeze.flags.log-freeze", true);
+    }
+
+    public boolean isFreezeLogUnfreezeEnabled() {
+        return config.getBoolean("logs.freeze.flags.log-unfreeze", true);
+    }
+
+    public boolean isFreezeLogQuitEnabled() {
+        return config.getBoolean("logs.freeze.flags.log-quit-while-frozen", true);
+    }
+
+    public boolean isFreezeLogRestoreEnabled() {
+        return config.getBoolean("logs.freeze.flags.log-rejoin-restore", true);
     }
 
     private LogTypeSettings loadType(String path) {
@@ -112,6 +132,8 @@ public class LogsConfig {
 
         LogFieldConfig fieldConfig = new LogFieldConfig(
                 getString(root + ".embed.fields.player", defaults + ".embed.fields.player", "Speler"),
+                getString(root + ".embed.fields.actor", defaults + ".embed.fields.actor", "Staff"),
+                getString(root + ".embed.fields.source", defaults + ".embed.fields.source", "Actie"),
                 getString(root + ".embed.fields.world", defaults + ".embed.fields.world", "Wereld"),
                 getString(root + ".embed.fields.coordinates", defaults + ".embed.fields.coordinates", "Coördinaten"),
                 getString(root + ".embed.fields.item", defaults + ".embed.fields.item", "Items"),

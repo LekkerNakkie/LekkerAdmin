@@ -26,8 +26,7 @@ public class FreezeListener implements Listener {
     private boolean shouldIgnore(Player player) {
         return player == null
                 || !freezeService.isFrozen(player)
-                || player.hasPermission("lekkeradmin.freeze.bypass")
-                || player.hasPermission("lekkeradmin.admin");
+                || player.hasPermission("lekkeradmin.freeze.bypass");
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
