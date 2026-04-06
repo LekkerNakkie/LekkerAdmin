@@ -2,6 +2,7 @@ package me.lekkernakkie.lekkeradmin.discord;
 
 import me.lekkernakkie.lekkeradmin.LekkerAdmin;
 import me.lekkernakkie.lekkeradmin.config.DCBotConfig;
+import me.lekkernakkie.lekkeradmin.discord.bridge.DiscordBridgeService;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.OnlineStatus;
 import net.dv8tion.jda.api.entities.Activity;
@@ -14,6 +15,7 @@ public class DiscordManager {
     private final JDA jda;
     private final DCBotConfig config;
     private final DiscordRegistrar registrar;
+    private final DiscordBridgeService bridgeService;
 
     private DiscordStatusRotator statusRotator;
 
@@ -22,12 +24,14 @@ public class DiscordManager {
         this.jda = jda;
         this.config = plugin.getConfigManager().getDcBotConfig();
         this.registrar = new DiscordRegistrar(plugin, jda);
+        this.bridgeService = new DiscordBridgeService(plugin, jda);
     }
 
     public void start() {
         applyPresence();
         registrar.registerListeners();
         registrar.registerSlashCommands();
+        bridgeService.registerService();
     }
 
     public void shutdown() {
@@ -35,6 +39,8 @@ public class DiscordManager {
             statusRotator.stop();
             statusRotator = null;
         }
+
+        bridgeService.shutdown();
 
         if (jda != null) {
             jda.shutdown();
@@ -88,5 +94,9 @@ public class DiscordManager {
 
     public DiscordRegistrar getRegistrar() {
         return registrar;
+    }
+
+    public DiscordBridgeService getBridgeService() {
+        return bridgeService;
     }
 }
