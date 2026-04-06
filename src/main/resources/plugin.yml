@@ -85,6 +85,14 @@ commands:
     usage: /vanish
     aliases: [v]
 
+  freeze:
+    description: Freeze a player
+    usage: /freeze <player>
+
+  unfreeze:
+    description: Unfreeze a player
+    usage: /unfreeze <player>
+
 permissions:
   lekkeradmin.admin:
     description: Full access to LekkerAdmin
@@ -200,4 +208,20 @@ permissions:
 
   lekkeradmin.vanish.see:
     description: See vanished staff
+    default: op
+
+  lekkeradmin.freeze:
+    description: Freeze players
+    default: op
+
+  lekkeradmin.unfreeze:
+    description: Unfreeze players
+    default: op
+
+  lekkeradmin.freeze.notify:
+    description: Receive freeze notifications
+    default: op
+
+  lekkeradmin.freeze.bypass:
+    description: Bypass freeze restrictions
     default: op

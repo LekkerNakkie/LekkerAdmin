@@ -10,6 +10,8 @@ import me.lekkernakkie.lekkeradmin.discord.log.*;
 import me.lekkernakkie.lekkeradmin.hook.*;
 import me.lekkernakkie.lekkeradmin.listener.MaintenanceLoginListener;
 import me.lekkernakkie.lekkeradmin.listener.VanishListener;
+import me.lekkernakkie.lekkeradmin.listener.freeze.FreezeJoinQuitListener;
+import me.lekkernakkie.lekkeradmin.listener.freeze.FreezeListener;
 import me.lekkernakkie.lekkeradmin.listener.inventory.PendingChangesPlayerListener;
 import me.lekkernakkie.lekkeradmin.listener.invsee.InvseeClickListener;
 import me.lekkernakkie.lekkeradmin.listener.invsee.InvseeCloseListener;
@@ -20,6 +22,7 @@ import me.lekkernakkie.lekkeradmin.punishment.listener.*;
 import me.lekkernakkie.lekkeradmin.punishment.service.*;
 import me.lekkernakkie.lekkeradmin.service.MaintenanceService;
 import me.lekkernakkie.lekkeradmin.service.RestartService;
+import me.lekkernakkie.lekkeradmin.service.freeze.FreezeService;
 import me.lekkernakkie.lekkeradmin.service.invsee.InvseeService;
 import me.lekkernakkie.lekkeradmin.service.log.ExplosionTrackerService;
 import me.lekkernakkie.lekkeradmin.service.vanish.VanishService;
@@ -55,6 +58,7 @@ public class LekkerAdmin extends JavaPlugin {
     private MaintenanceService maintenanceService;
     private ExplosionTrackerService explosionTrackerService;
     private VanishService vanishService;
+    private FreezeService freezeService;
 
     @Override
     public void onEnable() {
@@ -151,6 +155,7 @@ public class LekkerAdmin extends JavaPlugin {
         this.maintenanceService = new MaintenanceService(this);
         this.explosionTrackerService = new ExplosionTrackerService(this);
         this.vanishService = new VanishService(this);
+        this.freezeService = new FreezeService(this);
     }
 
     private void startRuntimeServices() {
@@ -176,6 +181,10 @@ public class LekkerAdmin extends JavaPlugin {
 
         if (vanishService != null) {
             vanishService.shutdown();
+        }
+
+        if (freezeService != null) {
+            freezeService.shutdown();
         }
 
         if (discordManager != null) {
@@ -253,6 +262,20 @@ public class LekkerAdmin extends JavaPlugin {
             vanish.setExecutor(new VanishCommand(this));
         }
 
+        PluginCommand freeze = getCommand("freeze");
+        if (freeze == null) {
+            getLogger().warning("Command 'freeze' not found in plugin.yml");
+        } else {
+            freeze.setExecutor(new FreezeCommand(this));
+        }
+
+        PluginCommand unfreeze = getCommand("unfreeze");
+        if (unfreeze == null) {
+            getLogger().warning("Command 'unfreeze' not found in plugin.yml");
+        } else {
+            unfreeze.setExecutor(new UnfreezeCommand(this));
+        }
+
         PluginCommand nextRestart = getCommand("nextrestart");
         if (nextRestart == null) {
             getLogger().warning("Command 'nextrestart' not found in plugin.yml");
@@ -312,6 +335,8 @@ public class LekkerAdmin extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new PendingChangesPlayerListener(this), this);
         getServer().getPluginManager().registerEvents(new MaintenanceLoginListener(this), this);
         getServer().getPluginManager().registerEvents(new VanishListener(this), this);
+        getServer().getPluginManager().registerEvents(new FreezeListener(this), this);
+        getServer().getPluginManager().registerEvents(new FreezeJoinQuitListener(this), this);
     }
 
     private void startDiscord() {
@@ -356,6 +381,7 @@ public class LekkerAdmin extends JavaPlugin {
         console("&bEnderchest&7: &f" + (configManager.getMainConfig().isEnderchestEnabled() ? "Enabled" : "Disabled"));
         console("&bWhois&7: &f" + (configManager.getMainConfig().isWhoisEnabled() ? "Enabled" : "Disabled"));
         console("&bVanish&7: &f" + (configManager.getMainConfig().isVanishEnabled() ? "Enabled" : "Disabled"));
+        console("&bFreeze&7: &f" + (getConfig().getBoolean("freeze.enabled", true) ? "Enabled" : "Disabled"));
         console("&bRestart&7: &f" + (configManager.getMainConfig().isRestartEnabled() ? "Enabled" : "Disabled"));
         console("&bMaintenance&7: &f" + (configManager.getMainConfig().isMaintenanceEnabled() ? "Enabled" : "Disabled"));
         console("&b&m--------------------------------------------------------");
@@ -450,5 +476,9 @@ public class LekkerAdmin extends JavaPlugin {
 
     public VanishService getVanishService() {
         return vanishService;
+    }
+
+    public FreezeService getFreezeService() {
+        return freezeService;
     }
 }

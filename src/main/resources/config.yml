@@ -179,3 +179,39 @@ vanish:
 
   logging:
     enabled: true
+
+freeze:
+  enabled: true
+  block:
+    movement: true
+    rotation-only-allowed: true
+    commands: true
+    drop-items: true
+    pickup-items: true
+    inventory-click: true
+    interact: true
+    block-break: true
+    block-place: true
+    damage-deal: true
+    damage-take: false
+    teleport: true
+  commands-whitelist:
+    - "msg"
+    - "r"
+    - "reply"
+  chat-reminder:
+    enabled: true
+    interval-seconds: 15
+  bossbar:
+    enabled: true
+    color: "RED"
+    style: "SOLID"
+    progress: 1.0
+  quit:
+    log: true
+    notify-staff: true
+    keep-frozen-on-rejoin: true
+  messages:
+    send-chat-on-freeze: true
+    send-chat-on-unfreeze: true
+    send-bossbar-on-freeze: true

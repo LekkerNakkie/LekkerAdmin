@@ -442,3 +442,42 @@ logs:
         coordinates: "Coördinaten"
         reason: "Bron"
         gamemode: "Gamemode"
+
+freeze:
+  enabled: true
+  use-embeds: true
+  delivery-mode: "BOT"
+
+  flags:
+    log-freeze: true
+    log-unfreeze: true
+    log-quit-while-frozen: true
+    log-rejoin-restore: true
+
+  bot:
+    channel-id: ""
+
+  webhook:
+    url: ""
+    username: "Freeze Logs"
+    avatar-url: ""
+
+  embed:
+    title: "Freeze"
+    description: ""
+    color: "#3498DB"
+    footer: "LekkerAdmin • Freeze"
+    use-timestamp: true
+    show-player-head-thumbnail: true
+    show-world: true
+    show-coordinates: true
+    max-field-length: 1024
+
+    fields:
+      player: "Speler"
+      actor: "Staff"
+      world: "Wereld"
+      coordinates: "Coördinaten"
+      reason: "Reden"
+      source: "Actie"
+      gamemode: "Gamemode"
