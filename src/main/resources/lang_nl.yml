@@ -71,10 +71,12 @@ admin:
     header: "&8&m----------------------------------------"
     title: "&9LekkerAdmin &7- Tools"
     invsee: "&7/la invsee <speler> &8- &bBekijk inventory van speler"
-    enderchest: "&7/la enderchest <speler> &8- &bBekijk enderchest van speler"
-    planrestart: "&7/la planrestart <time> <reden...> &8- &bPlan een restart"
-    cancelrestart: "&7/la cancelrestart &8- &bAnnuleer geplande restart"
-    maintenance: "&7/la maintenancemode &8- &bToggle maintenance mode"
+    enderchest: "&7/enderchest <speler> &8- &bBekijk enderchest van speler"
+    planrestart: "&7/planrestart <time> <reden...> &8- &bPlan een restart"
+    cancelrestart: "&7/cancelrestart &8- &bAnnuleer geplande restart"
+    maintenance: "&7/maintenancemode &8- &bToggle maintenance mode"
+    whois: "&7/whois <speler> [pagina] &8- &bBekijk uitgebreide spelerinfo"
+    vanish: "&7/vanish, /v &8- &bToggle vanish mode"
     footer: "&8&m----------------------------------------"
 
   punishment-help:

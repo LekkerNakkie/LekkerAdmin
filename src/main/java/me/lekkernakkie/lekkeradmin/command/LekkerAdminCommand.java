@@ -75,19 +75,33 @@ public class LekkerAdminCommand implements CommandExecutor {
 
         if (sender.hasPermission("lekkeradmin.invsee") || sender.hasPermission("lekkeradmin.admin")) {
             sender.sendMessage(plugin.lang().get("admin.tools.invsee", "&7/la invsee <speler> &8- &bBekijk inventory van speler"));
+            sender.sendMessage(plugin.lang().get("admin.tools.invsee-alias", "&7/invsee <speler> &8- &bAlias voor invsee"));
         }
 
         if (sender.hasPermission("lekkeradmin.enderchest") || sender.hasPermission("lekkeradmin.admin")) {
             sender.sendMessage(plugin.lang().get("admin.tools.enderchest", "&7/la enderchest <speler> &8- &bBekijk enderchest van speler"));
+            sender.sendMessage(plugin.lang().get("admin.tools.enderchest-alias", "&7/enderchest <speler> &8- &bAlias voor enderchest"));
+        }
+
+        if (sender.hasPermission("lekkeradmin.whois") || sender.hasPermission("lekkeradmin.admin")) {
+            sender.sendMessage(plugin.lang().get("admin.tools.whois", "&7/whois <speler> [pagina] &8- &bBekijk uitgebreide spelerinfo"));
+        }
+
+        if (sender.hasPermission("lekkeradmin.vanish") || sender.hasPermission("lekkeradmin.admin")) {
+            sender.sendMessage(plugin.lang().get("admin.tools.vanish", "&7/vanish &8- &bToggle vanish mode"));
+            sender.sendMessage(plugin.lang().get("admin.tools.vanish-alias", "&7/v &8- &bKorte alias voor vanish"));
         }
 
         if (sender.hasPermission("lekkeradmin.restart") || sender.hasPermission("lekkeradmin.admin")) {
             sender.sendMessage(plugin.lang().get("admin.tools.planrestart", "&7/la planrestart <time> <reden...> &8- &bPlan een restart"));
             sender.sendMessage(plugin.lang().get("admin.tools.cancelrestart", "&7/la cancelrestart &8- &bAnnuleer geplande restart"));
+            sender.sendMessage(plugin.lang().get("admin.tools.planrestart-alias", "&7/planrestart <time> <reden...> &8- &bAlias voor planrestart"));
+            sender.sendMessage(plugin.lang().get("admin.tools.cancelrestart-alias", "&7/cancelrestart &8- &bAlias voor cancelrestart"));
         }
 
         if (sender.hasPermission("lekkeradmin.maintenance") || sender.hasPermission("lekkeradmin.admin")) {
             sender.sendMessage(plugin.lang().get("admin.tools.maintenance", "&7/la maintenancemode &8- &bToggle maintenance mode"));
+            sender.sendMessage(plugin.lang().get("admin.tools.maintenance-alias", "&7/maintenance &8- &bAlias voor maintenance mode"));
         }
 
         sender.sendMessage(plugin.lang().get("admin.tools.footer", "&8&m----------------------------------------"));
