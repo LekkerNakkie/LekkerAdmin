@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.HashMap;
 
 public class LangConfig {
 
@@ -49,54 +50,54 @@ public class LangConfig {
         return get("general.prefix", "&7[&9LekkerAdmin&7] ");
     }
 
+    public String getSectionPrefix(String section) {
+        return get(section + ".prefix", "");
+    }
+
     public String message(String path, String fallback) {
-        return withPrefix(get(path, fallback));
+        return get(path, fallback);
     }
 
     public List<String> messageList(String path, List<String> fallback) {
-        List<String> lines = getList(path, fallback);
-        if (lines.isEmpty()) {
-            return lines;
-        }
-
-        List<String> result = new ArrayList<>(lines.size());
-        String prefix = getPrefix();
-
-        for (int i = 0; i < lines.size(); i++) {
-            if (i == 0) {
-                result.add(prefix + lines.get(i));
-            } else {
-                result.add(lines.get(i));
-            }
-        }
-
-        return result;
-    }
-
-    public String withPrefix(String message) {
-        return getPrefix() + message;
+        return getList(path, fallback);
     }
 
     public String format(String path, String fallback, Map<String, String> placeholders) {
-        return applyPlaceholders(get(path, fallback), placeholders);
+        return StringUtil.colorize(applyPlaceholders(getRaw(path, fallback), placeholders));
     }
 
     public String formatMessage(String path, String fallback, Map<String, String> placeholders) {
-        return withPrefix(format(path, fallback, placeholders));
+        return format(path, fallback, placeholders);
     }
 
     public List<String> formatMessageList(String path, List<String> fallback, Map<String, String> placeholders) {
-        List<String> lines = getList(path, fallback);
-        List<String> result = new ArrayList<>(lines.size());
+        List<String> lines = config.getStringList(path);
+        List<String> source = (lines == null || lines.isEmpty()) ? fallback : lines;
 
-        for (int i = 0; i < lines.size(); i++) {
-            String line = applyPlaceholders(lines.get(i), placeholders);
-            if (i == 0) {
-                result.add(getPrefix() + line);
-            } else {
-                result.add(line);
-            }
+        if (source == null) {
+            return Collections.emptyList();
         }
+
+        List<String> result = new ArrayList<>(source.size());
+        for (String line : source) {
+            result.add(StringUtil.colorize(applyPlaceholders(line, placeholders)));
+        }
+        return result;
+    }
+
+    public Map<String, String> withPrefixes(Map<String, String> placeholders) {
+        Map<String, String> result = new HashMap<>();
+        if (placeholders != null) {
+            result.putAll(placeholders);
+        }
+
+        result.putIfAbsent("prefix", getPrefix());
+        result.putIfAbsent("general-prefix", getPrefix());
+        result.putIfAbsent("restart-prefix", getSectionPrefix("restart"));
+        result.putIfAbsent("punishments-prefix", getSectionPrefix("punishments"));
+        result.putIfAbsent("vanish-prefix", getSectionPrefix("vanish"));
+        result.putIfAbsent("whois-prefix", getSectionPrefix("whois"));
+        result.putIfAbsent("maintenance-prefix", getSectionPrefix("maintenance"));
 
         return result;
     }

@@ -23,7 +23,11 @@ public class RestartAliasCommand implements CommandExecutor, TabCompleter {
     }
 
     @Override
-    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
+    public boolean onCommand(@NotNull CommandSender sender,
+                             @NotNull Command command,
+                             @NotNull String label,
+                             @NotNull String[] args) {
+
         if (command.getName().equalsIgnoreCase("planrestart")) {
             String[] forwarded = new String[args.length + 1];
             forwarded[0] = "planrestart";
@@ -32,7 +36,9 @@ public class RestartAliasCommand implements CommandExecutor, TabCompleter {
         }
 
         if (command.getName().equalsIgnoreCase("cancelrestart")) {
-            String[] forwarded = new String[]{"cancelrestart"};
+            String[] forwarded = new String[args.length + 1];
+            forwarded[0] = "cancelrestart";
+            System.arraycopy(args, 0, forwarded, 1, args.length);
             return cancelRestartCommand.execute(sender, forwarded);
         }
 
@@ -43,7 +49,7 @@ public class RestartAliasCommand implements CommandExecutor, TabCompleter {
     public List<String> onTabComplete(@NotNull CommandSender sender,
                                       @NotNull Command command,
                                       @NotNull String alias,
-                                      String[] args) {
+                                      @NotNull String[] args) {
 
         List<String> completions = new ArrayList<>();
 
@@ -58,6 +64,12 @@ public class RestartAliasCommand implements CommandExecutor, TabCompleter {
             addIfMatches(completions, args[0], "2h");
             addIfMatches(completions, args[0], "1h30m");
             addIfMatches(completions, args[0], "1d");
+        }
+
+        if (command.getName().equalsIgnoreCase("cancelrestart") && args.length == 1) {
+            addIfMatches(completions, args[0], "1");
+            addIfMatches(completions, args[0], "2");
+            addIfMatches(completions, args[0], "3");
         }
 
         return completions;

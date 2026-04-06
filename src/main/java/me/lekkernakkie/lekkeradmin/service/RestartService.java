@@ -31,6 +31,7 @@ public class RestartService {
     private String scheduledBy;
 
     private final Set<Long> announcedSeconds = new HashSet<>();
+    private final Set<ZonedDateTime> skippedAutoRestarts = new HashSet<>();
 
     public RestartService(LekkerAdmin plugin) {
         this.plugin = plugin;
@@ -48,6 +49,7 @@ public class RestartService {
         }
 
         clearScheduledRestart();
+        skippedAutoRestarts.clear();
     }
 
     public boolean scheduleManualRestart(CommandSender sender, String timeInput, String reason) {
@@ -83,17 +85,16 @@ public class RestartService {
 
         sender.sendMessage(plugin.lang().formatMessage(
                 "restart.planned",
-                "&7Restart gepland over &b{time}&7. Reden: &b{reason}&7. Uitvoering om &b{target-time}&7.",
+                "&7Restart gepland over &b{time}&7. Reden: &b{reason}",
                 Map.of(
                         "time", getRemainingFormatted(),
-                        "reason", this.scheduledReason,
-                        "target-time", formatTargetTime(target)
+                        "reason", this.scheduledReason
                 )
         ));
         return true;
     }
 
-    public boolean cancelRestart(CommandSender sender) {
+    private boolean cancelManualRestart(CommandSender sender) {
         if (scheduledAt == null || !manualRestart) {
             sender.sendMessage(plugin.lang().message(
                     "restart.none-running",
@@ -111,6 +112,60 @@ public class RestartService {
         ));
 
         scheduleNextAutoRestartIfNeeded();
+        return true;
+    }
+
+    public boolean cancelUpcomingRestart(CommandSender sender, int index) {
+        if (index <= 0) {
+            sender.sendMessage(plugin.lang().message(
+                    "restart.cancel-invalid-index",
+                    "&cOngeldige restart index. Gebruik bv: &b/cancelrestart 2"
+            ));
+            return false;
+        }
+
+        List<UpcomingRestart> upcoming = getUpcomingRestarts(Math.max(3, index));
+        if (upcoming.size() < index) {
+            sender.sendMessage(plugin.lang().formatMessage(
+                    "restart.cancel-index-not-found",
+                    "&cEr is geen komende restart met index &b{index}&c.",
+                    Map.of("index", String.valueOf(index))
+            ));
+            return false;
+        }
+
+        UpcomingRestart selected = upcoming.get(index - 1);
+
+        if (selected.manual()) {
+            if (scheduledAt != null && manualRestart && scheduledAt.equals(selected.time())) {
+                return cancelManualRestart(sender);
+            }
+
+            sender.sendMessage(plugin.lang().formatMessage(
+                    "restart.cancel-index-not-found",
+                    "&cEr is geen komende restart met index &b{index}&c.",
+                    Map.of("index", String.valueOf(index))
+            ));
+            return false;
+        }
+
+        skippedAutoRestarts.add(selected.time());
+
+        if (scheduledAt != null && !manualRestart && scheduledAt.equals(selected.time())) {
+            clearScheduledRestart();
+            scheduleNextAutoRestartIfNeeded();
+        }
+
+        sender.sendMessage(plugin.lang().formatMessage(
+                "restart.cancelled-auto-once",
+                "&7Automatische restart &b#{index} &7werd eenmalig &cgeskipt&7. Gepland moment: &b{target-time}&7.",
+                Map.of(
+                        "index", String.valueOf(index),
+                        "target-time", formatTargetTime(selected.time())
+                )
+        ));
+
+        plugin.debug("Auto restart occurrence skipped door " + sender.getName() + ": " + selected.time());
         return true;
     }
 
@@ -147,6 +202,60 @@ public class RestartService {
         }
 
         return formatDuration(remaining.getSeconds());
+    }
+
+    public String formatDurationUntil(ZonedDateTime target) {
+        if (target == null) {
+            return "-";
+        }
+
+        long seconds = Duration.between(ZonedDateTime.now(getZoneId()), target).getSeconds();
+        if (seconds <= 0) {
+            return "nu";
+        }
+
+        return formatDuration(seconds);
+    }
+
+    public String formatTargetTime(ZonedDateTime targetTime) {
+        if (targetTime == null) {
+            return "-";
+        }
+        return targetTime.format(TARGET_TIME_FORMAT);
+    }
+
+    public List<UpcomingRestart> getUpcomingRestarts(int limit) {
+        List<UpcomingRestart> result = new ArrayList<>();
+        ZoneId zoneId = getZoneId();
+        ZonedDateTime now = ZonedDateTime.now(zoneId);
+
+        pruneSkippedAutoRestarts(now);
+
+        if (scheduledAt != null) {
+            result.add(new UpcomingRestart(scheduledAt, scheduledReason, manualRestart, scheduledBy));
+        }
+
+        List<ZonedDateTime> autoCandidates = findNextAutoRestarts(limit + 5);
+        for (ZonedDateTime autoTime : autoCandidates) {
+            if (scheduledAt != null && scheduledAt.equals(autoTime)) {
+                continue;
+            }
+
+            result.add(new UpcomingRestart(
+                    autoTime,
+                    plugin.getConfigManager().getMainConfig().getAutoRestartDefaultReason(),
+                    false,
+                    "AUTO"
+            ));
+        }
+
+        result.sort(Comparator.comparing(UpcomingRestart::time));
+
+        if (result.size() > limit) {
+            return new ArrayList<>(result.subList(0, limit));
+        }
+
+        return result;
     }
 
     private void tick() {
@@ -253,7 +362,14 @@ public class RestartService {
 
         plugin.debug("Restart wordt uitgevoerd. Type=" + actionType + ", command=" + command + ", reason=" + scheduledReason);
 
+        ZonedDateTime executedAt = scheduledAt;
+        boolean executedManual = manualRestart;
+
         clearScheduledRestart();
+
+        if (!executedManual && executedAt != null) {
+            skippedAutoRestarts.remove(executedAt);
+        }
 
         if ("command".equals(actionType)) {
             if (!command.isBlank()) {
@@ -293,46 +409,71 @@ public class RestartService {
     }
 
     private ZonedDateTime findNextAutoRestart() {
-        MainConfig config = plugin.getConfigManager().getMainConfig();
+        List<ZonedDateTime> candidates = findNextAutoRestarts(1);
+        return candidates.isEmpty() ? null : candidates.get(0);
+    }
 
+    private List<ZonedDateTime> findNextAutoRestarts(int amount) {
+        MainConfig config = plugin.getConfigManager().getMainConfig();
         List<String> configuredTimes = config.getAutoRestartTimes();
-        if (configuredTimes.isEmpty()) {
-            return null;
+
+        if (configuredTimes.isEmpty() || amount <= 0) {
+            return Collections.emptyList();
         }
 
         ZoneId zoneId = getZoneId();
         ZonedDateTime now = ZonedDateTime.now(zoneId);
+        pruneSkippedAutoRestarts(now);
 
-        ZonedDateTime best = null;
-
+        List<LocalTime> localTimes = new ArrayList<>();
         for (String raw : configuredTimes) {
             if (raw == null || raw.isBlank()) {
                 continue;
             }
 
-            LocalTime localTime;
             try {
-                localTime = LocalTime.parse(raw.trim());
+                localTimes.add(LocalTime.parse(raw.trim()));
             } catch (Exception ex) {
                 plugin.getLogger().warning("Ongeldige restart.auto.times waarde in config.yml: " + raw);
-                continue;
-            }
-
-            ZonedDateTime candidate = now.withHour(localTime.getHour())
-                    .withMinute(localTime.getMinute())
-                    .withSecond(0)
-                    .withNano(0);
-
-            if (!candidate.isAfter(now)) {
-                candidate = candidate.plusDays(1);
-            }
-
-            if (best == null || candidate.isBefore(best)) {
-                best = candidate;
             }
         }
 
-        return best;
+        localTimes.sort(Comparator.naturalOrder());
+
+        List<ZonedDateTime> results = new ArrayList<>();
+        int daysChecked = 0;
+
+        while (results.size() < amount && daysChecked < 30) {
+            ZonedDateTime dayBase = now.plusDays(daysChecked);
+
+            for (LocalTime localTime : localTimes) {
+                ZonedDateTime candidate = dayBase.withHour(localTime.getHour())
+                        .withMinute(localTime.getMinute())
+                        .withSecond(0)
+                        .withNano(0);
+
+                if (!candidate.isAfter(now)) {
+                    continue;
+                }
+
+                if (skippedAutoRestarts.contains(candidate)) {
+                    continue;
+                }
+
+                results.add(candidate);
+                if (results.size() >= amount) {
+                    break;
+                }
+            }
+
+            daysChecked++;
+        }
+
+        return results;
+    }
+
+    private void pruneSkippedAutoRestarts(ZonedDateTime now) {
+        skippedAutoRestarts.removeIf(time -> !time.isAfter(now));
     }
 
     private void clearScheduledRestart() {
@@ -378,7 +519,7 @@ public class RestartService {
         return Duration.ofSeconds(seconds);
     }
 
-    private String formatDuration(long totalSeconds) {
+    public String formatDuration(long totalSeconds) {
         if (totalSeconds <= 0) {
             return "nu";
         }
@@ -417,13 +558,6 @@ public class RestartService {
         return String.join(" ", parts);
     }
 
-    private String formatTargetTime(ZonedDateTime targetTime) {
-        if (targetTime == null) {
-            return "-";
-        }
-        return targetTime.format(TARGET_TIME_FORMAT) + " " + getZoneId().getId();
-    }
-
     private ZoneId getZoneId() {
         MainConfig config = plugin.getConfigManager().getMainConfig();
 
@@ -433,5 +567,13 @@ public class RestartService {
             plugin.getLogger().warning("Ongeldige timezone in config.yml: " + config.getRestartTimezone() + ". Fallback naar Europe/Brussels.");
             return ZoneId.of("Europe/Brussels");
         }
+    }
+
+    public record UpcomingRestart(
+            ZonedDateTime time,
+            String reason,
+            boolean manual,
+            String scheduledBy
+    ) {
     }
 }

@@ -32,6 +32,10 @@ commands:
     description: Cancel a planned restart
     usage: /cancelrestart
 
+  nextrestart:
+    description: Toon de volgende 3 restarts
+    usage: /nextrestart
+
   maintenance:
     description: Toggle maintenance mode
     usage: /maintenance

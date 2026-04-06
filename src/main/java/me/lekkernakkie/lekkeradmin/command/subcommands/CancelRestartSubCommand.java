@@ -20,7 +20,21 @@ public class CancelRestartSubCommand {
             return true;
         }
 
-        plugin.getRestartService().cancelRestart(sender);
+        int index = 1;
+
+        if (args.length >= 2) {
+            try {
+                index = Integer.parseInt(args[1]);
+            } catch (NumberFormatException ignored) {
+                sender.sendMessage(plugin.lang().message(
+                        "restart.cancel-invalid-index",
+                        "&cOngeldige restart index. Gebruik bv: &b/cancelrestart 2"
+                ));
+                return true;
+            }
+        }
+
+        plugin.getRestartService().cancelUpcomingRestart(sender, index);
         return true;
     }
 }

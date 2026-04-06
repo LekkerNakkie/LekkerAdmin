@@ -29,6 +29,7 @@ import org.bukkit.command.PluginCommand;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.event.HandlerList;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.ChatColor;
 
 import java.io.File;
 import java.util.Map;
@@ -251,6 +252,13 @@ public class LekkerAdmin extends JavaPlugin {
             vanish.setExecutor(new VanishCommand(this));
         }
 
+        PluginCommand nextRestart = getCommand("nextrestart");
+        if (nextRestart == null) {
+            getLogger().warning("Command 'nextrestart' not found in plugin.yml");
+        } else {
+            nextRestart.setExecutor(new NextRestartCommand(this));
+        }
+
         BanCommand banCommand = new BanCommand(this);
         UnbanCommand unbanCommand = new UnbanCommand(this);
         MuteCommand muteCommand = new MuteCommand(this);
@@ -349,7 +357,6 @@ public class LekkerAdmin extends JavaPlugin {
         console("&bVanish&7: &f" + (configManager.getMainConfig().isVanishEnabled() ? "Enabled" : "Disabled"));
         console("&bRestart&7: &f" + (configManager.getMainConfig().isRestartEnabled() ? "Enabled" : "Disabled"));
         console("&bMaintenance&7: &f" + (configManager.getMainConfig().isMaintenanceEnabled() ? "Enabled" : "Disabled"));
-        console("&bExplosionLogs&7: &f" + (configManager.getLogsConfig() != null && configManager.getLogsConfig().getExplosionLogs().isEnabled() ? "Enabled" : "Disabled"));
         console("&b&m--------------------------------------------------------");
     }
 
@@ -366,8 +373,10 @@ public class LekkerAdmin extends JavaPlugin {
         }
     }
 
+
+
     private void console(String message) {
-        Bukkit.getConsoleSender().sendMessage(message);
+        Bukkit.getConsoleSender().sendMessage(ChatColor.translateAlternateColorCodes('&', message));
     }
 
     public LangConfig lang() {

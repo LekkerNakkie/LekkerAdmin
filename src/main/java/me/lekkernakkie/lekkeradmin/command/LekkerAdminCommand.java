@@ -91,7 +91,8 @@ public class LekkerAdminCommand implements CommandExecutor {
 
         if (sender.hasPermission("lekkeradmin.restart") || sender.hasPermission("lekkeradmin.admin")) {
             sender.sendMessage(plugin.lang().get("admin.tools.planrestart", "&7/planrestart <time> <reden...> &8- &bPlan een restart"));
-            sender.sendMessage(plugin.lang().get("admin.tools.cancelrestart", "&7/cancelrestart &8- &bAnnuleer geplande restart"));
+            sender.sendMessage(plugin.lang().get("admin.tools.cancelrestart", "&7/cancelrestart [index] &8- &bAnnuleer manual restart of skip 1 auto restart"));
+            sender.sendMessage(plugin.lang().get("admin.tools.nextrestart", "&7/nextrestart &8- &bToon de volgende 3 restarts"));
         }
 
         if (sender.hasPermission("lekkeradmin.maintenance") || sender.hasPermission("lekkeradmin.admin")) {

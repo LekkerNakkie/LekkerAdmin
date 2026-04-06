@@ -73,7 +73,8 @@ admin:
     invsee: "&7/la invsee <speler> &8- &bBekijk inventory van speler"
     enderchest: "&7/enderchest <speler> &8- &bBekijk enderchest van speler"
     planrestart: "&7/planrestart <time> <reden...> &8- &bPlan een restart"
-    cancelrestart: "&7/cancelrestart &8- &bAnnuleer geplande restart"
+    nextrestart: "&7/nextrestart &8- &bToon de volgende 3 restarts"
+    cancelrestart: "&7/cancelrestart [id] &8- &bAnnuleer de eerstvolgende restart of skip een komende auto restart"
     maintenance: "&7/maintenancemode &8- &bToggle maintenance mode"
     whois: "&7/whois <speler> [pagina] &8- &bBekijk uitgebreide spelerinfo"
     vanish: "&7/vanish, /v &8- &bToggle vanish mode"
@@ -142,12 +143,23 @@ restart:
   title-main: "&7Restart over &b{time}"
   title-sub: "&7Reden: &b{reason}"
   kick-message: "&cServer restart!\n\n&7Reden: &b{reason}\n&7Je kan direct terug joinen."
-  planned: "&7Restart gepland over &b{time}&7. Reden: &b{reason}&7. Uitvoering om &b{target-time}&7."
+  planned: "&7Restart gepland over &b{time}&7. Reden: &b{reason}"
   cancelled: "&7De geplande restart is &cgeannuleerd&7."
   none-running: "&cEr is momenteel geen restart gepland."
   already-planned: "&cEr is al een restart gepland en overschrijven is uitgeschakeld."
   invalid-time: "&cOngeldige tijd&7. Gebruik bv: &b10s&7, &b5m&7, &b2h&7, &b1h30m"
   usage: "&7Gebruik: &b/planrestart <time> <reden...>"
+  cancel-invalid-index: "&cOngeldige restart index. Gebruik bv: &b/cancelrestart 2"
+  cancel-index-not-found: "&cEr is geen komende restart met index &b{index}&c."
+  cancelled-auto-once: "&7Automatische restart &b#{index} &7werd eenmalig &cgeskipt&7."
+
+nextrestart:
+  header: "&8&m----------------------------------------"
+  title: "&9Volgende Restarts"
+  none: "&7Er zijn momenteel geen komende restarts gevonden."
+  entry: "&7#&b{index} &8- &b{type} &8- &7{when} &8- &b{remaining}"
+  entry-reason: "&8  &7Reden: &b{reason}"
+  footer: "&8&m----------------------------------------"
 
 # =========================================================
 #  Punishments
