@@ -11,9 +11,36 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Send message to Discord
+      - name: Send embed to Discord
         run: |
           curl -H "Content-Type: application/json" \
           -X POST \
-          -d "{\"content\":\"🔧 Nieuwe update in **${{ github.repository }}** door **${{ github.actor }}**\nBranch: **${{ github.ref_name }}**\nCommit: **${{ github.event.head_commit.message }}**\n${{ github.event.head_commit.url }}\"}" \
+          -d "{
+            \"embeds\": [{
+              \"title\": \"🚀 Nieuwe GitHub Update\",
+              \"description\": \"**${{ github.repository }}**\",
+              \"color\": 3447003,
+              \"fields\": [
+                {
+                  \"name\": \"👤 Auteur\",
+                  \"value\": \"${{ github.actor }}\",
+                  \"inline\": true
+                },
+                {
+                  \"name\": \"🌿 Branch\",
+                  \"value\": \"${{ github.ref_name }}\",
+                  \"inline\": true
+                },
+                {
+                  \"name\": \"💬 Commit\",
+                  \"value\": \"${{ github.event.head_commit.message }}\"
+                }
+              ],
+              \"url\": \"${{ github.event.head_commit.url }}\",
+              \"footer\": {
+                \"text\": \"Sakurahelm Dev Logs\"
+              },
+              \"timestamp\": \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"
+            }]
+          }" \
           ${{ secrets.DISCORD_WEBHOOK }}
