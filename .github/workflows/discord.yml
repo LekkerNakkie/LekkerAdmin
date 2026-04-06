@@ -1,0 +1,19 @@
+name: Discord Updates
+
+on:
+  push:
+    branches:
+      - main
+      - master
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Send message to Discord
+        run: |
+          curl -H "Content-Type: application/json" \
+          -X POST \
+          -d "{\"content\":\"🔧 Nieuwe update in **${{ github.repository }}** door **${{ github.actor }}**\nBranch: **${{ github.ref_name }}**\nCommit: **${{ github.event.head_commit.message }}**\n${{ github.event.head_commit.url }}\"}" \
+          ${{ secrets.DISCORD_WEBHOOK }}
