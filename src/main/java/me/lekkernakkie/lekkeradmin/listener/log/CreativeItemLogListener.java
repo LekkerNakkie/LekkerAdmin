@@ -1,5 +1,11 @@
 package me.lekkernakkie.lekkeradmin.listener.log;
 
+import com.comphenix.protocol.PacketType;
+import com.comphenix.protocol.ProtocolLibrary;
+import com.comphenix.protocol.ProtocolManager;
+import com.comphenix.protocol.events.ListenerPriority;
+import com.comphenix.protocol.events.PacketAdapter;
+import com.comphenix.protocol.events.PacketEvent;
 import me.lekkernakkie.lekkeradmin.LekkerAdmin;
 import me.lekkernakkie.lekkeradmin.config.logs.LogTypeSettings;
 import me.lekkernakkie.lekkeradmin.discord.log.MinecraftBotLogger;
@@ -19,16 +25,19 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryCreativeEvent;
+import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerGameModeChangeEvent;
+import org.bukkit.event.player.PlayerItemHeldEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerSwapHandItemsEvent;
-import org.bukkit.event.player.PlayerItemHeldEvent;
 import org.bukkit.event.server.PluginDisableEvent;
+import org.bukkit.event.server.ServerCommandEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitTask;
 
 import java.awt.Color;
+import java.lang.reflect.Field;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.EnumMap;
@@ -40,8 +49,8 @@ import java.util.UUID;
 
 public class CreativeItemLogListener implements Listener {
 
-    private static final long SCAN_PERIOD_TICKS = 10L;      // 0.5s
-    private static final long IDLE_FLUSH_TICKS = 40L;       // 2s zonder veranderingen
+    private static final long SCAN_PERIOD_TICKS = 10L;
+    private static final long IDLE_FLUSH_TICKS = 40L;
 
     private final LekkerAdmin plugin;
     private final MinecraftBotLogger botLogger;
@@ -54,7 +63,9 @@ public class CreativeItemLogListener implements Listener {
         this.plugin = plugin;
         this.botLogger = new MinecraftBotLogger(plugin);
         this.webhookLogger = new MinecraftWebhookLogger(plugin);
+
         startScanner();
+        registerProtocolListeners();
     }
 
     private void startScanner() {
@@ -74,13 +85,83 @@ public class CreativeItemLogListener implements Listener {
         }
     }
 
-    private void scanCreativePlayers() {
-        if (plugin.getConfigManager() == null || plugin.getConfigManager().getLogsConfig() == null) {
+    private void registerProtocolListeners() {
+        try {
+            ProtocolManager manager = ProtocolLibrary.getProtocolManager();
+            if (manager == null) {
+                plugin.debug("CreativeItemLogListener: ProtocolManager unavailable.");
+                return;
+            }
+
+            registerPacketIfPresent(manager, "SET_CREATIVE_SLOT", "CREATIVE_SLOT_PACKET");
+            registerPacketIfPresent(manager, "PICK_ITEM", "PICK_ITEM");
+            registerPacketIfPresent(manager, "PICK_ITEM_FROM_BLOCK", "PICK_ITEM_FROM_BLOCK");
+            registerPacketIfPresent(manager, "PICK_ITEM_FROM_ENTITY", "PICK_ITEM_FROM_ENTITY");
+        } catch (Throwable throwable) {
+            plugin.getLogger().warning("Could not register ProtocolLib creative item listeners: " + throwable.getMessage());
+        }
+    }
+
+    private void registerPacketIfPresent(ProtocolManager manager, String packetFieldName, String sourceName) {
+        PacketType packetType = getClientPacketType(packetFieldName);
+        if (packetType == null) {
+            plugin.debug("CreativeItemLogListener: PacketType.Play.Client." + packetFieldName + " not available.");
             return;
         }
 
-        LogTypeSettings settings = plugin.getConfigManager().getLogsConfig().getCreativeItemsLogs();
-        if (settings == null || !settings.isEnabled()) {
+        manager.addPacketListener(new PacketAdapter(plugin, ListenerPriority.MONITOR, packetType) {
+            @Override
+            public void onPacketReceiving(PacketEvent event) {
+                handleTrackedPacket(event, sourceName);
+            }
+        });
+
+        plugin.debug("CreativeItemLogListener: registered packet listener for " + packetFieldName + ".");
+    }
+
+    private PacketType getClientPacketType(String fieldName) {
+        try {
+            Field field = PacketType.Play.Client.class.getField(fieldName);
+            Object value = field.get(null);
+            if (value instanceof PacketType packetType) {
+                return packetType;
+            }
+        } catch (Throwable ignored) {
+        }
+        return null;
+    }
+
+    private void handleTrackedPacket(PacketEvent event, String sourceName) {
+        Player player = event.getPlayer();
+        if (player == null || !player.isOnline()) {
+            return;
+        }
+
+        if (player.getGameMode() != GameMode.CREATIVE) {
+            return;
+        }
+
+        LogTypeSettings settings = getSettings();
+        if (settings == null) {
+            return;
+        }
+
+        if (isIgnoredWorld(player.getWorld().getName(), settings)) {
+            return;
+        }
+
+        PlayerCreativeTracker tracker = trackers.computeIfAbsent(
+                player.getUniqueId(),
+                ignored -> new PlayerCreativeTracker(player.getUniqueId(), snapshotInventory(player))
+        );
+
+        tracker.lastSource = sourceName;
+        tracker.lastChangeAt = System.currentTimeMillis();
+    }
+
+    private void scanCreativePlayers() {
+        LogTypeSettings settings = getSettings();
+        if (settings == null) {
             return;
         }
 
@@ -97,25 +178,24 @@ public class CreativeItemLogListener implements Listener {
 
             PlayerCreativeTracker tracker = trackers.computeIfAbsent(
                     player.getUniqueId(),
-                    ignored -> new PlayerCreativeTracker(
-                            player.getUniqueId(),
-                            snapshotInventory(player)
-                    )
+                    ignored -> new PlayerCreativeTracker(player.getUniqueId(), snapshotInventory(player))
             );
 
             Map<Material, Integer> current = snapshotInventory(player);
             ChangeSet changeSet = computeDiff(tracker.lastSnapshot, current, settings);
 
             if (!changeSet.spawned.isEmpty() || !changeSet.removed.isEmpty()) {
-                mergeLines(tracker.pendingSpawned, changeSet.spawned);
-                mergeLines(tracker.pendingRemoved, changeSet.removed);
+                mergeCounts(tracker.pendingSpawned, changeSet.spawned);
+                mergeCounts(tracker.pendingRemoved, changeSet.removed);
 
-                if (!changeSet.spawned.isEmpty() && changeSet.removed.isEmpty()) {
-                    tracker.lastSource = "INSPAWNED";
-                } else if (changeSet.spawned.isEmpty() && !changeSet.removed.isEmpty()) {
-                    tracker.lastSource = "REMOVED";
-                } else {
-                    tracker.lastSource = "MIXED";
+                if ("UNKNOWN".equals(tracker.lastSource) || tracker.lastSource == null || tracker.lastSource.isBlank()) {
+                    if (!changeSet.spawned.isEmpty() && changeSet.removed.isEmpty()) {
+                        tracker.lastSource = "INSPAWNED";
+                    } else if (changeSet.spawned.isEmpty() && !changeSet.removed.isEmpty()) {
+                        tracker.lastSource = "REMOVED";
+                    } else {
+                        tracker.lastSource = "MIXED";
+                    }
                 }
 
                 tracker.lastChangeAt = now;
@@ -133,7 +213,7 @@ public class CreativeItemLogListener implements Listener {
     }
 
     private long idleMillis() {
-        return (IDLE_FLUSH_TICKS * 50L);
+        return IDLE_FLUSH_TICKS * 50L;
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
@@ -146,7 +226,7 @@ public class CreativeItemLogListener implements Listener {
             return;
         }
 
-        ensureTracker(player);
+        ensureTracker(player, "CREATIVE_MENU");
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
@@ -159,7 +239,7 @@ public class CreativeItemLogListener implements Listener {
             return;
         }
 
-        ensureTracker(player);
+        ensureTracker(player, "CREATIVE_MENU");
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
@@ -169,7 +249,7 @@ public class CreativeItemLogListener implements Listener {
             return;
         }
 
-        ensureTracker(player);
+        ensureTracker(player, "HOTBAR_CHANGE");
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
@@ -179,7 +259,7 @@ public class CreativeItemLogListener implements Listener {
             return;
         }
 
-        ensureTracker(player);
+        ensureTracker(player, "SWAP_HANDS");
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
@@ -206,15 +286,17 @@ public class CreativeItemLogListener implements Listener {
         ChangeSet changeSet = computeDiff(tracker.lastSnapshot, current, settings);
 
         if (!changeSet.spawned.isEmpty() || !changeSet.removed.isEmpty()) {
-            mergeLines(tracker.pendingSpawned, changeSet.spawned);
-            mergeLines(tracker.pendingRemoved, changeSet.removed);
+            mergeCounts(tracker.pendingSpawned, changeSet.spawned);
+            mergeCounts(tracker.pendingRemoved, changeSet.removed);
 
-            if (!changeSet.spawned.isEmpty() && changeSet.removed.isEmpty()) {
-                tracker.lastSource = "INSPAWNED";
-            } else if (changeSet.spawned.isEmpty() && !changeSet.removed.isEmpty()) {
-                tracker.lastSource = "REMOVED";
-            } else {
-                tracker.lastSource = "MIXED";
+            if ("UNKNOWN".equals(tracker.lastSource) || tracker.lastSource == null || tracker.lastSource.isBlank()) {
+                if (!changeSet.spawned.isEmpty() && changeSet.removed.isEmpty()) {
+                    tracker.lastSource = "INSPAWNED";
+                } else if (changeSet.spawned.isEmpty() && !changeSet.removed.isEmpty()) {
+                    tracker.lastSource = "REMOVED";
+                } else {
+                    tracker.lastSource = "MIXED";
+                }
             }
 
             tracker.lastSnapshot = current;
@@ -242,15 +324,17 @@ public class CreativeItemLogListener implements Listener {
         ChangeSet changeSet = computeDiff(tracker.lastSnapshot, current, settings);
 
         if (!changeSet.spawned.isEmpty() || !changeSet.removed.isEmpty()) {
-            mergeLines(tracker.pendingSpawned, changeSet.spawned);
-            mergeLines(tracker.pendingRemoved, changeSet.removed);
+            mergeCounts(tracker.pendingSpawned, changeSet.spawned);
+            mergeCounts(tracker.pendingRemoved, changeSet.removed);
 
-            if (!changeSet.spawned.isEmpty() && changeSet.removed.isEmpty()) {
-                tracker.lastSource = "INSPAWNED";
-            } else if (changeSet.spawned.isEmpty() && !changeSet.removed.isEmpty()) {
-                tracker.lastSource = "REMOVED";
-            } else {
-                tracker.lastSource = "MIXED";
+            if ("UNKNOWN".equals(tracker.lastSource) || tracker.lastSource == null || tracker.lastSource.isBlank()) {
+                if (!changeSet.spawned.isEmpty() && changeSet.removed.isEmpty()) {
+                    tracker.lastSource = "INSPAWNED";
+                } else if (changeSet.spawned.isEmpty() && !changeSet.removed.isEmpty()) {
+                    tracker.lastSource = "REMOVED";
+                } else {
+                    tracker.lastSource = "MIXED";
+                }
             }
 
             tracker.lastSnapshot = current;
@@ -264,7 +348,7 @@ public class CreativeItemLogListener implements Listener {
     public void onJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
         if (player.getGameMode() == GameMode.CREATIVE) {
-            ensureTracker(player);
+            ensureTracker(player, "JOIN_CREATIVE");
         }
     }
 
@@ -273,7 +357,7 @@ public class CreativeItemLogListener implements Listener {
         Player player = event.getPlayer();
 
         if (event.getNewGameMode() == GameMode.CREATIVE) {
-            Bukkit.getScheduler().runTask(plugin, () -> ensureTracker(player));
+            Bukkit.getScheduler().runTask(plugin, () -> ensureTracker(player, "ENTER_CREATIVE"));
             return;
         }
 
@@ -284,14 +368,18 @@ public class CreativeItemLogListener implements Listener {
         }
 
         PlayerCreativeTracker tracker = trackers.get(player.getUniqueId());
-        if (tracker != null) {
-            Map<Material, Integer> current = snapshotInventory(player);
-            ChangeSet changeSet = computeDiff(tracker.lastSnapshot, current, settings);
+        if (tracker == null) {
+            return;
+        }
 
-            if (!changeSet.spawned.isEmpty() || !changeSet.removed.isEmpty()) {
-                mergeLines(tracker.pendingSpawned, changeSet.spawned);
-                mergeLines(tracker.pendingRemoved, changeSet.removed);
+        Map<Material, Integer> current = snapshotInventory(player);
+        ChangeSet changeSet = computeDiff(tracker.lastSnapshot, current, settings);
 
+        if (!changeSet.spawned.isEmpty() || !changeSet.removed.isEmpty()) {
+            mergeCounts(tracker.pendingSpawned, changeSet.spawned);
+            mergeCounts(tracker.pendingRemoved, changeSet.removed);
+
+            if ("UNKNOWN".equals(tracker.lastSource) || tracker.lastSource == null || tracker.lastSource.isBlank()) {
                 if (!changeSet.spawned.isEmpty() && changeSet.removed.isEmpty()) {
                     tracker.lastSource = "INSPAWNED";
                 } else if (changeSet.spawned.isEmpty() && !changeSet.removed.isEmpty()) {
@@ -300,10 +388,10 @@ public class CreativeItemLogListener implements Listener {
                     tracker.lastSource = "MIXED";
                 }
             }
-
-            flushTracker(player, tracker, settings);
-            trackers.remove(player.getUniqueId());
         }
+
+        flushTracker(player, tracker, settings);
+        trackers.remove(player.getUniqueId());
     }
 
     @EventHandler
@@ -314,14 +402,84 @@ public class CreativeItemLogListener implements Listener {
         }
     }
 
-    private void ensureTracker(Player player) {
-        trackers.computeIfAbsent(
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onPlayerCommand(PlayerCommandPreprocessEvent event) {
+        LogTypeSettings settings = getSettings();
+        if (settings == null || !plugin.getConfigManager().getLogsConfig().isGiveCommandLogEnabled()) {
+            return;
+        }
+
+        Player actor = event.getPlayer();
+        GiveParseResult parsed = parsePlayerGiveCommand(actor, event.getMessage());
+        if (parsed == null || parsed.target() == null) {
+            return;
+        }
+
+        Player target = parsed.target();
+        if (isIgnoredWorld(target.getWorld().getName(), settings) || isIgnoredMaterial(parsed.material(), settings)) {
+            return;
+        }
+
+        scheduleGiveDeltaCapture(target, settings, "GIVE_COMMAND_PLAYER", "actor=" + actor.getName() + " | command=" + parsed.rawCommand());
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onServerCommand(ServerCommandEvent event) {
+        LogTypeSettings settings = getSettings();
+        if (settings == null || !plugin.getConfigManager().getLogsConfig().isGiveCommandLogEnabled()) {
+            return;
+        }
+
+        GiveParseResult parsed = parseServerGiveCommand(event.getSender(), event.getCommand());
+        if (parsed == null || parsed.target() == null) {
+            return;
+        }
+
+        Player target = parsed.target();
+        if (isIgnoredWorld(target.getWorld().getName(), settings) || isIgnoredMaterial(parsed.material(), settings)) {
+            return;
+        }
+
+        scheduleGiveDeltaCapture(target, settings, "GIVE_COMMAND_CONSOLE", "actor=" + parsed.actorName() + " | command=" + parsed.rawCommand());
+    }
+
+    private void scheduleGiveDeltaCapture(Player target, LogTypeSettings settings, String source, String details) {
+        Map<Material, Integer> before = snapshotInventory(target);
+
+        Bukkit.getScheduler().runTaskLater(plugin, () -> {
+            if (!target.isOnline()) {
+                return;
+            }
+
+            Map<Material, Integer> after = snapshotInventory(target);
+            ChangeSet diff = computeDiff(before, after, settings);
+
+            if (diff.spawned.isEmpty() && diff.removed.isEmpty()) {
+                return;
+            }
+
+            MinecraftLogMessage message = buildCreativeSummaryMessage(
+                    settings,
+                    target,
+                    diff.spawned,
+                    diff.removed,
+                    source,
+                    details
+            );
+
+            sendLog(settings, message);
+        }, 2L);
+    }
+
+    private void ensureTracker(Player player, String source) {
+        PlayerCreativeTracker tracker = trackers.computeIfAbsent(
                 player.getUniqueId(),
-                ignored -> new PlayerCreativeTracker(
-                        player.getUniqueId(),
-                        snapshotInventory(player)
-                )
+                ignored -> new PlayerCreativeTracker(player.getUniqueId(), snapshotInventory(player))
         );
+
+        if (tracker.lastSource == null || tracker.lastSource.isBlank() || "UNKNOWN".equals(tracker.lastSource)) {
+            tracker.lastSource = source;
+        }
     }
 
     private LogTypeSettings getSettings() {
@@ -347,13 +505,14 @@ public class CreativeItemLogListener implements Listener {
                 player,
                 tracker.pendingSpawned,
                 tracker.pendingRemoved,
-                tracker.lastSource
+                tracker.lastSource,
+                "creative inventory delta"
         );
 
         sendLog(settings, message);
         tracker.pendingSpawned.clear();
         tracker.pendingRemoved.clear();
-        tracker.lastSource = "MIXED";
+        tracker.lastSource = "UNKNOWN";
         tracker.lastChangeAt = 0L;
     }
 
@@ -361,7 +520,8 @@ public class CreativeItemLogListener implements Listener {
                                                             Player player,
                                                             Map<Material, Integer> spawned,
                                                             Map<Material, Integer> removed,
-                                                            String source) {
+                                                            String source,
+                                                            String details) {
 
         List<String> spawnedLines = toLines(spawned, "+");
         List<String> removedLines = toLines(removed, "-");
@@ -374,11 +534,12 @@ public class CreativeItemLogListener implements Listener {
                 ? "-"
                 : joinLines(removedLines, settings.getEmbedConfig().getMaxFieldLength());
 
-        String finalSource = source == null || source.isBlank() ? "MIXED" : source;
+        String finalSource = source == null || source.isBlank() ? "UNKNOWN" : source;
 
         if (!settings.isUseEmbeds()) {
             String plain = player.getName()
                     + " | source=" + finalSource
+                    + " | details=" + details
                     + " | spawned=" + spawnedText.replace("\n", " | ")
                     + " | removed=" + removedText.replace("\n", " | ")
                     + " | world=" + player.getWorld().getName()
@@ -412,6 +573,7 @@ public class CreativeItemLogListener implements Listener {
         embed.addField(settings.getEmbedConfig().getFields().getSource(), finalSource, true);
         embed.addField("Ingespawned", spawnedText, false);
         embed.addField("Terug weg / verminderd", removedText, false);
+        embed.addField(settings.getEmbedConfig().getFields().getReason(), truncate(details, settings.getEmbedConfig().getMaxFieldLength()), false);
 
         if (settings.getEmbedConfig().isShowPlayerHeadThumbnail()) {
             embed.setThumbnail("https://mc-heads.net/avatar/" + player.getUniqueId());
@@ -465,7 +627,7 @@ public class CreativeItemLogListener implements Listener {
         return counts;
     }
 
-    private void mergeLines(Map<Material, Integer> target, Map<Material, Integer> source) {
+    private void mergeCounts(Map<Material, Integer> target, Map<Material, Integer> source) {
         for (Map.Entry<Material, Integer> entry : source.entrySet()) {
             target.merge(entry.getKey(), entry.getValue(), Integer::sum);
         }
@@ -481,9 +643,84 @@ public class CreativeItemLogListener implements Listener {
         return lines;
     }
 
-    private String resolveTitle(LogTypeSettings settings, String fallback) {
-        String title = settings.getEmbedConfig().getTitle();
-        return title == null || title.isBlank() ? fallback : title;
+    private GiveParseResult parsePlayerGiveCommand(Player actor, String rawMessage) {
+        if (rawMessage == null || rawMessage.isBlank()) {
+            return null;
+        }
+
+        String raw = rawMessage.startsWith("/") ? rawMessage.substring(1) : rawMessage;
+        String[] parts = raw.split("\\s+");
+        if (parts.length < 2) {
+            return null;
+        }
+
+        String command = parts[0].toLowerCase(Locale.ROOT);
+        if (!isGiveCommand(command)) {
+            return null;
+        }
+
+        if (parts.length >= 3) {
+            Player target = Bukkit.getPlayerExact(parts[1]);
+            Material material = parseMaterial(parts[2]);
+
+            if (target != null && material != null) {
+                return new GiveParseResult(target, material, actor.getName(), raw);
+            }
+        }
+
+        Material selfMaterial = parseMaterial(parts[1]);
+        if (selfMaterial != null) {
+            return new GiveParseResult(actor, selfMaterial, actor.getName(), raw);
+        }
+
+        return null;
+    }
+
+    private GiveParseResult parseServerGiveCommand(org.bukkit.command.CommandSender sender, String raw) {
+        if (raw == null || raw.isBlank()) {
+            return null;
+        }
+
+        String[] parts = raw.split("\\s+");
+        if (parts.length < 3) {
+            return null;
+        }
+
+        String command = parts[0].toLowerCase(Locale.ROOT);
+        if (!isGiveCommand(command)) {
+            return null;
+        }
+
+        Player target = Bukkit.getPlayerExact(parts[1]);
+        Material material = parseMaterial(parts[2]);
+
+        if (target == null || material == null) {
+            return null;
+        }
+
+        String actorName = sender != null ? sender.getName() : "Console";
+        return new GiveParseResult(target, material, actorName, raw);
+    }
+
+    private boolean isGiveCommand(String command) {
+        return command.equals("give") || command.equals("minecraft:give");
+    }
+
+    private Material parseMaterial(String input) {
+        if (input == null || input.isBlank()) {
+            return null;
+        }
+
+        String normalized = input.toUpperCase(Locale.ROOT);
+        if (normalized.contains(":")) {
+            normalized = normalized.substring(normalized.indexOf(':') + 1);
+        }
+
+        try {
+            return Material.valueOf(normalized);
+        } catch (Exception ignored) {
+            return null;
+        }
     }
 
     private boolean isIgnoredWorld(String worldName, LogTypeSettings settings) {
@@ -516,6 +753,11 @@ public class CreativeItemLogListener implements Listener {
             }
             case NONE -> plugin.debug("Creative item log skipped: delivery mode NONE.");
         }
+    }
+
+    private String resolveTitle(LogTypeSettings settings, String fallback) {
+        String title = settings.getEmbedConfig().getTitle();
+        return title == null || title.isBlank() ? fallback : title;
     }
 
     private String joinLines(List<String> lines, int maxLength) {
@@ -574,13 +816,25 @@ public class CreativeItemLogListener implements Listener {
         }
     }
 
+    private String truncate(String value, int max) {
+        if (value == null) {
+            return "-";
+        }
+
+        if (max <= 0 || value.length() <= max) {
+            return value;
+        }
+
+        return value.substring(0, max - 3) + "...";
+    }
+
     private static final class PlayerCreativeTracker {
         private final UUID playerUuid;
         private Map<Material, Integer> lastSnapshot;
         private final Map<Material, Integer> pendingSpawned = new EnumMap<>(Material.class);
         private final Map<Material, Integer> pendingRemoved = new EnumMap<>(Material.class);
         private long lastChangeAt;
-        private String lastSource = "MIXED";
+        private String lastSource = "UNKNOWN";
 
         private PlayerCreativeTracker(UUID playerUuid, Map<Material, Integer> lastSnapshot) {
             this.playerUuid = playerUuid;
@@ -589,5 +843,8 @@ public class CreativeItemLogListener implements Listener {
     }
 
     private record ChangeSet(Map<Material, Integer> spawned, Map<Material, Integer> removed) {
+    }
+
+    private record GiveParseResult(Player target, Material material, String actorName, String rawCommand) {
     }
 }
