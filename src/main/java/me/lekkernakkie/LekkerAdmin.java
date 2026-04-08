@@ -328,6 +328,7 @@ public class LekkerAdmin extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new TrackedItemDestroyListener(this), this);
         getServer().getPluginManager().registerEvents(new TrackedItemSpawnLinkListener(this), this);
         getServer().getPluginManager().registerEvents(new ExplosionLogListener(this), this);
+        getServer().getPluginManager().registerEvents(new CreativeItemLogListener(this), this);
 
         getServer().getPluginManager().registerEvents(new InvseeClickListener(this, invseeService), this);
         getServer().getPluginManager().registerEvents(new InvseeDragListener(this, invseeService), this);

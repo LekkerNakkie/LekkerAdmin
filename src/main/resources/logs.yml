@@ -46,6 +46,8 @@ defaults:
 
     fields:
       player: "Speler"
+      actor: "Staff"
+      source: "Actie"
       world: "Wereld"
       coordinates: "Coördinaten"
       item: "Items"
@@ -443,41 +445,89 @@ logs:
         reason: "Bron"
         gamemode: "Gamemode"
 
-freeze:
-  enabled: true
-  use-embeds: true
-  delivery-mode: "BOT"
+  freeze:
+    enabled: true
+    use-embeds: true
+    delivery-mode: "BOT"
 
-  flags:
-    log-freeze: true
-    log-unfreeze: true
-    log-quit-while-frozen: true
-    log-rejoin-restore: true
+    flags:
+      log-freeze: true
+      log-unfreeze: true
+      log-quit-while-frozen: true
+      log-rejoin-restore: true
 
-  bot:
-    channel-id: ""
+    bot:
+      channel-id: ""
 
-  webhook:
-    url: ""
-    username: "Freeze Logs"
-    avatar-url: ""
+    webhook:
+      url: ""
+      username: "Freeze Logs"
+      avatar-url: ""
 
-  embed:
-    title: "Freeze"
-    description: ""
-    color: "#3498DB"
-    footer: "LekkerAdmin • Freeze"
-    use-timestamp: true
-    show-player-head-thumbnail: true
-    show-world: true
-    show-coordinates: true
-    max-field-length: 1024
+    embed:
+      title: "Freeze"
+      description: ""
+      color: "#3498DB"
+      footer: "LekkerAdmin • Freeze"
+      use-timestamp: true
+      show-player-head-thumbnail: true
+      show-world: true
+      show-coordinates: true
+      max-field-length: 1024
 
-    fields:
-      player: "Speler"
-      actor: "Staff"
-      world: "Wereld"
-      coordinates: "Coördinaten"
-      reason: "Reden"
-      source: "Actie"
-      gamemode: "Gamemode"
+      fields:
+        player: "Speler"
+        actor: "Staff"
+        world: "Wereld"
+        coordinates: "Coördinaten"
+        reason: "Reden"
+        source: "Actie"
+        gamemode: "Gamemode"
+
+  creative-items:
+    enabled: true
+    use-embeds: true
+    delivery-mode: "BOT"
+
+    flags:
+      log-creative-menu: true
+      log-creative-clone: true
+      log-give-command: true
+
+    bot:
+      channel-id: ""
+
+    webhook:
+      url: ""
+      username: "Creative Item Logs"
+      avatar-url: ""
+
+    filters:
+      ignored-worlds: []
+      ignored-materials: []
+      only-log-if-enchanted: false
+      min-amount: 1
+      split-large-item-lists: false
+      max-items-shown: 12
+      deduplicate-death-drops: false
+
+    embed:
+      title: "Creative Items"
+      description: ""
+      color: "#F1C40F"
+      footer: "LekkerAdmin • Creative Items"
+      use-timestamp: true
+      show-player-head-thumbnail: true
+      show-world: true
+      show-coordinates: true
+      max-field-length: 1024
+
+      fields:
+        player: "Speler"
+        item: "Item"
+        amount: "Aantal"
+        world: "Wereld"
+        coordinates: "Coördinaten"
+        gamemode: "Gamemode"
+        source: "Bron"
+        reason: "Details"

@@ -74,6 +74,10 @@ public class LogsConfig {
         return loadType("freeze");
     }
 
+    public LogTypeSettings getCreativeItemsLogs() {
+        return loadType("creative-items");
+    }
+
     public boolean isVanishLogEnableEnabled() {
         return config.getBoolean("logs.vanish.flags.log-enable", true);
     }
@@ -100,6 +104,18 @@ public class LogsConfig {
 
     public boolean isFreezeLogRestoreEnabled() {
         return config.getBoolean("logs.freeze.flags.log-rejoin-restore", true);
+    }
+
+    public boolean isCreativeMenuLogEnabled() {
+        return config.getBoolean("logs.creative-items.flags.log-creative-menu", true);
+    }
+
+    public boolean isCreativeCloneLogEnabled() {
+        return config.getBoolean("logs.creative-items.flags.log-creative-clone", true);
+    }
+
+    public boolean isGiveCommandLogEnabled() {
+        return config.getBoolean("logs.creative-items.flags.log-give-command", true);
     }
 
     private LogTypeSettings loadType(String path) {
