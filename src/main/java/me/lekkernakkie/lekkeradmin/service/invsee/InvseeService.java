@@ -4,6 +4,7 @@ import me.lekkernakkie.lekkeradmin.LekkerAdmin;
 import me.lekkernakkie.lekkeradmin.config.MainConfig;
 import me.lekkernakkie.lekkeradmin.model.invsee.InvseeSession;
 import me.lekkernakkie.lekkeradmin.model.invsee.InvseeTargetData;
+import me.lekkernakkie.lekkeradmin.util.LoggerUtil;
 import me.lekkernakkie.lekkeradmin.util.StringUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -89,8 +90,7 @@ public class InvseeService {
                     "&cKon offline inventory niet laden: &7{error}",
                     Map.of("error", ex.getMessage() == null ? "-" : ex.getMessage())
             ));
-            plugin.getLogger().warning("Failed to load offline invsee for " + target.getName() + ": " + ex.getMessage());
-            ex.printStackTrace();
+            LoggerUtil.exception(plugin, java.util.logging.Level.WARNING, "Failed to load offline invsee for " + target.getName() + ".", ex);
         }
     }
 
@@ -137,8 +137,7 @@ public class InvseeService {
                     "&cKon offline enderchest niet laden: &7{error}",
                     Map.of("error", ex.getMessage() == null ? "-" : ex.getMessage())
             ));
-            plugin.getLogger().warning("Failed to load offline enderchest for " + target.getName() + ": " + ex.getMessage());
-            ex.printStackTrace();
+            LoggerUtil.exception(plugin, java.util.logging.Level.WARNING, "Failed to load offline enderchest for " + target.getName() + ".", ex);
         }
     }
 
@@ -172,8 +171,7 @@ public class InvseeService {
                     "&cKon wijzigingen niet opslaan: &7{error}",
                     Map.of("error", ex.getMessage() == null ? "-" : ex.getMessage())
             ));
-            plugin.getLogger().warning("Failed to save session for " + session.getTarget().getName() + ": " + ex.getMessage());
-            ex.printStackTrace();
+            LoggerUtil.exception(plugin, java.util.logging.Level.WARNING, "Failed to save session for " + session.getTarget().getName() + ".", ex);
         } finally {
             unlockOfflineTarget(session);
         }
@@ -215,8 +213,7 @@ public class InvseeService {
 
             logService.logSession(session);
         } catch (Exception ex) {
-            plugin.getLogger().warning("Failed to flush offline invsee session before join for " + joinedPlayer.getName() + ": " + ex.getMessage());
-            ex.printStackTrace();
+            LoggerUtil.exception(plugin, java.util.logging.Level.WARNING, "Failed to flush offline invsee session before join for " + joinedPlayer.getName() + ".", ex);
         } finally {
             sessions.remove(viewerUuid);
             stopLiveSync(viewerUuid);

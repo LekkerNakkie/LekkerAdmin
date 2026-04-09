@@ -6,6 +6,8 @@ import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 
+import java.util.concurrent.TimeUnit;
+
 public class DiscordBootstrap {
 
     private final LekkerAdmin plugin;
@@ -35,7 +37,7 @@ public class DiscordBootstrap {
                     );
 
             JDA jda = builder.build();
-            jda.awaitReady();
+            jda.awaitStatus(JDA.Status.CONNECTED, 20, TimeUnit.SECONDS);
 
             DiscordManager manager = new DiscordManager(plugin, jda);
             manager.start();
@@ -43,8 +45,7 @@ public class DiscordBootstrap {
             plugin.getLogger().info("Discord bot connected successfully.");
             return manager;
         } catch (Exception ex) {
-            plugin.getLogger().severe("Failed to start Discord bot: " + ex.getMessage());
-            ex.printStackTrace();
+            plugin.getLogger().log(java.util.logging.Level.SEVERE, "Failed to start Discord bot.", ex);
             return null;
         }
     }

@@ -3,6 +3,7 @@ package me.lekkernakkie.lekkeradmin.discord.log;
 import me.lekkernakkie.lekkeradmin.LekkerAdmin;
 import me.lekkernakkie.lekkeradmin.config.logs.LogChannelConfig;
 import me.lekkernakkie.lekkeradmin.config.logs.LogTypeSettings;
+import me.lekkernakkie.lekkeradmin.util.LoggerUtil;
 import org.bukkit.Bukkit;
 
 import java.io.InputStream;
@@ -58,8 +59,7 @@ public class MinecraftWebhookLogger {
                 }
 
             } catch (Exception ex) {
-                plugin.getLogger().warning("Failed to send Minecraft webhook log: " + ex.getMessage());
-                ex.printStackTrace();
+                LoggerUtil.exception(plugin, java.util.logging.Level.WARNING, "Failed to send Minecraft webhook log.", ex);
             } finally {
                 if (connection != null) {
                     connection.disconnect();

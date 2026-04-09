@@ -2,6 +2,7 @@ package me.lekkernakkie.lekkeradmin.discord.message;
 
 import me.lekkernakkie.lekkeradmin.LekkerAdmin;
 import me.lekkernakkie.lekkeradmin.config.DCBotConfig;
+import me.lekkernakkie.lekkeradmin.util.LoggerUtil;
 import org.bukkit.Bukkit;
 
 import java.io.OutputStream;
@@ -52,8 +53,7 @@ public class DiscordWebhookService {
 
                 connection.disconnect();
             } catch (Exception ex) {
-                plugin.getLogger().warning("Failed to send Discord webhook: " + ex.getMessage());
-                ex.printStackTrace();
+                LoggerUtil.exception(plugin, java.util.logging.Level.WARNING, "Failed to send Discord webhook.", ex);
             }
         });
     }
