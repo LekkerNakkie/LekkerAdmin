@@ -8,6 +8,7 @@ import me.lekkernakkie.lekkeradmin.command.subcommands.PlanRestartSubCommand;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 public class LekkerAdminCommand implements CommandExecutor {
@@ -28,15 +29,15 @@ public class LekkerAdminCommand implements CommandExecutor {
 
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
-        if (!sender.hasPermission("lekkeradmin.admin") && !sender.hasPermission("lekkeradmin.help")) {
-            sender.sendMessage(plugin.lang().message(
-                    "general.no-permission",
-                    "&cDaar edde gij het lef ni vur.."
-            ));
-            return true;
-        }
-
         if (args.length == 0) {
+            if (!sender.hasPermission("lekkeradmin.admin") && !sender.hasPermission("lekkeradmin.help")) {
+                sender.sendMessage(plugin.lang().message(
+                        "general.no-permission",
+                        "&cDaar edde gij het lef ni vur.."
+                ));
+                return true;
+            }
+
             sendHelp(sender);
             return true;
         }
@@ -44,16 +45,52 @@ public class LekkerAdminCommand implements CommandExecutor {
         String sub = args[0].toLowerCase();
 
         switch (sub) {
-            case "help" -> sendHelp(sender);
-            case "tools" -> sendToolsHelp(sender);
-            case "punishments" -> sendPunishmentHelp(sender);
+            case "help" -> {
+                if (!sender.hasPermission("lekkeradmin.admin") && !sender.hasPermission("lekkeradmin.help")) {
+                    sender.sendMessage(plugin.lang().message(
+                            "general.no-permission",
+                            "&cDaar edde gij het lef ni vur.."
+                    ));
+                    return true;
+                }
+                sendHelp(sender);
+            }
+            case "tools" -> {
+                if (!sender.hasPermission("lekkeradmin.admin") && !sender.hasPermission("lekkeradmin.help")) {
+                    sender.sendMessage(plugin.lang().message(
+                            "general.no-permission",
+                            "&cDaar edde gij het lef ni vur.."
+                    ));
+                    return true;
+                }
+                sendToolsHelp(sender);
+            }
+            case "punishments" -> {
+                if (!sender.hasPermission("lekkeradmin.admin") && !sender.hasPermission("lekkeradmin.help")) {
+                    sender.sendMessage(plugin.lang().message(
+                            "general.no-permission",
+                            "&cDaar edde gij het lef ni vur.."
+                    ));
+                    return true;
+                }
+                sendPunishmentHelp(sender);
+            }
             case "reload" -> handleReload(sender);
             case "invsee" -> invseeCommand.execute(sender, args);
             case "enderchest", "echest" -> enderChestCommand.execute(sender, args);
             case "planrestart" -> planRestartCommand.execute(sender, args);
             case "cancelrestart" -> cancelRestartCommand.execute(sender, args);
             case "maintenancemode", "maintenance" -> handleMaintenanceToggle(sender);
-            default -> sendHelp(sender);
+            default -> {
+                if (!sender.hasPermission("lekkeradmin.admin") && !sender.hasPermission("lekkeradmin.help")) {
+                    sender.sendMessage(plugin.lang().message(
+                            "general.no-permission",
+                            "&cDaar edde gij het lef ni vur.."
+                    ));
+                    return true;
+                }
+                sendHelp(sender);
+            }
         }
 
         return true;
@@ -143,7 +180,12 @@ public class LekkerAdminCommand implements CommandExecutor {
 
         if (enabled) {
             sender.sendMessage(plugin.getMaintenanceService().getToggleOnMessage());
-            plugin.getMaintenanceService().kickNonBypassOnlinePlayers();
+
+            if (sender instanceof Player player) {
+                plugin.getMaintenanceService().kickNonBypassOnlinePlayers(player);
+            } else {
+                plugin.getMaintenanceService().kickNonBypassOnlinePlayers();
+            }
         } else {
             sender.sendMessage(plugin.getMaintenanceService().getToggleOffMessage());
         }

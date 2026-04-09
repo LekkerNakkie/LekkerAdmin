@@ -4,6 +4,8 @@ import me.lekkernakkie.lekkeradmin.LekkerAdmin;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
+import java.util.UUID;
+
 public class MaintenanceService {
 
     private final LekkerAdmin plugin;
@@ -37,15 +39,28 @@ public class MaintenanceService {
     }
 
     public void kickNonBypassOnlinePlayers() {
+        kickNonBypassOnlinePlayers((UUID) null);
+    }
+
+    public void kickNonBypassOnlinePlayers(Player exemptPlayer) {
+        kickNonBypassOnlinePlayers(exemptPlayer == null ? null : exemptPlayer.getUniqueId());
+    }
+
+    public void kickNonBypassOnlinePlayers(UUID exemptPlayerUuid) {
         String kickMessage = plugin.lang().get(
                 "maintenance.kick-online",
                 "&cServer staat in maintenance mode.\n\n&7Probeer later opnieuw."
         );
 
         for (Player player : Bukkit.getOnlinePlayers()) {
+            if (exemptPlayerUuid != null && player.getUniqueId().equals(exemptPlayerUuid)) {
+                continue;
+            }
+
             if (hasBypass(player)) {
                 continue;
             }
+
             player.kickPlayer(kickMessage);
         }
     }

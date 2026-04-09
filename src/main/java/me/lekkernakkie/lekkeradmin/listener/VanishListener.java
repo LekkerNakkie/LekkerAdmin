@@ -2,6 +2,8 @@ package me.lekkernakkie.lekkeradmin.listener;
 
 import me.lekkernakkie.lekkeradmin.LekkerAdmin;
 import me.lekkernakkie.lekkeradmin.service.vanish.VanishService;
+import org.bukkit.Bukkit;
+import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -84,8 +86,33 @@ public class VanishListener implements Listener {
         }
 
         Player player = event.getPlayer();
-        if (vanishService.isVanished(player.getUniqueId())) {
-            event.setCancelled(true);
+        if (!vanishService.isVanished(player.getUniqueId())) {
+            return;
         }
+
+        Item droppedItem = event.getItemDrop();
+
+        Bukkit.getScheduler().runTask(plugin, () -> {
+            if (!droppedItem.isValid()) {
+                return;
+            }
+
+            for (Player viewer : Bukkit.getOnlinePlayers()) {
+                if (viewer.getUniqueId().equals(player.getUniqueId())) {
+                    continue;
+                }
+
+                if (canSeeVanished(viewer)) {
+                    viewer.showEntity(plugin, droppedItem);
+                } else {
+                    viewer.hideEntity(plugin, droppedItem);
+                }
+            }
+        });
+    }
+
+    private boolean canSeeVanished(Player viewer) {
+        return viewer.hasPermission("lekkeradmin.admin")
+                || viewer.hasPermission("lekkeradmin.vanish.see");
     }
 }
