@@ -4,6 +4,7 @@ import me.lekkernakkie.lekkeradmin.LekkerAdmin;
 import me.lekkernakkie.lekkeradmin.config.DCBotConfig;
 import me.lekkernakkie.lekkeradmin.discord.embed.PlayerApplicationEmbedFactory;
 import me.lekkernakkie.lekkeradmin.discord.util.DiscordButtonFactory;
+import me.lekkernakkie.lekkeradmin.util.LoggerUtil;
 import me.lekkernakkie.lekkeradmin.model.application.WhitelistApplication;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageEmbed;
@@ -99,17 +100,14 @@ public class DiscordDmService extends DiscordMessageService {
                                                 .queue(
                                                         success -> {},
                                                         error -> {
-                                                            plugin.getLogger().warning("Failed to send invalid-name DM to " + discordUserId + ": " + error.getMessage());
-                                                            error.printStackTrace();
+                                                            LoggerUtil.exception(plugin, java.util.logging.Level.WARNING, "Failed to send invalid-name DM to " + discordUserId + ".", error);
                                                         }
                                                 ),
                                 error -> {
-                                    plugin.getLogger().warning("Failed to open DM channel for invalid-name message to " + discordUserId + ": " + error.getMessage());
-                                    error.printStackTrace();
+                                    LoggerUtil.exception(plugin, java.util.logging.Level.WARNING, "Failed to open DM channel for invalid-name message to " + discordUserId + ".", error);
                                 }),
                 error -> {
-                    plugin.getLogger().warning("Failed to retrieve Discord user for invalid-name DM: " + discordUserId + ": " + error.getMessage());
-                    error.printStackTrace();
+                    LoggerUtil.exception(plugin, java.util.logging.Level.WARNING, "Failed to retrieve Discord user for invalid-name DM: " + discordUserId + ".", error);
                 });
     }
 
@@ -123,17 +121,14 @@ public class DiscordDmService extends DiscordMessageService {
                                         channel.sendMessageEmbeds(embed).queue(
                                                 success -> {},
                                                 error -> {
-                                                    plugin.getLogger().warning("Failed to send embed DM to " + discordUserId + ": " + error.getMessage());
-                                                    error.printStackTrace();
+                                                    LoggerUtil.exception(plugin, java.util.logging.Level.WARNING, "Failed to send embed DM to " + discordUserId + ".", error);
                                                 }
                                         ),
                                 error -> {
-                                    plugin.getLogger().warning("Failed to open DM channel for embed DM to " + discordUserId + ": " + error.getMessage());
-                                    error.printStackTrace();
+                                    LoggerUtil.exception(plugin, java.util.logging.Level.WARNING, "Failed to open DM channel for embed DM to " + discordUserId + ".", error);
                                 }),
                 error -> {
-                    plugin.getLogger().warning("Failed to retrieve Discord user for embed DM: " + discordUserId + ": " + error.getMessage());
-                    error.printStackTrace();
+                    LoggerUtil.exception(plugin, java.util.logging.Level.WARNING, "Failed to retrieve Discord user for embed DM: " + discordUserId + ".", error);
                 });
     }
 

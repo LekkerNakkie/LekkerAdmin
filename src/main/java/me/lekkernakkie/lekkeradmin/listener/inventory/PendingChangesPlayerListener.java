@@ -1,6 +1,7 @@
 package me.lekkernakkie.lekkeradmin.listener.inventory;
 
 import me.lekkernakkie.lekkeradmin.LekkerAdmin;
+import me.lekkernakkie.lekkeradmin.util.LoggerUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -26,9 +27,7 @@ public class PendingChangesPlayerListener implements Listener {
             try {
                 plugin.getInvseeService().handleTargetJoinWhileOfflineEditing(player);
             } catch (Exception ex) {
-                plugin.getLogger().warning("Failed to flush offline invsee session on join for "
-                        + player.getName() + ": " + ex.getMessage());
-                ex.printStackTrace();
+                LoggerUtil.exception(plugin, java.util.logging.Level.WARNING, "Failed to flush offline invsee session on join for " + player.getName() + ".", ex);
 
                 player.sendMessage(plugin.lang().formatMessage(
                         "invsee.flush-join-failed",

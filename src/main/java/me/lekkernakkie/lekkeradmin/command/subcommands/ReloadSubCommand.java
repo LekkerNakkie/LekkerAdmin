@@ -1,6 +1,7 @@
 package me.lekkernakkie.lekkeradmin.command.subcommands;
 
 import me.lekkernakkie.lekkeradmin.LekkerAdmin;
+import me.lekkernakkie.lekkeradmin.util.LoggerUtil;
 import org.bukkit.command.CommandSender;
 
 public class ReloadSubCommand {
@@ -31,8 +32,7 @@ public class ReloadSubCommand {
                     "general.unknown-error",
                     "&cEr is iets misgelopen."
             ));
-            plugin.getLogger().warning("Reload command failed: " + ex.getMessage());
-            ex.printStackTrace();
+            LoggerUtil.exception(plugin, java.util.logging.Level.WARNING, "Reload command failed.", ex);
         }
 
         return true;
