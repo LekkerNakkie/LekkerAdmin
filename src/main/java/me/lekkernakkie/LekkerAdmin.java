@@ -342,7 +342,19 @@ public class LekkerAdmin extends JavaPlugin {
     }
 
     private void startDiscord() {
-        this.discordManager = new DiscordBootstrap(this).start();
+        Bukkit.getScheduler().runTaskAsynchronously(this, () -> {
+            DiscordManager manager = new DiscordBootstrap(this).start();
+            if (manager == null) {
+                return;
+            }
+
+            if (!isEnabled()) {
+                manager.shutdown();
+                return;
+            }
+
+            this.discordManager = manager;
+        });
     }
 
     private void createDefaultFiles() {

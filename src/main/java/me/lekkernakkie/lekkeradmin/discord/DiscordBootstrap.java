@@ -43,8 +43,7 @@ public class DiscordBootstrap {
             plugin.getLogger().info("Discord bot connected successfully.");
             return manager;
         } catch (Exception ex) {
-            plugin.getLogger().severe("Failed to start Discord bot: " + ex.getMessage());
-            ex.printStackTrace();
+            plugin.getLogger().log(java.util.logging.Level.SEVERE, "Failed to start Discord bot.", ex);
             return null;
         }
     }
