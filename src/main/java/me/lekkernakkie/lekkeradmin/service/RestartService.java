@@ -81,6 +81,16 @@ public class RestartService {
         ZonedDateTime now = ZonedDateTime.now(getZoneId());
         ZonedDateTime target = now.plus(duration);
 
+        UpcomingRestart blockingAutoRestart = findBlockingAutoRestart(target);
+        if (blockingAutoRestart != null) {
+            sender.sendMessage(plugin.lang().format(
+                    "restart.auto-conflict",
+                    "{prefix}&cEr staat al een automatische restart gepland op &b{target-time}&c. Omdat &frestart.auto.skip-if-planned-running &cuit staat, kan je geen latere handmatige restart plannen die deze auto restart zou overschrijven.",
+                    Map.of("target-time", formatTargetTime(blockingAutoRestart.time()))
+            ));
+            return false;
+        }
+
         this.scheduledAt = target;
         this.scheduledReason = (reason == null || reason.isBlank()) ? config.getPlanRestartDefaultReason() : reason;
         this.manualRestart = true;
@@ -234,6 +244,7 @@ public class RestartService {
         List<UpcomingRestart> result = new ArrayList<>();
         ZoneId zoneId = getZoneId();
         ZonedDateTime now = ZonedDateTime.now(zoneId);
+        MainConfig config = plugin.getConfigManager().getMainConfig();
 
         pruneSkippedAutoRestarts(now);
 
@@ -244,6 +255,10 @@ public class RestartService {
         List<ZonedDateTime> autoCandidates = findNextAutoRestarts(limit + 5);
         for (ZonedDateTime autoTime : autoCandidates) {
             if (scheduledAt != null && scheduledAt.equals(autoTime)) {
+                continue;
+            }
+
+            if (manualRestart && scheduledAt != null && config.isAutoRestartSkipIfPlannedRunning() && !autoTime.isAfter(scheduledAt)) {
                 continue;
             }
 
@@ -413,6 +428,27 @@ public class RestartService {
     private ZonedDateTime findNextAutoRestart() {
         List<ZonedDateTime> candidates = findNextAutoRestarts(1);
         return candidates.isEmpty() ? null : candidates.get(0);
+    }
+
+    private UpcomingRestart findBlockingAutoRestart(ZonedDateTime manualTarget) {
+        MainConfig config = plugin.getConfigManager().getMainConfig();
+        if (config.isAutoRestartSkipIfPlannedRunning()) {
+            return null;
+        }
+
+        List<ZonedDateTime> candidates = findNextAutoRestarts(10);
+        for (ZonedDateTime candidate : candidates) {
+            if (candidate.isBefore(manualTarget)) {
+                return new UpcomingRestart(
+                        candidate,
+                        config.getAutoRestartDefaultReason(),
+                        false,
+                        "AUTO"
+                );
+            }
+        }
+
+        return null;
     }
 
     private List<ZonedDateTime> findNextAutoRestarts(int amount) {

@@ -2,6 +2,7 @@ package me.lekkernakkie.lekkeradmin.listener.freeze;
 
 import me.lekkernakkie.lekkeradmin.LekkerAdmin;
 import me.lekkernakkie.lekkeradmin.service.freeze.FreezeService;
+import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -36,14 +37,26 @@ public class FreezeListener implements Listener {
             return;
         }
 
-        if (event.getFrom().getX() == event.getTo().getX()
-                && event.getFrom().getY() == event.getTo().getY()
-                && event.getFrom().getZ() == event.getTo().getZ()) {
+        Location from = event.getFrom();
+        Location to = event.getTo();
+        if (to == null) {
+            event.setCancelled(true);
+            return;
+        }
+
+        boolean positionChanged = from.getX() != to.getX()
+                || from.getY() != to.getY()
+                || from.getZ() != to.getZ();
+
+        if (!positionChanged) {
             return;
         }
 
         if (freezeService.isRotationOnlyAllowed()) {
-            event.setTo(event.getFrom());
+            Location lockedPosition = from.clone();
+            lockedPosition.setYaw(to.getYaw());
+            lockedPosition.setPitch(to.getPitch());
+            event.setTo(lockedPosition);
             return;
         }
 

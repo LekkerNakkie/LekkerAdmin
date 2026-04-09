@@ -1,4 +1,4 @@
-package me.lekkernakkie.lekkeradmin;
+package me.lekkernakkie;
 
 import me.lekkernakkie.lekkeradmin.command.*;
 import me.lekkernakkie.lekkeradmin.config.ConfigManager;
@@ -120,6 +120,7 @@ public class LekkerAdmin extends JavaPlugin {
         this.migrationRunner.runMigrations();
 
         createRuntimeServices();
+        registerHooks();
         registerCommands();
         registerListeners();
         startRuntimeServices();
