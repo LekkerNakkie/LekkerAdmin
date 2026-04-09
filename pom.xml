@@ -142,7 +142,23 @@
                         </goals>
                         <configuration>
                             <createDependencyReducedPom>false</createDependencyReducedPom>
-                            <minimizeJar>false</minimizeJar>
+                            <minimizeJar>true</minimizeJar>
+
+                            <entryPoints>
+                                <entryPoint>me.lekkernakkie.lekkeradmin.LekkerAdmin</entryPoint>
+                            </entryPoints>
+
+                            <artifactSet>
+                                <includes>
+                                    <include>net.dv8tion:JDA</include>
+                                    <include>org.xerial:sqlite-jdbc</include>
+                                    <include>com.mysql:mysql-connector-j</include>
+                                    <include>com.zaxxer:HikariCP</include>
+                                    <include>io.github.jglrxavpok.hephaistos:common</include>
+                                    <include>com.google.code.gson:gson</include>
+                                </includes>
+                            </artifactSet>
+
                             <filters>
                                 <filter>
                                     <artifact>*:*</artifact>
