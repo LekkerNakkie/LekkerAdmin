@@ -18,14 +18,19 @@ import org.bukkit.entity.Player;
 
 import java.awt.Color;
 import java.time.Instant;
-import java.util.*;
-import java.util.logging.Level;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 
 public class VanishService {
 
     private final LekkerAdmin plugin;
     private final Set<UUID> vanishedPlayers = new HashSet<>();
     private final Map<UUID, BossBar> bossBars = new HashMap<>();
+    private final Map<UUID, Boolean> originalPickupState = new HashMap<>();
 
     private final MinecraftBotLogger botLogger;
     private final MinecraftWebhookLogger webhookLogger;
@@ -41,7 +46,13 @@ public class VanishService {
     }
 
     public void enableVanish(Player player, boolean notify, String source) {
+        boolean alreadyVanished = vanishedPlayers.contains(player.getUniqueId());
         vanishedPlayers.add(player.getUniqueId());
+
+        if (!alreadyVanished) {
+            originalPickupState.put(player.getUniqueId(), player.getCanPickupItems());
+        }
+
         applyVanishState(player);
 
         if (notify) {
@@ -57,8 +68,7 @@ public class VanishService {
     public void disableVanish(Player player, boolean notify, String source) {
         vanishedPlayers.remove(player.getUniqueId());
         removeBossBar(player);
-        player.setGlowing(false);
-        player.setCanPickupItems(true);
+        restorePickupState(player);
 
         for (Player viewer : Bukkit.getOnlinePlayers()) {
             viewer.showPlayer(plugin, player);
@@ -88,6 +98,10 @@ public class VanishService {
                     return;
                 }
 
+                if (!originalPickupState.containsKey(joined.getUniqueId())) {
+                    originalPickupState.put(joined.getUniqueId(), joined.getCanPickupItems());
+                }
+
                 applyVanishState(joined);
                 joined.sendMessage(plugin.lang().message(
                         "vanish.restored",
@@ -105,18 +119,32 @@ public class VanishService {
     }
 
     public void shutdown() {
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            if (isVanished(player.getUniqueId())) {
+                restorePickupState(player);
+                for (Player viewer : Bukkit.getOnlinePlayers()) {
+                    viewer.showPlayer(plugin, player);
+                }
+            }
+        }
+
         for (BossBar bossBar : bossBars.values()) {
             bossBar.removeAll();
         }
         bossBars.clear();
         vanishedPlayers.clear();
+        originalPickupState.clear();
     }
 
     private void applyVanishState(Player player) {
-        player.setCanPickupItems(false);
+        if (plugin.getConfigManager().getMainConfig().isVanishBlockItemPickup()) {
+            player.setCanPickupItems(false);
+        }
 
         if (plugin.getConfigManager().getMainConfig().isVanishBossBarEnabled()) {
             showBossBar(player);
+        } else {
+            removeBossBar(player);
         }
 
         for (Player viewer : Bukkit.getOnlinePlayers()) {
@@ -126,16 +154,11 @@ public class VanishService {
 
     private void updateViewer(Player viewer, Player vanished) {
         if (viewer.getUniqueId().equals(vanished.getUniqueId())) {
-            vanished.setGlowing(false);
             return;
         }
 
         if (canSeeVanished(viewer)) {
             viewer.showPlayer(plugin, vanished);
-
-            if (plugin.getConfigManager().getMainConfig().isVanishStaffGlowEnabled()) {
-                vanished.setGlowing(true);
-            }
         } else {
             viewer.hidePlayer(plugin, vanished);
         }
@@ -144,6 +167,18 @@ public class VanishService {
     private boolean canSeeVanished(Player viewer) {
         return viewer.hasPermission("lekkeradmin.admin")
                 || viewer.hasPermission("lekkeradmin.vanish.see");
+    }
+
+    private void restorePickupState(Player player) {
+        Boolean previous = originalPickupState.remove(player.getUniqueId());
+        if (previous != null) {
+            player.setCanPickupItems(previous);
+            return;
+        }
+
+        if (plugin.getConfigManager().getMainConfig().isVanishBlockItemPickup()) {
+            player.setCanPickupItems(true);
+        }
     }
 
     private void showBossBar(Player player) {

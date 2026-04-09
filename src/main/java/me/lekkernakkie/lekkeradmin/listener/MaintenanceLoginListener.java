@@ -21,6 +21,10 @@ public class MaintenanceLoginListener implements Listener {
             return;
         }
 
+        if (event.getResult() != PlayerLoginEvent.Result.ALLOWED) {
+            return;
+        }
+
         if (maintenanceService.hasBypass(event.getPlayer())) {
             return;
         }
