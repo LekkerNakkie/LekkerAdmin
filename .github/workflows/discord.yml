@@ -27,11 +27,22 @@ jobs:
           from datetime import datetime, timezone
 
           payload = {
+              # 🔥 Custom webhook identity
+              "username": "LekkerAdmin",
+              "avatar_url": "https://imgur.com/a/BBZ21Cc",
+
               "embeds": [
                   {
                       "title": "🚀 Nieuwe GitHub Update",
                       "description": f"**{os.environ.get('REPOSITORY', 'Onbekende repo')}**",
                       "color": 3447003,
+
+                      # 👇 Extra stijl (icon + label)
+                      "author": {
+                          "name": "GitHub Push",
+                          "icon_url": "https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png"
+                      },
+
                       "fields": [
                           {
                               "name": "👤 Auteur",
@@ -45,13 +56,16 @@ jobs:
                           },
                           {
                               "name": "💬 Commit",
-                              "value": os.environ.get("COMMIT_MESSAGE", "Geen commit message")[:1024]
+                              "value": (os.environ.get("COMMIT_MESSAGE") or "Geen commit message")[:1024]
                           }
                       ],
+
                       "url": os.environ.get("COMMIT_URL", ""),
+
                       "footer": {
                           "text": "Sakurahelm Dev Logs"
                       },
+
                       "timestamp": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
                   }
               ]
