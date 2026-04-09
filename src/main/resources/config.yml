@@ -1,13 +1,40 @@
+# =========================================================
+# LekkerAdmin - Main Plugin Config
+# =========================================================
+# General gameplay/admin systems:
+# - Invsee / Enderchest
+# - Restart system
+# - Maintenance
+# - Whois
+# - Vanish
+# - Freeze
+# =========================================================
+
+# Enable extra console debug output.
 debug: false
 
+# =========================================================
+# Inventory viewer
+# =========================================================
 invsee:
+  # Master toggle for invsee.
   enabled: true
+
+  # Allow opening inventories of offline players.
   allow-offline: true
+
+  # Allow staff to modify the viewed inventory.
   allow-modify: true
+
+  # GUI title.
+  # Placeholder(s): {player}
   title: "&bInvsee &7• &f{player}"
+
+  # Chest row count for the menu.
   rows: 6
 
   layout:
+    # Equipment slot positions inside the GUI.
     slots:
       helmet: 46
       chestplate: 47
@@ -15,6 +42,7 @@ invsee:
       boots: 49
       offhand: 53
 
+    # Decorative label item positions.
     label-slots:
       helmet: 37
       chestplate: 38
@@ -22,6 +50,7 @@ invsee:
       boots: 40
       offhand: 44
 
+    # Display names for equipment labels.
     labels:
       helmet: "&bHelm"
       chestplate: "&bChestplate"
@@ -29,29 +58,62 @@ invsee:
       boots: "&bBoots"
       offhand: "&bOffhand"
 
+# =========================================================
+# Ender chest viewer
+# =========================================================
 enderchest:
+  # Master toggle for enderchest viewing.
   enabled: true
+
+  # Allow viewing offline player ender chests.
   allow-offline: true
+
+  # Allow modifying the viewed ender chest.
   allow-modify: true
+
+  # GUI title.
+  # Placeholder(s): {player}
   title: "&bEnderchest &7• &f{player}"
 
+# =========================================================
+# Join/leave tracking
+# =========================================================
 leave-tracking:
+  # Track leave causes for logging/session systems.
   enabled: true
+
+  # Try to classify kicks separately from normal quits.
   classify-kicks: true
+
+  # Fallback reason when no better reason is available.
   fallback-quit-reason: "QUIT"
 
+# =========================================================
+# Restart system
+# =========================================================
 restart:
+  # Timezone used for automatic and planned restarts.
   timezone: "Europe/Brussels"
+
+  # Master toggle for the restart system.
   enabled: true
 
   auto:
+    # Enable automatic scheduled restarts.
     enabled: true
+
+    # Times are interpreted in the restart timezone above.
     times:
       - "03:00"
       - "15:00"
+
+    # Skip the automatic restart if a manual/planned restart is already active.
     skip-if-planned-running: true
+
+    # Default reason used for automatic restarts.
     default-reason: "Automatische restart"
 
+  # Countdown moments in seconds before restart.
   announce-seconds:
     - 3600
     - 1800
@@ -67,42 +129,70 @@ restart:
     - 1
 
   title:
+    # Show title countdowns to players.
     enabled: true
     fade-in: 10
     stay: 40
     fade-out: 10
 
   disconnect:
+    # Kick players with the configured restart message when restart happens.
     enabled: true
 
   action:
+    # Action after countdown completes.
+    # type can be used for internal handling, command is what gets executed.
     type: "stop"
     command: "stop"
 
+# =========================================================
+# Manual restart planning
+# =========================================================
 planrestart:
+  # Allow a new planned restart to replace an existing one.
   allow-override: true
+
+  # Default reason if staff does not provide one.
   default-reason: "Geen reden opgegeven."
 
+# =========================================================
+# Maintenance mode
+# =========================================================
 maintenance:
+  # If true, the server starts with maintenance enabled.
   enabled: false
 
+# =========================================================
+# Whois command
+# =========================================================
 whois:
+  # Master toggle for /whois.
   enabled: true
 
   hooks:
+    # Use Essentials data where supported.
     essentials: true
+
+    # Use PlaceholderAPI for configured placeholders below.
     placeholderapi: true
 
   placeholders:
+    # Custom placeholders used inside the whois system.
     balance: "%vault_eco_balance_formatted%"
     level: "%lekkerleveling_level%"
 
   pages:
+    # Default page when no page is specified.
     default-page: 1
+
+    # Maximum amount of pages available.
     max-pages: 2
+
+    # Allow clickable navigation between whois pages.
     clickable-navigation: true
 
   fields:
+    # Enable/disable individual whois fields.
     minecraft-name: true
     nickname: true
     mc-uuid: true
@@ -129,6 +219,7 @@ whois:
     level: true
 
   layout:
+    # Ordered field layout per page.
     page-1:
       - minecraft-name
       - nickname
@@ -142,6 +233,7 @@ whois:
       - balance
       - playtime
       - last-online
+
     page-2:
       - location
       - hp
@@ -156,21 +248,32 @@ whois:
       - ip
       - alt-accounts
 
+# =========================================================
+# Vanish system
+# =========================================================
 vanish:
+  # Master toggle for vanish.
   enabled: true
+
+  # Restore vanish state after reconnect/restart if supported.
   persistent: true
 
   bossbar:
+    # Show a bossbar while the player is vanished.
     enabled: true
     title: "&bJe bent momenteel in vanish"
-    color: "PURPLE"
+    color: "AQUA"
     style: "SOLID"
 
   staff-visibility:
+    # Special visibility logic for staff members.
     enabled: true
+
+    # Make vanished players glow for staff who are allowed to see them.
     glow-for-staff: true
 
   hide:
+    # Hide common visible traces while vanished.
     suppress-join-message: true
     suppress-quit-message: true
     block-mob-targeting: true
@@ -178,11 +281,18 @@ vanish:
     hide-dropped-items: true
 
   logging:
+    # Enable vanish action logging.
     enabled: true
 
+# =========================================================
+# Freeze system
+# =========================================================
 freeze:
+  # Master toggle for freeze.
   enabled: true
+
   block:
+    # What frozen players are prevented from doing.
     movement: true
     rotation-only-allowed: true
     commands: true
@@ -195,23 +305,33 @@ freeze:
     damage-deal: true
     damage-take: false
     teleport: true
+
+  # Commands allowed while frozen when command blocking is enabled.
   commands-whitelist:
     - "msg"
     - "r"
     - "reply"
+
   chat-reminder:
+    # Periodically remind the frozen player in chat.
     enabled: true
     interval-seconds: 15
+
   bossbar:
+    # Bossbar shown to frozen players.
     enabled: true
     color: "RED"
     style: "SOLID"
     progress: 1.0
+
   quit:
+    # Behaviour when a frozen player leaves the server.
     log: true
     notify-staff: true
     keep-frozen-on-rejoin: true
+
   messages:
+    # Control which freeze/unfreeze feedback is sent.
     send-chat-on-freeze: true
     send-chat-on-unfreeze: true
     send-bossbar-on-freeze: true

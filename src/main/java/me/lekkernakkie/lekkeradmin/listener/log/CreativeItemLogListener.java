@@ -51,6 +51,7 @@ public class CreativeItemLogListener implements Listener {
 
     private static final long SCAN_PERIOD_TICKS = 10L;
     private static final long IDLE_FLUSH_TICKS = 40L;
+    private static final long GIVE_SUPPRESS_MILLIS = 3000L;
 
     private final LekkerAdmin plugin;
     private final MinecraftBotLogger botLogger;
@@ -93,7 +94,7 @@ public class CreativeItemLogListener implements Listener {
                 return;
             }
 
-            registerPacketIfPresent(manager, "SET_CREATIVE_SLOT", "CREATIVE_SLOT_PACKET");
+            registerPacketIfPresent(manager, "SET_CREATIVE_SLOT", "CREATIVE_MENU");
             registerPacketIfPresent(manager, "PICK_ITEM", "PICK_ITEM");
             registerPacketIfPresent(manager, "PICK_ITEM_FROM_BLOCK", "PICK_ITEM_FROM_BLOCK");
             registerPacketIfPresent(manager, "PICK_ITEM_FROM_ENTITY", "PICK_ITEM_FROM_ENTITY");
@@ -155,7 +156,7 @@ public class CreativeItemLogListener implements Listener {
                 ignored -> new PlayerCreativeTracker(player.getUniqueId(), snapshotInventory(player))
         );
 
-        tracker.lastSource = sourceName;
+        tracker.lastDetectedSource = sourceName;
         tracker.lastChangeAt = System.currentTimeMillis();
     }
 
@@ -182,22 +183,24 @@ public class CreativeItemLogListener implements Listener {
             );
 
             Map<Material, Integer> current = snapshotInventory(player);
+
+            if (now < tracker.suppressUntilMillis) {
+                tracker.lastSnapshot = current;
+                continue;
+            }
+
             ChangeSet changeSet = computeDiff(tracker.lastSnapshot, current, settings);
 
             if (!changeSet.spawned.isEmpty() || !changeSet.removed.isEmpty()) {
                 mergeCounts(tracker.pendingSpawned, changeSet.spawned);
                 mergeCounts(tracker.pendingRemoved, changeSet.removed);
 
-                if ("UNKNOWN".equals(tracker.lastSource) || tracker.lastSource == null || tracker.lastSource.isBlank()) {
-                    if (!changeSet.spawned.isEmpty() && changeSet.removed.isEmpty()) {
-                        tracker.lastSource = "INSPAWNED";
-                    } else if (changeSet.spawned.isEmpty() && !changeSet.removed.isEmpty()) {
-                        tracker.lastSource = "REMOVED";
-                    } else {
-                        tracker.lastSource = "MIXED";
-                    }
+                String resolvedSource = tracker.lastDetectedSource;
+                if (resolvedSource == null || resolvedSource.isBlank() || "UNKNOWN".equals(resolvedSource)) {
+                    resolvedSource = inferSourceFromDiff(changeSet);
                 }
 
+                tracker.pendingSource = resolvedSource;
                 tracker.lastChangeAt = now;
                 tracker.lastSnapshot = current;
                 continue;
@@ -283,24 +286,25 @@ public class CreativeItemLogListener implements Listener {
         }
 
         Map<Material, Integer> current = snapshotInventory(player);
-        ChangeSet changeSet = computeDiff(tracker.lastSnapshot, current, settings);
 
-        if (!changeSet.spawned.isEmpty() || !changeSet.removed.isEmpty()) {
-            mergeCounts(tracker.pendingSpawned, changeSet.spawned);
-            mergeCounts(tracker.pendingRemoved, changeSet.removed);
+        if (System.currentTimeMillis() >= tracker.suppressUntilMillis) {
+            ChangeSet changeSet = computeDiff(tracker.lastSnapshot, current, settings);
 
-            if ("UNKNOWN".equals(tracker.lastSource) || tracker.lastSource == null || tracker.lastSource.isBlank()) {
-                if (!changeSet.spawned.isEmpty() && changeSet.removed.isEmpty()) {
-                    tracker.lastSource = "INSPAWNED";
-                } else if (changeSet.spawned.isEmpty() && !changeSet.removed.isEmpty()) {
-                    tracker.lastSource = "REMOVED";
-                } else {
-                    tracker.lastSource = "MIXED";
+            if (!changeSet.spawned.isEmpty() || !changeSet.removed.isEmpty()) {
+                mergeCounts(tracker.pendingSpawned, changeSet.spawned);
+                mergeCounts(tracker.pendingRemoved, changeSet.removed);
+
+                String resolvedSource = tracker.lastDetectedSource;
+                if (resolvedSource == null || resolvedSource.isBlank() || "UNKNOWN".equals(resolvedSource)) {
+                    resolvedSource = inferSourceFromDiff(changeSet);
                 }
-            }
 
+                tracker.pendingSource = resolvedSource;
+                tracker.lastSnapshot = current;
+                tracker.lastChangeAt = System.currentTimeMillis();
+            }
+        } else {
             tracker.lastSnapshot = current;
-            tracker.lastChangeAt = System.currentTimeMillis();
         }
 
         flushTracker(player, tracker, settings);
@@ -321,22 +325,23 @@ public class CreativeItemLogListener implements Listener {
         }
 
         Map<Material, Integer> current = snapshotInventory(player);
-        ChangeSet changeSet = computeDiff(tracker.lastSnapshot, current, settings);
 
-        if (!changeSet.spawned.isEmpty() || !changeSet.removed.isEmpty()) {
-            mergeCounts(tracker.pendingSpawned, changeSet.spawned);
-            mergeCounts(tracker.pendingRemoved, changeSet.removed);
+        if (System.currentTimeMillis() >= tracker.suppressUntilMillis) {
+            ChangeSet changeSet = computeDiff(tracker.lastSnapshot, current, settings);
 
-            if ("UNKNOWN".equals(tracker.lastSource) || tracker.lastSource == null || tracker.lastSource.isBlank()) {
-                if (!changeSet.spawned.isEmpty() && changeSet.removed.isEmpty()) {
-                    tracker.lastSource = "INSPAWNED";
-                } else if (changeSet.spawned.isEmpty() && !changeSet.removed.isEmpty()) {
-                    tracker.lastSource = "REMOVED";
-                } else {
-                    tracker.lastSource = "MIXED";
+            if (!changeSet.spawned.isEmpty() || !changeSet.removed.isEmpty()) {
+                mergeCounts(tracker.pendingSpawned, changeSet.spawned);
+                mergeCounts(tracker.pendingRemoved, changeSet.removed);
+
+                String resolvedSource = tracker.lastDetectedSource;
+                if (resolvedSource == null || resolvedSource.isBlank() || "UNKNOWN".equals(resolvedSource)) {
+                    resolvedSource = inferSourceFromDiff(changeSet);
                 }
-            }
 
+                tracker.pendingSource = resolvedSource;
+                tracker.lastSnapshot = current;
+            }
+        } else {
             tracker.lastSnapshot = current;
         }
 
@@ -373,20 +378,20 @@ public class CreativeItemLogListener implements Listener {
         }
 
         Map<Material, Integer> current = snapshotInventory(player);
-        ChangeSet changeSet = computeDiff(tracker.lastSnapshot, current, settings);
 
-        if (!changeSet.spawned.isEmpty() || !changeSet.removed.isEmpty()) {
-            mergeCounts(tracker.pendingSpawned, changeSet.spawned);
-            mergeCounts(tracker.pendingRemoved, changeSet.removed);
+        if (System.currentTimeMillis() >= tracker.suppressUntilMillis) {
+            ChangeSet changeSet = computeDiff(tracker.lastSnapshot, current, settings);
 
-            if ("UNKNOWN".equals(tracker.lastSource) || tracker.lastSource == null || tracker.lastSource.isBlank()) {
-                if (!changeSet.spawned.isEmpty() && changeSet.removed.isEmpty()) {
-                    tracker.lastSource = "INSPAWNED";
-                } else if (changeSet.spawned.isEmpty() && !changeSet.removed.isEmpty()) {
-                    tracker.lastSource = "REMOVED";
-                } else {
-                    tracker.lastSource = "MIXED";
+            if (!changeSet.spawned.isEmpty() || !changeSet.removed.isEmpty()) {
+                mergeCounts(tracker.pendingSpawned, changeSet.spawned);
+                mergeCounts(tracker.pendingRemoved, changeSet.removed);
+
+                String resolvedSource = tracker.lastDetectedSource;
+                if (resolvedSource == null || resolvedSource.isBlank() || "UNKNOWN".equals(resolvedSource)) {
+                    resolvedSource = inferSourceFromDiff(changeSet);
                 }
+
+                tracker.pendingSource = resolvedSource;
             }
         }
 
@@ -468,6 +473,19 @@ public class CreativeItemLogListener implements Listener {
             );
 
             sendLog(settings, message);
+
+            PlayerCreativeTracker tracker = trackers.computeIfAbsent(
+                    target.getUniqueId(),
+                    ignored -> new PlayerCreativeTracker(target.getUniqueId(), after)
+            );
+
+            tracker.lastSnapshot = after;
+            tracker.pendingSpawned.clear();
+            tracker.pendingRemoved.clear();
+            tracker.pendingSource = "UNKNOWN";
+            tracker.lastDetectedSource = "UNKNOWN";
+            tracker.lastChangeAt = 0L;
+            tracker.suppressUntilMillis = System.currentTimeMillis() + GIVE_SUPPRESS_MILLIS;
         }, 2L);
     }
 
@@ -477,8 +495,8 @@ public class CreativeItemLogListener implements Listener {
                 ignored -> new PlayerCreativeTracker(player.getUniqueId(), snapshotInventory(player))
         );
 
-        if (tracker.lastSource == null || tracker.lastSource.isBlank() || "UNKNOWN".equals(tracker.lastSource)) {
-            tracker.lastSource = source;
+        if (tracker.lastDetectedSource == null || tracker.lastDetectedSource.isBlank() || "UNKNOWN".equals(tracker.lastDetectedSource)) {
+            tracker.lastDetectedSource = source;
         }
     }
 
@@ -500,20 +518,43 @@ public class CreativeItemLogListener implements Listener {
             return;
         }
 
+        String finalSource = tracker.pendingSource;
+        if (finalSource == null || finalSource.isBlank() || "UNKNOWN".equals(finalSource)) {
+            finalSource = inferSourceFromPending(tracker.pendingSpawned, tracker.pendingRemoved);
+        }
+
         MinecraftLogMessage message = buildCreativeSummaryMessage(
                 settings,
                 player,
                 tracker.pendingSpawned,
                 tracker.pendingRemoved,
-                tracker.lastSource,
+                finalSource,
                 "creative inventory delta"
         );
 
         sendLog(settings, message);
         tracker.pendingSpawned.clear();
         tracker.pendingRemoved.clear();
-        tracker.lastSource = "UNKNOWN";
+        tracker.pendingSource = "UNKNOWN";
+        tracker.lastDetectedSource = "UNKNOWN";
         tracker.lastChangeAt = 0L;
+    }
+
+    private String inferSourceFromDiff(ChangeSet changeSet) {
+        return inferSourceFromPending(changeSet.spawned, changeSet.removed);
+    }
+
+    private String inferSourceFromPending(Map<Material, Integer> spawned, Map<Material, Integer> removed) {
+        boolean hasSpawned = spawned != null && !spawned.isEmpty();
+        boolean hasRemoved = removed != null && !removed.isEmpty();
+
+        if (hasSpawned && !hasRemoved) {
+            return "INSPAWNED";
+        }
+        if (!hasSpawned && hasRemoved) {
+            return "REMOVED";
+        }
+        return "MIXED";
     }
 
     private MinecraftLogMessage buildCreativeSummaryMessage(LogTypeSettings settings,
@@ -834,7 +875,9 @@ public class CreativeItemLogListener implements Listener {
         private final Map<Material, Integer> pendingSpawned = new EnumMap<>(Material.class);
         private final Map<Material, Integer> pendingRemoved = new EnumMap<>(Material.class);
         private long lastChangeAt;
-        private String lastSource = "UNKNOWN";
+        private String lastDetectedSource = "UNKNOWN";
+        private String pendingSource = "UNKNOWN";
+        private long suppressUntilMillis = 0L;
 
         private PlayerCreativeTracker(UUID playerUuid, Map<Material, Integer> lastSnapshot) {
             this.playerUuid = playerUuid;

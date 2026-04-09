@@ -1,36 +1,50 @@
 # =========================================================
 # LekkerAdmin - Discord Bot Config
 # =========================================================
-# Vul hieronder je bot token en guild/server ID in.
-# Deze file regelt whitelist, suggesties, logging en Discord integratie.
+# Handles:
+# - Discord bot connection
+# - Whitelist applications
+# - Suggestion system
+# - Discord-side logging
+# - Permission / role restrictions
 # =========================================================
 
+# =========================================================
+# Bot connection
+# =========================================================
 bot:
+  # Master toggle for the Discord bot.
   enabled: true
+
+  # Discord bot token.
   token: "PASTE_BOT_TOKEN_HERE"
+
+  # Discord guild/server ID.
   guild-id: "000000000000000000"
 
-  # -------------------------------------------------------
-  # Bot status / presence rotatie
-  # Mogelijke types: PLAYING / WATCHING / LISTENING
-  # Placeholder: {online}
-  # -------------------------------------------------------
   status:
+    # Rotate the bot status/presence.
     enabled: true
+
+    # Time between status changes.
     interval-seconds: 10
+
+    # Placeholder(s): {online}
     messages:
       - "🌸 Welcome to LekkerAdmin!"
       - "👥 {online} spelers online"
+
+    # Supported values: PLAYING / WATCHING / LISTENING
     type: PLAYING
 
 # =========================================================
-# Discord kanalen
+# Discord channels
 # =========================================================
 channels:
-  # Kanaal waar whitelist aanvragen voor staff terechtkomen
+  # Staff review channel for whitelist applications.
   review-channel-id: "000000000000000000"
 
-  # Algemeen logkanaal voor whitelist audit logs
+  # General audit/log channel for whitelist actions.
   log-channel-id: "000000000000000000"
 
 # =========================================================
@@ -38,7 +52,7 @@ channels:
 # =========================================================
 webhooks:
   moderation-log:
-    # Alleen nodig als je via webhook wilt loggen
+    # Only needed if you want moderation logging through a webhook.
     enabled: false
     url: ""
     username: "LekkerAdmin Logs"
@@ -46,16 +60,17 @@ webhooks:
 
 # =========================================================
 # Database
-# SQLITE = lokaal bestand
-# MYSQL  = externe database
 # =========================================================
 database:
-  type: "SQLITE" # SQLITE or MYSQL
+  # Supported values: SQLITE / MYSQL
+  type: "SQLITE"
 
   sqlite:
+    # Local database file name.
     file: "data.db"
 
   mysql:
+    # External MySQL connection settings.
     host: "localhost"
     port: 3306
     database: "lekkeradmin"
@@ -65,61 +80,88 @@ database:
     pool-size: 10
 
 # =========================================================
-# Whitelist instellingen
+# Whitelist system
 # =========================================================
 whitelist:
   enabled: true
+
+  # Automatically link Discord <-> Minecraft after approval.
   auto-link-on-approve: true
+
+  # Automatically add to whitelist when the Minecraft name is valid.
   auto-whitelist-on-valid-name: true
+
+  # Require staff review before whitelist finalization.
   require-review-before-whitelist: true
+
+  # Allow the user to fix their Minecraft name after approval if needed.
   allow-name-retry-after-approval: true
+
+  # Maximum number of name correction attempts.
   max-name-retries: 3
+
+  # Notify staff if name validation fails.
   notify-staff-on-name-failure: true
+
+  # Notify player if name validation fails.
   notify-player-on-name-failure: true
+
+  # Use exact case matching for Minecraft names.
   case-sensitive-name-check: false
+
+  # Allow more than one open application per Discord user.
   allow-multiple-open-applications: false
+
+  # Cooldown between whitelist commands/submissions.
   command-cooldown-seconds: 60
 
-  # -------------------------------------------------------
-  # Ingame staff melding bij nieuwe whitelist aanvraag
-  # Alleen spelers met deze permission krijgen de melding
-  # Placeholder(s): {discord}, {minecraft}, {application_id}
-  # -------------------------------------------------------
   ingame-notify:
+    # Notify in-game staff about new applications.
     enabled: true
+
+    # Only players with this permission will receive the message.
     permission: "lekkeradmin.notify.whitelist"
+
+    # Placeholder(s): {discord}, {minecraft}, {application_id}
     message: "&7[&bWhitelist&7] &fNieuwe aanvraag van &b{discord}&f voor &b{minecraft}&f."
+
     sound: "ENTITY_EXPERIENCE_ORB_PICKUP"
     volume: 0.7
     pitch: 1.4
 
-  # -------------------------------------------------------
-  # Auto thread onder review bericht in Discord
-  # Placeholder(s): {minecraft}, {discord}, {application_id}
-  # -------------------------------------------------------
   review-thread:
+    # Automatically create a Discord thread under the review message.
     enabled: true
+
+    # Placeholder(s): {minecraft}, {discord}, {application_id}
     name-format: "Whitelist • {minecraft}"
 
 # =========================================================
-# Minecraft naam validatie
+# Validation
 # =========================================================
 validation:
   minecraft-name:
     enabled: true
+
+    # Standard Minecraft username limits.
     min-length: 3
     max-length: 16
+
+    # Allowed characters for Minecraft names.
     regex: "^[A-Za-z0-9_]+$"
+
+    # Check whether the profile actually exists.
     check-profile-exists: true
 
 # =========================================================
-# Whitelist formulier
+# Whitelist form
 # =========================================================
 forms:
   whitelist:
     title: "Whitelist aanvraag"
 
     dm-message:
+      # Send a DM entry message with a button to open the form.
       enabled: true
       content:
         - "Welkom bij Sakurahelm!"
@@ -127,6 +169,7 @@ forms:
       button-text: "Formulier openen"
 
     confirm-message:
+      # Confirmation screen shown before final submit.
       title: "Controleer je aanvraag"
       description:
         - "Lees alles goed na voor je bevestigt."
@@ -134,11 +177,10 @@ forms:
       edit-button: "Opnieuw invullen"
       cancel-button: "Annuleren"
 
-    # -----------------------------------------------------
-    # Velden in het whitelist formulier
-    # SHORT of PARAGRAPH
-    # -----------------------------------------------------
     fields:
+      # Supported styles: SHORT / PARAGRAPH
+      # order controls field order in the modal flow.
+
       minecraft_name:
         enabled: true
         label: "Minecraft naam"
@@ -180,11 +222,12 @@ forms:
         order: 4
 
 # =========================================================
-# Naamcorrectie na approval
+# Name retry modal
 # =========================================================
 name-retry:
   modal:
     title: "Minecraft naam corrigeren"
+
     field:
       label: "Juiste Minecraft naam"
       style: "SHORT"
@@ -194,7 +237,7 @@ name-retry:
       max-length: 16
 
 # =========================================================
-# Berichten
+# Messages
 # =========================================================
 messages:
   slash:
@@ -237,11 +280,13 @@ messages:
     whitelist-failed: "Whitelist mislukt: {reason}"
     application-not-found: "Applicatie niet gevonden."
     pending-name-fix-with-reason: "Applicatie goedgekeurd, maar naamcorrectie is nodig: {reason}"
+
 # =========================================================
 # Discord buttons
-# Mogelijke styles: PRIMARY / SUCCESS / DANGER / SECONDARY
 # =========================================================
 buttons:
+  # Supported styles: PRIMARY / SUCCESS / DANGER / SECONDARY
+
   open-form:
     text: "Formulier openen"
     style: "PRIMARY"
@@ -308,18 +353,20 @@ embeds:
       description: ""
       footer: ""
 
-    fields:
-      reason: "Reden"
-      minecraft-name: "Minecraft naam"
-      discord: "Discord"
-      reviewer: "Reviewer"
-      problem: "Probleem"
+  fields:
+    # Reusable embed field names.
+    reason: "Reden"
+    minecraft-name: "Minecraft naam"
+    discord: "Discord"
+    reviewer: "Reviewer"
+    problem: "Probleem"
 
 # =========================================================
 # Logging
 # =========================================================
 logging:
   webhook:
+    # Enable whitelist-related webhook logs.
     enabled: false
     log-approvals: true
     log-denials: true
@@ -327,75 +374,71 @@ logging:
     log-name-retries: true
     log-auto-completions: true
 
-  # Placeholder(s):
-  # {reviewer}, {application_id}, {discord_user}, {minecraft_name},
-  # {reason}, {old_name}, {new_name}
   formats:
+    # Placeholder(s):
+    # {reviewer}, {application_id}, {discord_user}, {minecraft_name},
+    # {reason}, {old_name}, {new_name}
+
     approval: "{reviewer} keurde aanvraag {application_id} goed voor {discord_user} / {minecraft_name}"
     denial: "{reviewer} keurde aanvraag {application_id} af voor {discord_user} / {minecraft_name}. Reden: {reason}"
     invalid-name: "Naam validatie mislukt voor aanvraag {application_id}. Ingegeven naam: {minecraft_name}"
     retry-success: "Naamcorrectie succesvol voor aanvraag {application_id}. Oude naam: {old_name}, nieuwe naam: {new_name}"
 
 # =========================================================
-# Rollen / permissies
+# Discord roles / permissions
 # =========================================================
 roles:
-  # Leeg = iedereen met toegang tot buttons/modals kan reviewen
-  # Vul hier staff role IDs in als je het wilt beperken
+  # Empty = anyone with access to the buttons/modals can review.
   review-role-ids: []
 
-  # Geef automatisch een Discord rol bij approval
   give-on-approve:
+    # Automatically give a Discord role after approval.
     enabled: false
     role-id: ""
 
 # =========================================================
-# /playerinfo permissies
+# /playerinfo Discord permission rules
 # =========================================================
 playerinfo:
+  # Restrict the Discord /playerinfo command to these roles/users.
   allowed-role-ids:
     - ""
+
   allowed-user-ids:
     - ""
 
 # =========================================================
-# Suggesties
+# Suggestions
 # =========================================================
 suggestions:
   enabled: true
 
-  # Publiek suggestiekanaal
+  # Public suggestion channel.
   channel-id: ""
 
-  # Staff log/review kanaal voor suggesties
+  # Staff log/review channel.
   log-channel-id: ""
 
   limits:
     min-length: 5
     max-length: 500
 
-  # -------------------------------------------------------
-  # Community voting
-  # -------------------------------------------------------
   voting:
+    # Community vote reactions.
     upvote-emoji: "👍"
     downvote-emoji: "👎"
     prevent-double-vote: true
 
-  # -------------------------------------------------------
-  # Staff review via emoji
-  # Alleen rollen hieronder mogen reviewen
-  # -------------------------------------------------------
   review:
+    # Staff review reactions.
     enabled: true
     approve-emoji: "🟢"
     deny-emoji: "🔴"
+
+    # Only these roles may review suggestions.
     allowed-role-ids:
       - ""
 
-  # -------------------------------------------------------
-  # Suggestie embeds
-  # -------------------------------------------------------
   embed:
     title: "Nieuwe suggestie"
     log-title: "Nieuwe suggestie • Staff review"
@@ -416,8 +459,11 @@ suggestions:
       reviewer: "Beoordeeld door"
 
 # =========================================================
-# Expiry / verloop
+# Expiry settings
 # =========================================================
 expiry:
+  # Auto-expire unfinished applications after X hours.
   application-hours: 24
+
+  # Auto-expire name retry windows after X hours.
   retry-name-hours: 24

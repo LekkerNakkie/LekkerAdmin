@@ -1,18 +1,45 @@
+# =========================================================
+# LekkerAdmin - Punishments Config
+# =========================================================
+# Handles:
+# - Warns
+# - Mutes / unmutes
+# - Bans / unbans
+# - Kicks
+# - Banlist
+# - Discord DM notifications
+# - Discord /playerinfo lookup settings
+# =========================================================
+
 settings:
+  # Master toggle for the punishment system.
   enabled: true
+
+  # Timezone used for punishment dates and formatting.
   timezone: "Europe/Brussels"
+
+  # Format used when punishment dates are displayed.
   date-format: "dd-MM-yyyy HH:mm:ss"
+
+  # Server name used in messages/logging.
   server-name: "Sakurahelm"
 
+  # Keywords that should be interpreted as permanent duration.
   permanent-keywords:
     - "perm"
     - "permanent"
 
+  # Notify players later if they were offline when punished.
   offline-notifications: true
+
+  # Allow staff to punish themselves.
   allow-self-punishment: true
+
+  # How often expired punishments are checked.
   expiry-check-seconds: 2
 
 defaults:
+  # Default reasons used when no reason is provided.
   warn-reason: "Geen reden opgegeven."
   ban-reason: "Geen reden opgegeven."
   unban-reason: "Geen reden opgegeven."
@@ -21,9 +48,11 @@ defaults:
   kick-reason: "Geen reden opgegeven."
 
 banlist:
+  # Amount of entries shown per banlist page.
   entries-per-page: 10
 
 discord-dm:
+  # Enable Discord DM notifications for punishments.
   enabled: true
 
   warn:
@@ -57,10 +86,24 @@ discord-dm:
     color: "#3498DB"
 
 playerinfo:
+  # Enable the Discord /playerinfo command.
   enabled: true
+
+  # Optional required Discord role to use /playerinfo.
   required-role-id: ""
+
+  # Avatar/head image URL.
+  # Placeholder(s): {minecraft_name}
   skin-head-url: "https://mc-heads.net/avatar/{minecraft_name}/256"
+
+  # Max amount of active punishments shown.
   active-limit: 5
+
+  # Max amount of expired punishments shown.
   expired-limit: 5
+
+  # Message when no player could be found.
   no-results-message: "Geen speler gevonden."
+
+  # Fallback text for unknown data.
   unknown-value: "Onbekend"

@@ -1,5 +1,8 @@
 # =========================================================
-# LekkerAdmin - Nederlandse language file
+# LekkerAdmin - Dutch language file
+# =========================================================
+# This file contains in-game messages.
+# Common placeholder(s): {prefix}, {player}, {reason}, {time}
 # =========================================================
 
 general:
@@ -14,7 +17,6 @@ general:
 # =========================================================
 # Reload
 # =========================================================
-
 reload:
   started: "{prefix} &7Reload gestart..."
   config: "{prefix} &a✔ &7Config herladen"
@@ -32,9 +34,8 @@ reload:
   finished: "{prefix} &7Reload voltooid in &b{time}ms&7."
 
 # =========================================================
-# Admin command help
+# Main admin command help
 # =========================================================
-
 admin:
   help:
     header: "&8&m----------------------------------------"
@@ -61,7 +62,6 @@ admin:
 # =========================================================
 # Invsee / Enderchest
 # =========================================================
-
 invsee-command:
   player-only: "{prefix} &cAlleen spelers kunnen dit command gebruiken."
   disabled: "{prefix} &cInvsee staat uitgeschakeld."
@@ -78,7 +78,6 @@ enderchest-command:
 # =========================================================
 # Maintenance
 # =========================================================
-
 maintenance:
   enabled: "{prefix} &7Maintenance mode is nu &aingeschakeld&7."
   disabled: "{prefix} &7Maintenance mode is nu &cuitgeschakeld&7."
@@ -89,7 +88,6 @@ maintenance:
 # =========================================================
 # Restart
 # =========================================================
-
 restart:
   prefix: "&7[&cRestart&7]"
   chat: "{restart-prefix} &7Server restart over &b{time}&7. Reden: &b{reason}"
@@ -110,7 +108,6 @@ restart:
 # =========================================================
 # Punishments
 # =========================================================
-
 punishments:
   common:
     player-not-found: "{prefix} &cSpeler niet gevonden."
@@ -135,7 +132,6 @@ punishments:
 # =========================================================
 # Whois
 # =========================================================
-
 whois:
   usage: "{prefix} &7Gebruik: &b/whois <speler>"
   disabled: "{prefix} &cWhois staat uit."
@@ -144,7 +140,6 @@ whois:
 # =========================================================
 # Vanish
 # =========================================================
-
 vanish:
   player-only: "{prefix} &cAlleen spelers."
   no-permission: "{prefix} &cGeen permission."
@@ -153,6 +148,9 @@ vanish:
   disabled: "{prefix} &7Vanish &cuit"
   restored: "{prefix} &7Vanish hersteld"
 
+# =========================================================
+# Freeze
+# =========================================================
 freeze:
   frozen-chat: "{prefix} &cJe bent gefreezed door staff."
   frozen-chat-reason: "{prefix} &7Reden: &f{reason}"

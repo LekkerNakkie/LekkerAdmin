@@ -1,15 +1,36 @@
+# =========================================================
+# LekkerAdmin - Logs Config
+# =========================================================
+# Controls Discord logging for:
+# - Drops / pickups / deaths
+# - Joins / leaves
+# - Invsee / Enderchest sessions
+# - Punishments / history clears
+# - Explosions
+# - Vanish / Freeze
+# - Creative item actions
+# =========================================================
+
 enabled: true
 timezone: "Europe/Brussels"
 debug: false
 
+# =========================================================
+# Global defaults
+# =========================================================
 defaults:
+  # Global embed / delivery behaviour.
   use-embeds: true
-  delivery-mode: "BOT" # BOT, WEBHOOK, BOTH, NONE
 
+  # Supported values: BOT, WEBHOOK, BOTH, NONE
+  delivery-mode: "BOT"
+
+  # Formatting / content limits.
   split-large-item-lists: true
   max-items-shown: 12
   max-field-length: 1024
 
+  # Extra item/world details in logs.
   show-enchantments: true
   show-lore: false
   show-world: true
@@ -17,6 +38,7 @@ defaults:
   show-timestamp: true
   show-player-head-thumbnail: true
 
+  # Item filters.
   only-log-if-enchanted: false
   min-amount: 1
   deduplicate-death-drops: true
@@ -25,6 +47,7 @@ defaults:
   ignored-materials: []
 
   aggregation:
+    # Combine rapid item events into grouped logs.
     enabled: true
     flush-after-ticks: 40
     track-destruction: true
@@ -32,9 +55,11 @@ defaults:
     include-destroyed-items: true
 
   bot:
+    # Default bot channel if a section does not override it.
     channel-id: ""
 
   webhook:
+    # Default webhook if a section does not override it.
     url: ""
     username: "LekkerAdmin Logs"
     avatar-url: ""
@@ -44,6 +69,7 @@ defaults:
     footer: "LekkerAdmin Logs"
     use-timestamp: true
 
+    # Default reusable field names.
     fields:
       player: "Speler"
       actor: "Staff"
@@ -66,7 +92,14 @@ defaults:
       food: "Food"
       gamemode: "Gamemode"
 
+# =========================================================
+# Individual log modules
+# =========================================================
 logs:
+
+  # -------------------------------------------------------
+  # Player drops
+  # -------------------------------------------------------
   player-drops:
     enabled: true
     use-embeds: true
@@ -119,6 +152,9 @@ logs:
         enchantments: "Enchantments"
         drop-type: "Drop type"
 
+  # -------------------------------------------------------
+  # Player pickups
+  # -------------------------------------------------------
   player-pickups:
     enabled: true
     use-embeds: true
@@ -171,6 +207,9 @@ logs:
         enchantments: "Enchantments"
         pickup-type: "Pickup type"
 
+  # -------------------------------------------------------
+  # Player deaths
+  # -------------------------------------------------------
   player-deaths:
     enabled: true
     use-embeds: true
@@ -223,6 +262,9 @@ logs:
         xp: "XP"
         keep-inventory: "KeepInventory"
 
+  # -------------------------------------------------------
+  # Player joins
+  # -------------------------------------------------------
   player-joins:
     enabled: true
     use-embeds: true
@@ -256,6 +298,9 @@ logs:
         food: "Food"
         gamemode: "Gamemode"
 
+  # -------------------------------------------------------
+  # Player leaves
+  # -------------------------------------------------------
   player-leaves:
     enabled: true
     use-embeds: true
@@ -289,6 +334,9 @@ logs:
         food: "Food"
         gamemode: "Gamemode"
 
+  # -------------------------------------------------------
+  # Invsee sessions
+  # -------------------------------------------------------
   invsee:
     enabled: true
     use-embeds: true
@@ -313,6 +361,9 @@ logs:
       show-coordinates: false
       max-field-length: 1024
 
+  # -------------------------------------------------------
+  # Enderchest sessions
+  # -------------------------------------------------------
   enderchest:
     enabled: true
     use-embeds: true
@@ -337,6 +388,9 @@ logs:
       show-coordinates: false
       max-field-length: 1024
 
+  # -------------------------------------------------------
+  # Punishments
+  # -------------------------------------------------------
   punishments:
     enabled: true
     use-embeds: true
@@ -361,6 +415,9 @@ logs:
       show-coordinates: false
       max-field-length: 1024
 
+  # -------------------------------------------------------
+  # History clear actions
+  # -------------------------------------------------------
   history-clear:
     enabled: true
     use-embeds: true
@@ -385,6 +442,9 @@ logs:
       show-coordinates: false
       max-field-length: 1024
 
+  # -------------------------------------------------------
+  # Explosion logs
+  # -------------------------------------------------------
   explosion-logs:
     enabled: true
     use-embeds: true
@@ -409,6 +469,9 @@ logs:
       show-coordinates: true
       max-field-length: 1024
 
+  # -------------------------------------------------------
+  # Vanish logs
+  # -------------------------------------------------------
   vanish:
     enabled: true
     use-embeds: true
@@ -445,6 +508,9 @@ logs:
         reason: "Bron"
         gamemode: "Gamemode"
 
+  # -------------------------------------------------------
+  # Freeze logs
+  # -------------------------------------------------------
   freeze:
     enabled: true
     use-embeds: true
@@ -484,6 +550,9 @@ logs:
         source: "Actie"
         gamemode: "Gamemode"
 
+  # -------------------------------------------------------
+  # Creative item logs
+  # -------------------------------------------------------
   creative-items:
     enabled: true
     use-embeds: true
