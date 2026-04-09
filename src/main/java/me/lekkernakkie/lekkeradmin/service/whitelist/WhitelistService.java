@@ -90,7 +90,11 @@ public class WhitelistService {
         }
 
         Optional<DiscordMinecraftLink> existingMinecraftLink =
-                linkService.findByMinecraftName(application.getMinecraftName());
+                linkService.findByMinecraftUuid(resolvedUuid);
+
+        if (existingMinecraftLink.isEmpty()) {
+            existingMinecraftLink = linkService.findByMinecraftName(application.getMinecraftName());
+        }
 
         if (existingMinecraftLink.isPresent()) {
             boolean sameDiscord = existingMinecraftLink.get().getDiscordUserId().equalsIgnoreCase(application.getDiscordUserId());
@@ -121,7 +125,9 @@ public class WhitelistService {
             );
         }
 
-        applicationService.markCompleted(application);
+        if (application.getStatus() != ApplicationStatus.COMPLETED) {
+            applicationService.markCompleted(application);
+        }
 
         if (alreadyWhitelisted) {
             return new WhitelistResult(true, false, "Player stond al op de whitelist en is nu correct afgewerkt.");

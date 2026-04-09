@@ -55,6 +55,10 @@ public class ApplicationService {
         return repository.findByMinecraftName(minecraftName);
     }
 
+    public Optional<WhitelistApplication> findByMinecraftUuid(String minecraftUuid) {
+        return repository.findByMinecraftUuid(minecraftUuid);
+    }
+
     public void markApproved(WhitelistApplication application, String reviewerDiscordId, String reason) {
         markApproved(application, reviewerDiscordId, null, reason);
     }

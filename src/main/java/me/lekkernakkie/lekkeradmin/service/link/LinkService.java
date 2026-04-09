@@ -49,6 +49,12 @@ public class LinkService {
                 .map(this::mapLink);
     }
 
+    public Optional<DiscordMinecraftLink> findByMinecraftUuid(String minecraftUuid) {
+        return applicationService.findByMinecraftUuid(minecraftUuid)
+                .filter(this::isActiveLink)
+                .map(this::mapLink);
+    }
+
     public Optional<DiscordMinecraftLink> mapIfActive(WhitelistApplication application) {
         if (application == null || !isActiveLink(application)) {
             return Optional.empty();

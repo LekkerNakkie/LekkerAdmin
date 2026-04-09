@@ -248,6 +248,33 @@ public class ApplicationRepository {
         }
     }
 
+    public Optional<WhitelistApplication> findByMinecraftUuid(String minecraftUuid) {
+        String sql = """
+                SELECT * FROM LA_whitelist
+                WHERE minecraft_uuid = ?
+                ORDER BY
+                    CASE WHEN linked_at IS NULL THEN 1 ELSE 0 END,
+                    linked_at DESC,
+                    submitted_at DESC
+                LIMIT 1
+                """;
+
+        try (Connection connection = databaseManager.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+
+            statement.setString(1, minecraftUuid);
+
+            try (ResultSet rs = statement.executeQuery()) {
+                if (rs.next()) {
+                    return Optional.of(mapApplication(rs));
+                }
+                return Optional.empty();
+            }
+        } catch (Exception ex) {
+            throw new RuntimeException("Failed to load application by minecraft uuid: " + minecraftUuid, ex);
+        }
+    }
+
     private WhitelistApplication mapApplication(ResultSet rs) throws Exception {
         Connection connection = rs.getStatement().getConnection();
 
