@@ -92,15 +92,11 @@ maintenance:
 
 restart:
   prefix: "&7[&cRestart&7]"
-
   chat: "{restart-prefix} &7Server restart over &b{time}&7. Reden: &b{reason}"
   chat-now: "{restart-prefix} &cServer restart nu&7. Reden: &b{reason}"
-
   title-main: "&7Restart over &b{time}"
   title-sub: "&7Reden: &b{reason}"
-
   kick-message: "&cServer restart!\n\n&7Reden: &b{reason}\n&7Je kan direct terug joinen."
-
   planned: "{prefix} &7Restart gepland over &b{time}&7. Reden: &b{reason}"
   cancelled: "{prefix} &7De geplande restart is &cgeannuleerd&7."
   none-running: "{prefix} &cEr is momenteel geen restart gepland."
@@ -153,7 +149,6 @@ vanish:
   player-only: "{prefix} &cAlleen spelers."
   no-permission: "{prefix} &cGeen permission."
   disabled-feature: "{prefix} &cVanish uitgeschakeld."
-
   enabled: "{prefix} &7Vanish &aaan"
   disabled: "{prefix} &7Vanish &cuit"
   restored: "{prefix} &7Vanish hersteld"
@@ -162,18 +157,14 @@ freeze:
   frozen-chat: "{prefix} &cJe bent gefreezed door staff."
   frozen-chat-reason: "{prefix} &7Reden: &f{reason}"
   frozen-chat-instructions: "{prefix} &7Blijf stilstaan en wacht op een stafflid."
-
   frozen-bossbar: "&cJe bent gefreezed - wacht op staff"
-
   unfrozen-chat: "{prefix} &aJe bent niet langer gefreezed."
   player-frozen: "{prefix} &7Speler &b{player} &7is gefreezed."
   player-unfrozen: "{prefix} &7Speler &b{player} &7is unfreezed."
-
   already-frozen: "{prefix} &cDeze speler is al gefreezed."
   not-frozen: "{prefix} &cDeze speler is niet gefreezed."
   usage-freeze: "{prefix} &7Gebruik: &b/freeze <speler> [reden]"
   usage-unfreeze: "{prefix} &7Gebruik: &b/unfreeze <speler>"
-
   blocked-command: "{prefix} &cJe kan geen commands gebruiken terwijl je gefreezed bent."
   quit-while-frozen: "{prefix} &cSpeler &b{player} &cheeft de server verlaten tijdens freeze."
   rejoin-still-frozen: "{prefix} &cJe bent nog steeds gefreezed."
