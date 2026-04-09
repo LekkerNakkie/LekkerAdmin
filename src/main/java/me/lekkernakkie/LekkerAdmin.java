@@ -1,4 +1,4 @@
-package me.lekkernakkie;
+package me.lekkernakkie.lekkeradmin;
 
 import me.lekkernakkie.lekkeradmin.command.*;
 import me.lekkernakkie.lekkeradmin.config.ConfigManager;
