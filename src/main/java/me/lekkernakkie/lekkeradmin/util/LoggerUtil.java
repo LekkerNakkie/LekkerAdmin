@@ -2,6 +2,8 @@ package me.lekkernakkie.lekkeradmin.util;
 
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.util.logging.Level;
+
 public final class LoggerUtil {
 
     private LoggerUtil() {
@@ -23,5 +25,18 @@ public final class LoggerUtil {
         if (plugin != null && message != null) {
             plugin.getLogger().severe(message);
         }
+    }
+
+    public static void exception(JavaPlugin plugin, Level level, String message, Throwable throwable) {
+        if (plugin == null || message == null) {
+            return;
+        }
+
+        if (throwable == null) {
+            plugin.getLogger().log(level, message);
+            return;
+        }
+
+        plugin.getLogger().log(level, message, throwable);
     }
 }

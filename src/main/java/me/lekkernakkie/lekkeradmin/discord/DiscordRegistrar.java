@@ -5,6 +5,7 @@ import me.lekkernakkie.lekkeradmin.discord.listener.ButtonListener;
 import me.lekkernakkie.lekkeradmin.discord.listener.ModalListener;
 import me.lekkernakkie.lekkeradmin.discord.listener.SlashCommandListener;
 import me.lekkernakkie.lekkeradmin.discord.listener.SuggestionReactionListener;
+import me.lekkernakkie.lekkeradmin.util.LoggerUtil;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
@@ -42,8 +43,7 @@ public class DiscordRegistrar {
                 .queue(
                         success -> plugin.getLogger().info("Discord slash commands registered."),
                         error -> {
-                            plugin.getLogger().warning("Failed to register slash commands: " + error.getMessage());
-                            error.printStackTrace();
+                            LoggerUtil.exception(plugin, java.util.logging.Level.WARNING, "Failed to register slash commands.", error);
                         }
                 );
     }

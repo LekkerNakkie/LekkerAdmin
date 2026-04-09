@@ -61,7 +61,7 @@ public class DCBotConfig {
     }
 
     public boolean isWebhookLoggingEnabled() {
-        return config.getBoolean("logging.webhook.enabled", true);
+        return getBooleanCompat("logging.webhook.enabled", "webhooks.moderation-log.enabled", true);
     }
 
     public String getWebhookUrl() {
@@ -77,51 +77,69 @@ public class DCBotConfig {
     }
 
     public boolean shouldLogApprovals() {
-        return config.getBoolean("logging.webhook.log-approvals", true);
+        return getBooleanCompat("logging.webhook.log-approvals", "webhooks.moderation-log.log-approvals", true);
     }
 
     public boolean shouldLogDenials() {
-        return config.getBoolean("logging.webhook.log-denials", true);
+        return getBooleanCompat("logging.webhook.log-denials", "webhooks.moderation-log.log-denials", true);
     }
 
     public boolean shouldLogNameFailures() {
-        return config.getBoolean("logging.webhook.log-name-failures", true);
+        return getBooleanCompat("logging.webhook.log-name-failures", "webhooks.moderation-log.log-name-failures", true);
     }
 
     public boolean shouldLogNameRetries() {
-        return config.getBoolean("logging.webhook.log-name-retries", true);
+        return getBooleanCompat("logging.webhook.log-name-retries", "webhooks.moderation-log.log-name-retries", true);
     }
 
     public boolean shouldLogAutoCompletions() {
-        return config.getBoolean("logging.webhook.log-auto-completions", true);
+        return getBooleanCompat("logging.webhook.log-auto-completions", "webhooks.moderation-log.log-auto-completions", true);
     }
 
     public String getApprovalLogFormat() {
-        return config.getString(
+        return getStringCompat(
                 "logging.formats.approval",
+                "webhooks.moderation-log.formats.approval",
                 "{reviewer} keurde aanvraag {application_id} goed voor {discord_user} / {minecraft_name}"
         );
     }
 
     public String getDenialLogFormat() {
-        return config.getString(
+        return getStringCompat(
                 "logging.formats.denial",
+                "webhooks.moderation-log.formats.denial",
                 "{reviewer} keurde aanvraag {application_id} af voor {discord_user} / {minecraft_name}. Reden: {reason}"
         );
     }
 
     public String getInvalidNameLogFormat() {
-        return config.getString(
+        return getStringCompat(
                 "logging.formats.invalid-name",
+                "webhooks.moderation-log.formats.invalid-name",
                 "Naam validatie mislukt voor aanvraag {application_id}. Ingegeven naam: {minecraft_name}"
         );
     }
 
     public String getRetrySuccessLogFormat() {
-        return config.getString(
+        return getStringCompat(
                 "logging.formats.retry-success",
+                "webhooks.moderation-log.formats.retry-success",
                 "Naamcorrectie succesvol voor aanvraag {application_id}. Oude naam: {old_name}, nieuwe naam: {new_name}"
         );
+    }
+
+    private boolean getBooleanCompat(String primaryPath, String fallbackPath, boolean defaultValue) {
+        if (config.isSet(primaryPath)) {
+            return config.getBoolean(primaryPath, defaultValue);
+        }
+        return config.getBoolean(fallbackPath, defaultValue);
+    }
+
+    private String getStringCompat(String primaryPath, String fallbackPath, String defaultValue) {
+        if (config.isSet(primaryPath)) {
+            return config.getString(primaryPath, defaultValue);
+        }
+        return config.getString(fallbackPath, defaultValue);
     }
 
     public String getDatabaseType() {
