@@ -6,6 +6,7 @@ import me.lekkernakkie.lekkeradmin.config.logs.LogTypeSettings;
 import me.lekkernakkie.lekkeradmin.model.log.LoggedItemData;
 import me.lekkernakkie.lekkeradmin.util.log.ItemLogUtil;
 import me.lekkernakkie.lekkeradmin.util.log.LocationLogUtil;
+import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
@@ -26,6 +27,10 @@ public class PlayerPickupLogListener implements Listener {
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onPlayerPickup(EntityPickupItemEvent event) {
         if (!(event.getEntity() instanceof Player player)) {
+            return;
+        }
+
+        if (player.getGameMode() == GameMode.CREATIVE) {
             return;
         }
 

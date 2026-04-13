@@ -6,6 +6,7 @@ import me.lekkernakkie.lekkeradmin.config.logs.LogTypeSettings;
 import me.lekkernakkie.lekkeradmin.model.log.LoggedItemData;
 import me.lekkernakkie.lekkeradmin.util.log.ItemLogUtil;
 import me.lekkernakkie.lekkeradmin.util.log.LocationLogUtil;
+import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
@@ -39,6 +40,10 @@ public class PlayerDropLogListener implements Listener {
         ItemStack itemStack = droppedEntity == null ? null : droppedEntity.getItemStack();
 
         if (player == null || droppedEntity == null || itemStack == null || itemStack.getType() == Material.AIR) {
+            return;
+        }
+
+        if (player.getGameMode() == GameMode.CREATIVE) {
             return;
         }
 

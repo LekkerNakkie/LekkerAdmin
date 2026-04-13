@@ -6,8 +6,6 @@ import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 
-import java.util.concurrent.TimeUnit;
-
 public class DiscordBootstrap {
 
     private final LekkerAdmin plugin;
@@ -24,7 +22,9 @@ public class DiscordBootstrap {
             return null;
         }
 
-        if (config.getBotToken() == null || config.getBotToken().isBlank() || config.getBotToken().equals("PASTE_BOT_TOKEN_HERE")) {
+        if (config.getBotToken() == null
+                || config.getBotToken().isBlank()
+                || config.getBotToken().equals("PASTE_BOT_TOKEN_HERE")) {
             plugin.getLogger().warning("Discord bot is enabled, but no valid token is configured.");
             return null;
         }
@@ -37,13 +37,14 @@ public class DiscordBootstrap {
                     );
 
             JDA jda = builder.build();
-            jda.awaitStatus(JDA.Status.CONNECTED, 20, TimeUnit.SECONDS);
+            jda.awaitReady();
 
             DiscordManager manager = new DiscordManager(plugin, jda);
             manager.start();
 
             plugin.getLogger().info("Discord bot connected successfully.");
             return manager;
+
         } catch (Exception ex) {
             plugin.getLogger().log(java.util.logging.Level.SEVERE, "Failed to start Discord bot.", ex);
             return null;

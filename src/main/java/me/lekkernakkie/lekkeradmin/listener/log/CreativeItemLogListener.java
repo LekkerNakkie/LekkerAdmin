@@ -22,10 +22,12 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityPickupItemEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryCreativeEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
+import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerGameModeChangeEvent;
 import org.bukkit.event.player.PlayerItemHeldEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
@@ -243,6 +245,39 @@ public class CreativeItemLogListener implements Listener {
         }
 
         ensureTracker(player, "CREATIVE_MENU");
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onCreativeGroundPickup(EntityPickupItemEvent event) {
+        if (!(event.getEntity() instanceof Player player)) {
+            return;
+        }
+
+        if (player.getGameMode() != GameMode.CREATIVE) {
+            return;
+        }
+
+        LogTypeSettings settings = getSettings();
+        if (settings == null || isIgnoredWorld(player.getWorld().getName(), settings)) {
+            return;
+        }
+
+        Bukkit.getScheduler().runTask(plugin, () -> resetTrackerSnapshot(player, "GROUND_PICKUP"));
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onCreativeDrop(PlayerDropItemEvent event) {
+        Player player = event.getPlayer();
+        if (player.getGameMode() != GameMode.CREATIVE) {
+            return;
+        }
+
+        LogTypeSettings settings = getSettings();
+        if (settings == null || isIgnoredWorld(player.getWorld().getName(), settings)) {
+            return;
+        }
+
+        Bukkit.getScheduler().runTask(plugin, () -> resetTrackerSnapshot(player, "GROUND_DROP"));
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
@@ -498,6 +533,24 @@ public class CreativeItemLogListener implements Listener {
         if (tracker.lastDetectedSource == null || tracker.lastDetectedSource.isBlank() || "UNKNOWN".equals(tracker.lastDetectedSource)) {
             tracker.lastDetectedSource = source;
         }
+    }
+
+    private void resetTrackerSnapshot(Player player, String source) {
+        if (player == null || !player.isOnline()) {
+            return;
+        }
+
+        PlayerCreativeTracker tracker = trackers.computeIfAbsent(
+                player.getUniqueId(),
+                ignored -> new PlayerCreativeTracker(player.getUniqueId(), snapshotInventory(player))
+        );
+
+        tracker.lastSnapshot = snapshotInventory(player);
+        tracker.pendingSpawned.clear();
+        tracker.pendingRemoved.clear();
+        tracker.pendingSource = "UNKNOWN";
+        tracker.lastDetectedSource = source;
+        tracker.lastChangeAt = 0L;
     }
 
     private LogTypeSettings getSettings() {
