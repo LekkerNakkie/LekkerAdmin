@@ -37,14 +37,19 @@ public class DiscordRegistrar {
                         Commands.slash("whitelist", "Start je whitelist aanvraag"),
                         Commands.slash("playerinfo", "Bekijk informatie over een speler")
                                 .addOption(OptionType.STRING, "spelernaam", "Minecraft naam, Discord naam of Discord ID", true),
+                        Commands.slash("playerlist", "Bekijk de online spelers op de server"),
+                        Commands.slash("status", "Bekijk de status van de server en Minecraft services"),
                         Commands.slash("suggest", "Dien een suggestie in")
                                 .addOption(OptionType.STRING, "suggestie", "Jouw suggestie", true)
                 )
                 .queue(
                         success -> plugin.getLogger().info("Discord slash commands registered."),
-                        error -> {
-                            LoggerUtil.exception(plugin, java.util.logging.Level.WARNING, "Failed to register slash commands.", error);
-                        }
+                        error -> LoggerUtil.exception(
+                                plugin,
+                                java.util.logging.Level.WARNING,
+                                "Failed to register slash commands.",
+                                error
+                        )
                 );
     }
 }

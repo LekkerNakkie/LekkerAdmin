@@ -4,6 +4,7 @@ import me.lekkernakkie.lekkeradmin.LekkerAdmin;
 import me.lekkernakkie.lekkeradmin.config.DCBotConfig;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
+import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 
 public class DiscordBootstrap {
@@ -38,6 +39,18 @@ public class DiscordBootstrap {
 
             JDA jda = builder.build();
             jda.awaitReady();
+
+            /*      -- DUBBEL COMMAND VERWIJDEREN DISCORD BOT 
+            if (config.getGuildId() != null && !config.getGuildId().isBlank()) {
+                Guild guild = jda.getGuildById(config.getGuildId());
+                if (guild != null) {
+                    guild.updateCommands().complete();
+                    plugin.getLogger().info("Cleared old guild slash commands.");
+                } else {
+                    plugin.getLogger().warning("Guild not found for command cleanup.");
+                }
+            }
+            */
 
             DiscordManager manager = new DiscordManager(plugin, jda);
             manager.start();

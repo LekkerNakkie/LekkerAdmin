@@ -15,8 +15,7 @@
     <properties>
         <java.version>21</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.source>21</maven.compiler.source>
-        <maven.compiler.target>21</maven.compiler.target>
+        <maven.compiler.release>21</maven.compiler.release>
     </properties>
 
     <repositories>
@@ -56,6 +55,25 @@
                     <artifactId>opus-java</artifactId>
                 </exclusion>
             </exclusions>
+        </dependency>
+
+        <!-- Explicit runtime deps for JDA / OkHttp -->
+        <dependency>
+            <groupId>com.squareup.okhttp3</groupId>
+            <artifactId>okhttp</artifactId>
+            <version>4.12.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.squareup.okio</groupId>
+            <artifactId>okio-jvm</artifactId>
+            <version>3.9.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.jetbrains.kotlin</groupId>
+            <artifactId>kotlin-stdlib-jdk8</artifactId>
+            <version>1.9.10</version>
         </dependency>
 
         <!-- SQLite -->
@@ -125,8 +143,7 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.13.0</version>
                 <configuration>
-                    <source>21</source>
-                    <target>21</target>
+                    <release>21</release>
                 </configuration>
             </plugin>
 
@@ -142,23 +159,7 @@
                         </goals>
                         <configuration>
                             <createDependencyReducedPom>false</createDependencyReducedPom>
-                            <minimizeJar>true</minimizeJar>
-
-                            <entryPoints>
-                                <entryPoint>me.lekkernakkie.lekkeradmin.LekkerAdmin</entryPoint>
-                            </entryPoints>
-
-                            <artifactSet>
-                                <includes>
-                                    <include>net.dv8tion:JDA</include>
-                                    <include>org.xerial:sqlite-jdbc</include>
-                                    <include>com.mysql:mysql-connector-j</include>
-                                    <include>com.zaxxer:HikariCP</include>
-                                    <include>io.github.jglrxavpok.hephaistos:common</include>
-                                    <include>com.google.code.gson:gson</include>
-                                </includes>
-                            </artifactSet>
-
+                            <minimizeJar>false</minimizeJar>
                             <filters>
                                 <filter>
                                     <artifact>*:*</artifact>

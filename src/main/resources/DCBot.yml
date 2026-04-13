@@ -247,7 +247,9 @@ messages:
     suggest-disabled: "Suggesties zijn momenteel uitgeschakeld."
     suggest-missing-channel: "Het suggestiekanaal is niet correct ingesteld."
     suggest-invalid-length: "Je suggestie moet tussen {min} en {max} tekens lang zijn."
-
+    playerlist-disabled: "Playerlist is momenteel uitgeschakeld."
+    playerlist-no-permission: "Je hebt geen permissie om dit commando te gebruiken."
+    status-disabled: "The status command is currently disabled."
   dm:
     application-submitted: "Je whitelist aanvraag is doorgestuurd naar staff."
     application-cancelled: "Je aanvraag is geannuleerd."
@@ -467,3 +469,55 @@ expiry:
 
   # Auto-expire name retry windows after X hours.
   retry-name-hours: 24
+
+# =========================================================
+# /playerlist
+# =========================================================
+playerlist:
+  # Master toggle for the Discord /playerlist command.
+  enabled: true
+
+  # Permission restrictions.
+  # Leave empty to allow everyone who can use the command in Discord.
+  allowed-role-ids:
+    - ""
+
+  allowed-user-ids:
+    - ""
+
+  response:
+    # Ephemeral = only visible to the user who runs the command.
+    ephemeral: false
+
+    # Show online/max instead of just online count.
+    show-max-players: true
+
+    # Include the player's current world.
+    show-world: false
+
+    # Sort names alphabetically.
+    sort-alphabetically: true
+
+  embed:
+    title: "👥 Online Players"
+    description: ""
+    footer: "Sakurahelm"
+    color: "#30F2FF"
+    use-timestamp: true
+
+    empty-server-text: "No players online."
+
+    fields:
+      count: "Players Online"
+      players: "Player List"
+
+status-command:
+  enabled: true
+  ephemeral: true
+  timeout-millis: 3500
+
+  embed:
+    title: "🛰️ Server Status"
+    description: "Live overview van de server en Minecraft-related services."
+    footer: "Sakurahelm"
+    color: "#30F2FF"

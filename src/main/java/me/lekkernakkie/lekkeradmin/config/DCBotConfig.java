@@ -412,6 +412,14 @@ public class DCBotConfig {
         return config.getString("messages.slash.suggest-invalid-length", "Je suggestie moet tussen {min} en {max} tekens lang zijn.");
     }
 
+    public String getPlayerListDisabledMessage() {
+        return config.getString("messages.slash.playerlist-disabled", "Playerlist is momenteel uitgeschakeld.");
+    }
+
+    public String getPlayerListNoPermissionMessage() {
+        return config.getString("messages.slash.playerlist-no-permission", "Je hebt geen permissie om dit commando te gebruiken.");
+    }
+
     public String getDmApplicationSubmitted() {
         return config.getString("messages.dm.application-submitted", "Je whitelist aanvraag is doorgestuurd naar staff.");
     }
@@ -716,6 +724,66 @@ public class DCBotConfig {
         return config.getStringList("playerinfo.allowed-user-ids");
     }
 
+    public boolean isPlayerListEnabled() {
+        return config.getBoolean("playerlist.enabled", true);
+    }
+
+    public List<String> getPlayerListAllowedRoleIds() {
+        return config.getStringList("playerlist.allowed-role-ids");
+    }
+
+    public List<String> getPlayerListAllowedUserIds() {
+        return config.getStringList("playerlist.allowed-user-ids");
+    }
+
+    public boolean isPlayerListEphemeral() {
+        return config.getBoolean("playerlist.response.ephemeral", true);
+    }
+
+    public boolean isPlayerListShowMaxPlayers() {
+        return config.getBoolean("playerlist.response.show-max-players", true);
+    }
+
+    public boolean isPlayerListShowWorld() {
+        return config.getBoolean("playerlist.response.show-world", false);
+    }
+
+    public boolean isPlayerListSortAlphabetically() {
+        return config.getBoolean("playerlist.response.sort-alphabetically", true);
+    }
+
+    public boolean isPlayerListUseTimestamp() {
+        return config.getBoolean("playerlist.embed.use-timestamp", true);
+    }
+
+    public String getPlayerListEmbedTitle() {
+        return config.getString("playerlist.embed.title", "👥 Online Players");
+    }
+
+    public String getPlayerListEmbedDescription() {
+        return config.getString("playerlist.embed.description", "");
+    }
+
+    public String getPlayerListEmbedFooter() {
+        return config.getString("playerlist.embed.footer", "");
+    }
+
+    public int getPlayerListEmbedColor() {
+        return parseColor("playerlist.embed.color", "#30F2FF");
+    }
+
+    public String getPlayerListCountFieldName() {
+        return config.getString("playerlist.embed.fields.count", "Players Online");
+    }
+
+    public String getPlayerListPlayersFieldName() {
+        return config.getString("playerlist.embed.fields.players", "Player List");
+    }
+
+    public String getPlayerListEmptyServerText() {
+        return config.getString("playerlist.embed.empty-server-text", "No players online.");
+    }
+
     public boolean isSuggestionsEnabled() {
         return config.getBoolean("suggestions.enabled", false);
     }
@@ -822,6 +890,37 @@ public class DCBotConfig {
 
     public int getRetryNameExpiryHours() {
         return config.getInt("expiry.retry-name-hours", 24);
+    }
+    public boolean isStatusCommandEnabled() {
+        return config.getBoolean("status-command.enabled", true);
+    }
+
+    public boolean isStatusCommandEphemeral() {
+        return config.getBoolean("status-command.ephemeral", true);
+    }
+
+    public int getStatusCommandTimeoutMillis() {
+        return config.getInt("status-command.timeout-millis", 3500);
+    }
+
+    public String getStatusCommandEmbedTitle() {
+        return config.getString("status-command.embed.title", "Server Status");
+    }
+
+    public String getStatusCommandEmbedDescription() {
+        return config.getString("status-command.embed.description", "Live overzicht van minecraft services");
+    }
+
+    public String getStatusCommandEmbedFooter() {
+        return config.getString("status-command.embed.footer", "");
+    }
+
+    public String getStatusCommandEmbedColor() {
+        return config.getString("status-command.embed.color", "#30F2FF");
+    }
+
+    public String getStatusCommandDisabledMessage() {
+        return config.getString("messages.slash.status-disabled", "The status command is currently disabled.");
     }
 
     private int parseColor(String path, String fallbackHex) {
